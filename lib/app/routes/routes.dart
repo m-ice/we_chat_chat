@@ -1,0 +1,30 @@
+abstract final class Routes {
+  static const root = '/';
+  static const homeCityPicker = '/home/city-picker';
+  static const homeActivityFilter = '/home/activity-filter';
+  static const chat = '/chat';
+  static const coins = '/profile/coins';
+  static const vip = '/profile/vip';
+  static const userDetail = '/user-detail';
+  static const report = '/report';
+  static const imagePreview = '/image-preview';
+  static const voiceCall = '/voice-call';
+  static const teamDetail = '/team-detail';
+  static const guideArticle = '/guide-article';
+  static const teamPublish = '/team-publish';
+  static const teamActivityPicker = '/team-publish/activity';
+  static const teamPublishReview = '/team-publish/review';
+  static const legal = '/legal';
+  static const profileEdit = '/profile/edit';
+  static const profileInterests = '/profile/edit/interests';
+  static const profilePersonality = '/profile/edit/personality';
+  static const verification = '/profile/verification';
+  static const customerService = '/profile/customer-service';
+  static const album = '/profile/album';
+  static const albumPreview = '/profile/album/preview';
+  static const myWorld = '/profile/my-world';
+  static const myWorldPublish = '/profile/my-world/publish';
+  static const topicDetail = '/discover/topic-detail';
+  static const centerSearch = '/discover/video/search';
+  static const videoFeed = '/discover/video/feed';
+}

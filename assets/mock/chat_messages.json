@@ -1,0 +1,9 @@
+[
+  {
+    "id": "assistant-welcome",
+    "peerId": -1,
+    "text": "欢迎来到微撩组队！我是微撩助手，可以为你解答骑行、露营、美食、运动等组队相关问题，欢迎随时向我提问。",
+    "isFromCurrentUser": false,
+    "createdAt": "2026-09-02T09:00:00+08:00"
+  }
+]

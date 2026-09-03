@@ -1,0 +1,352 @@
+[
+  {
+    "id": 1,
+    "nickname": "晓风",
+    "age": 26,
+    "gender": "女",
+    "hobbies": [
+      "骑行",
+      "摄影",
+      "海边散步"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_1.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_1_1.png"
+      ],
+      "content": "周末沿深圳湾骑了一圈，海风很舒服，下次想找人一起骑到西丽～",
+      "createdAt": "2026-05-20T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_1_1.png"
+      ],
+      "activity": "骑行组队",
+      "location": "深圳湾-西丽",
+      "date": "2026-10-13T10:00:00+08:00",
+      "content": "5月25日深圳湾出发骑到西丽，休闲配速，欢迎同好一起，私信我～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 2,
+    "nickname": "沐野",
+    "age": 24,
+    "gender": "女",
+    "hobbies": [
+      "露营",
+      "徒步",
+      "野餐"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_2.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_2_1.png"
+      ],
+      "content": "上次北京郊野露营太治愈了，星空和篝火都想再来一次！",
+      "createdAt": "2026-05-28T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_2_1.png"
+      ],
+      "activity": "露营组队",
+      "location": "北京露营",
+      "date": "2026-10-14T10:00:00+08:00",
+      "content": "6月1日北京露营约起来，装备齐全，差几位小伙伴，有兴趣的留言～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 3,
+    "nickname": "芳华",
+    "age": 58,
+    "gender": "女",
+    "hobbies": [
+      "骑行",
+      "太极",
+      "养花"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_4.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_4_1.png"
+      ],
+      "content": "清晨从广州东站骑到南站，一路风景好，身体也舒坦，有同龄朋友一起更好。",
+      "createdAt": "2026-05-30T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_4_1.png"
+      ],
+      "activity": "骑行组队",
+      "location": "广州东站-广州南站",
+      "date": "2026-10-15T10:00:00+08:00",
+      "content": "6月3日老年人休闲骑行，广州东站至广州南站，慢速安全，欢迎同年龄段骑友组队！",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 4,
+    "nickname": "云杉",
+    "age": 27,
+    "gender": "女",
+    "hobbies": [
+      "爬山",
+      "瑜伽",
+      "看日出"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_5.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_5_1.png"
+      ],
+      "content": "梧桐山登顶打卡，腿酸但值得，山顶视野绝了！",
+      "createdAt": "2026-06-05T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_5_1.png"
+      ],
+      "activity": "爬山组队",
+      "location": "梧桐山",
+      "date": "2026-10-16T10:00:00+08:00",
+      "content": "6月8日梧桐山爬山组队，早上出发，中等难度，求靠谱队友一起冲顶～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 6,
+    "nickname": "墨白",
+    "age": 25,
+    "gender": "男",
+    "hobbies": [
+      "密室逃脱",
+      "推理",
+      "桌游"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_6.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_6_1.png"
+      ],
+      "content": "昆明这家密室剧情太顶了，解谜烧脑但超爽，已二刷还想三刷！",
+      "createdAt": "2026-06-08T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_6_2.png"
+      ],
+      "activity": "密室逃脱组队",
+      "location": "昆明",
+      "date": "2026-10-18T10:00:00+08:00",
+      "content": "6月10日昆明密室组队，缺2-3人，恐怖本，胆子大的来，私信拼团～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 7,
+    "nickname": "川哥",
+    "age": 29,
+    "gender": "男",
+    "hobbies": [
+      "美食",
+      "火锅",
+      "探店"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_7.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_7_1.png"
+      ],
+      "content": "重庆火锅永远的神，辣得过瘾，下次还要带朋友来战！",
+      "createdAt": "2026-06-10T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_7_1.png"
+      ],
+      "activity": "吃饭组队",
+      "location": "重庆",
+      "date": "2026-10-19T10:00:00+08:00",
+      "content": "6月13日重庆吃饭组队，火锅串串都行，AA制，爱吃辣的来凑一桌～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 8,
+    "nickname": "酒酿",
+    "age": 24,
+    "gender": "女",
+    "hobbies": [
+      "清吧",
+      "爵士",
+      "城市夜生活"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_8.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_8_1.png"
+      ],
+      "content": "上周在静安找了一家氛围感超棒的清吧，爵士 live 配威士忌，整个人慢下来，太治愈了～",
+      "createdAt": "2026-07-05T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_8_1.png"
+      ],
+      "activity": "清吧聚会",
+      "location": "上海·静安",
+      "date": "2026-10-20T10:00:00+08:00",
+      "content": "7月18日周五晚清吧小聚，想约几位爱聊天、能小酌的朋友，不拼酒只图氛围，AA制，私信我～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9,
+    "nickname": "霓虹",
+    "age": 23,
+    "gender": "女",
+    "hobbies": [
+      "夜店",
+      "蹦迪",
+      "电子音乐"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_9.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_9_1.png"
+      ],
+      "content": "昨晚 CL 的 set 太炸了，灯光和 bass 直接拉满，蹦到闭店还意犹未尽！",
+      "createdAt": "2026-07-10T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_9_1.png"
+      ],
+      "activity": "蹦迪组队",
+      "location": "成都·兰桂坊",
+      "date": "2026-10-21T10:00:00+08:00",
+      "content": "7月26日周六蹦迪组队，找节奏感好、不劝酒的小伙伴，先舞池见再决定转场，女生优先私信～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 10,
+    "nickname": "阿泽",
+    "age": 27,
+    "gender": "男",
+    "hobbies": [
+      "清吧",
+      "威士忌",
+      "深聊"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_10.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_10_1.png"
+      ],
+      "content": "珠江新城这家 speakeasy 藏得深但值得，单杯威士忌能聊一整晚，适合想认真认识新朋友的人。",
+      "createdAt": "2026-07-15T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_10_1.png"
+      ],
+      "activity": "清吧聚会",
+      "location": "广州·珠江新城",
+      "date": "2026-10-12T10:00:00+08:00",
+      "content": "8月2日清吧聚会，约 3-4 人小桌聊天，可以聊工作、旅行或随便瞎扯，适度饮酒，欢迎同好～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 11,
+    "nickname": "狼王",
+    "age": 26,
+    "gender": "男",
+    "hobbies": [
+      "狼人杀",
+      "桌游",
+      "推理"
+    ],
+    "avatarPath": "assets/images/avatar/img_feed_user_11.png",
+    "intro": "",
+    "isVerified": false,
+    "moment": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_11_1.png"
+      ],
+      "content": "昨晚十二人局太精彩了，悍跳预言家被全场怀疑，最后反转获胜，桌游店的 DM 都说这局能写复盘。",
+      "createdAt": "2026-07-20T00:00:00+08:00",
+      "moderationStatus": "approved"
+    },
+    "teamPost": {
+      "imagePaths": [
+        "assets/images/content/img_feed_user_11_1.png"
+      ],
+      "activity": "狼人杀组队",
+      "location": "深圳·南山",
+      "date": "2026-10-13T10:00:00+08:00",
+      "content": "8月15日狼人杀聚会，标准 12 人局，缺 4 位逻辑在线的玩家，新手友好有老手带，场地费 AA～",
+      "moderationStatus": "approved"
+    },
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  }
+]

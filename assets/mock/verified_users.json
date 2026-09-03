@@ -1,0 +1,194 @@
+[
+  {
+    "id": 9001,
+    "nickname": "甜心",
+    "avatarPath": "assets/images/avatar/img_verified_user_01.png",
+    "city": "上海",
+    "age": 25,
+    "intent": "找搭子",
+    "occupation": "自由职业",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_01.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9002,
+    "nickname": "恬恬",
+    "avatarPath": "assets/images/avatar/img_verified_user_02.png",
+    "city": "北京",
+    "age": 24,
+    "intent": "找搭子",
+    "occupation": "设计师",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_02.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9003,
+    "nickname": "天美",
+    "avatarPath": "assets/images/avatar/img_verified_user_03.png",
+    "city": "广州",
+    "age": 26,
+    "intent": "找搭子",
+    "occupation": "产品经理",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_03.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9004,
+    "nickname": "甜橙",
+    "avatarPath": "assets/images/avatar/img_verified_user_04.png",
+    "city": "深圳",
+    "age": 23,
+    "intent": "找搭子",
+    "occupation": "运营",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_04.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9005,
+    "nickname": "甜甜",
+    "avatarPath": "assets/images/avatar/img_verified_user_05.png",
+    "city": "杭州",
+    "age": 27,
+    "intent": "找搭子",
+    "occupation": "教师",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_05.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9006,
+    "nickname": "甜豆",
+    "avatarPath": "assets/images/avatar/img_verified_user_06.png",
+    "city": "成都",
+    "age": 25,
+    "intent": "找搭子",
+    "occupation": "护士",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_06.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9007,
+    "nickname": "甜崽",
+    "avatarPath": "assets/images/avatar/img_verified_user_07.png",
+    "city": "南京",
+    "age": 22,
+    "intent": "找搭子",
+    "occupation": "学生",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_07.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 9008,
+    "nickname": "甜奈",
+    "avatarPath": "assets/images/avatar/img_verified_user_08.png",
+    "city": "武汉",
+    "age": 28,
+    "intent": "找搭子",
+    "occupation": "律师",
+    "intro": "示例内容｜用于演示视频浏览与互动。",
+    "hobbies": [
+      "探店",
+      "摄影"
+    ],
+    "galleryImagePaths": [
+
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "assets/videos/verified/user_08.mp4",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  }
+]
