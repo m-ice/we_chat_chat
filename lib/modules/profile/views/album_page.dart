@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../../domain/entities/album_item.dart';
@@ -201,7 +202,7 @@ class _Upload extends StatelessWidget {
           Opacity(
             opacity: onTap == null ? .45 : 1,
             child: const AppImage(
-              'assets/icons/profile_edit/album_add.svg',
+              AppImageString.profileEditAlbumAdd,
               width: 24,
               height: 24,
             ),

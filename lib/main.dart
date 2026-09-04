@@ -50,6 +50,9 @@ class MiTuApp extends StatelessWidget {
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
         minTextAdapt: true,
+        rebuildFactor: (oldData, newData) =>
+            oldData.orientation != newData.orientation ||
+            oldData.size.width != newData.size.width,
         builder: (_, __) => GetMaterialApp(
           title: 'app_name'.tr,
           debugShowCheckedModeBanner: false,

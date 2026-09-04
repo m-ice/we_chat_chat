@@ -14,6 +14,8 @@ class CityUser {
     required this.isRealPersonVerified,
     required this.videoPath,
     required this.isOnline,
+    this.videoCoverPath = '',
+    this.videoAvatarPath = '',
     this.isSeedData = false,
   });
 
@@ -31,5 +33,7 @@ class CityUser {
   final bool isRealPersonVerified;
   final String videoPath;
   final bool isOnline;
+  final String videoCoverPath;
+  final String videoAvatarPath;
   final bool isSeedData;
 }

@@ -12,7 +12,7 @@ class CustomerServiceController extends GetxController {
   final contactController = TextEditingController();
   final isSubmitting = false.obs;
 
-  Future<void> refresh() async {
+  Future<void> reload() async {
     // The current repository exposes a local delivery queue synchronously.
     // Keeping this boundary makes the screen refresh-ready when remote support
     // history becomes available without inventing UI-only records.
@@ -35,16 +35,16 @@ class CustomerServiceController extends GetxController {
     isSubmitting.value = true;
     try {
       await _repository.submit(
-        title: '在线客服反馈',
+        title: 'support_ticket_title'.tr,
         description: description,
         contact: contact,
       );
       descriptionController.clear();
       contactController.clear();
-      AppToast.show('support_submitted'.tr);
+      AppToast.show('support_queued'.tr);
       return true;
     } on Object {
-      AppToast.show('保存失败，请稍后重试');
+      AppToast.show('support_save_failed'.tr);
       return false;
     } finally {
       isSubmitting.value = false;

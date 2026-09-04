@@ -1,23 +1,25 @@
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
-import '../../../data/repositories/message_center_repository_impl.dart';
 import '../../../domain/entities/conversation.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/repositories/chat_repository.dart';
 import '../../../domain/repositories/message_center_repository.dart';
+import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/user_repository.dart';
+import 'message_center_controller.dart';
 
 class ConversationController extends GetxController {
-  ConversationController(this._chats, [MessageCenterRepository? messageCenter])
-    : messageCenter = messageCenter ?? const MessageCenterRepositoryImpl();
+  ConversationController(this._chats, this.messageCenter, this._social);
 
   final ChatRepository _chats;
   final MessageCenterRepository messageCenter;
+  final SocialStateRepository _social;
   final conversations = <Conversation>[].obs;
   final contacts = <User>[].obs;
   final hasError = false.obs;
   final isLoading = true.obs;
+  final quickUnreadCounts = <MessageCenterSection, int>{}.obs;
 
   User? get assistant {
     for (final conversation in conversations) {
@@ -38,7 +40,13 @@ class ConversationController extends GetxController {
     hasError.value = false;
     isLoading.value = true;
     try {
-      conversations.assignAll(await _chats.getConversations());
+      conversations.assignAll(
+        (await _chats.getConversations()).where(
+          (conversation) =>
+              conversation.isAssistant || _allows(conversation.peer.id),
+        ),
+      );
+      await _loadQuickUnreadCounts();
     } on Object {
       hasError.value = true;
     } finally {
@@ -49,7 +57,9 @@ class ConversationController extends GetxController {
       final users = Get.find<UserRepository>();
       final currentUser = await users.getCurrentUser();
       contacts.assignAll(
-        (await users.getUsers()).where((user) => user.id != currentUser.id),
+        (await users.getUsers()).where(
+          (user) => user.id != currentUser.id && _allows(user.id),
+        ),
       );
     } on Object {
       contacts.assignAll(
@@ -60,6 +70,10 @@ class ConversationController extends GetxController {
     }
   }
 
+  bool _allows(int userId) =>
+      !_social.blockedIds.contains(userId) &&
+      !_social.shieldedIds.contains(userId);
+
   Future<void> openChat(User peer) async {
     await Get.toNamed(Routes.chat, arguments: peer);
     await load();
@@ -67,5 +81,28 @@ class ConversationController extends GetxController {
 
   Future<void> startVoiceCall(User peer) async {
     await Get.toNamed(Routes.voiceCall, arguments: peer);
+  }
+
+  Future<void> openFeature(String route) async {
+    await Get.toNamed(route);
+    await _loadQuickUnreadCounts();
+  }
+
+  Future<void> _loadQuickUnreadCounts() async {
+    final notices = await messageCenter.getSystemNotices();
+    final relationships = await messageCenter.getRelationships();
+    final visitors = await messageCenter.getVisitors();
+    final calls = await messageCenter.getCallRecords();
+    quickUnreadCounts.assignAll({
+      MessageCenterSection.system: notices.where((item) => !item.isRead).length,
+      MessageCenterSection.relationships: relationships.fold(
+        0,
+        (sum, item) => sum + item.unreadCount,
+      ),
+      MessageCenterSection.visitors: visitors
+          .where((item) => !item.isRead)
+          .length,
+      MessageCenterSection.calls: calls.where((item) => !item.isRead).length,
+    });
   }
 }

@@ -42,13 +42,13 @@ class _CustomerServicePageState extends State<CustomerServicePage> {
 
   @override
   Widget build(BuildContext context) => ProfileDecoratedScaffold(
-    title: '在线客服',
+    title: 'customer_service_title'.tr,
     resizeToAvoidBottomInset: true,
     body: Column(
       children: [
         Expanded(
           child: AppRefreshView(
-            onRefresh: controller.refresh,
+            onRefresh: controller.reload,
             child: ListView(
               key: const ValueKey('customer-service-form-scroll'),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -103,7 +103,7 @@ class _CustomerServicePageState extends State<CustomerServicePage> {
               () => ProfilePrimaryButton(
                 key: const ValueKey('customer-service-submit'),
                 label: controller.isSubmitting.value
-                    ? '正在提交…'
+                    ? 'support_submit_loading'.tr
                     : 'support_submit'.tr,
                 onPressed: controller.isSubmitting.value ? null : submit,
               ),

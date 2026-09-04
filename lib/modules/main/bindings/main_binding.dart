@@ -7,6 +7,8 @@ import '../../../domain/repositories/user_repository.dart';
 import '../../../domain/repositories/home_city_repository.dart';
 import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/chat_repository.dart';
+import '../../../domain/repositories/message_center_repository.dart';
+import '../../../domain/repositories/video_engagement_repository.dart';
 import '../../chat/controllers/conversation_controller.dart';
 import '../../../domain/repositories/membership_wallet_repository.dart';
 import '../../profile/controllers/profile_controller.dart';
@@ -30,9 +32,16 @@ class MainBinding extends Bindings {
         Get.find<UserRepository>(),
         Get.find<HomeCityRepository>(),
         Get.find<SocialStateRepository>(),
+        Get.find<VideoEngagementRepository>(),
       ),
     );
-    Get.lazyPut(() => ConversationController(Get.find<ChatRepository>()));
+    Get.lazyPut(
+      () => ConversationController(
+        Get.find<ChatRepository>(),
+        Get.find<MessageCenterRepository>(),
+        Get.find<SocialStateRepository>(),
+      ),
+    );
     Get.lazyPut(
       () => ProfileController(
         Get.find<UserRepository>(),

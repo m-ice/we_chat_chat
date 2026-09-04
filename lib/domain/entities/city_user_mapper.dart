@@ -14,12 +14,5 @@ extension CityUserMapper on CityUser {
     galleryImagePaths: galleryImagePaths,
     verificationVideoPath: isVideoVerified ? videoPath : '',
     isSeedData: isSeedData,
-    moment: galleryImagePaths.isEmpty
-        ? null
-        : UserMoment(
-            imagePaths: galleryImagePaths,
-            content: intro,
-            createdAt: DateTime(2026),
-          ),
   );
 }

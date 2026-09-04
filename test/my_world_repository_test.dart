@@ -49,4 +49,27 @@ void main() {
       'world/posts/legacy/img_0.jpg',
     ]);
   });
+
+  test('persists like and comment interactions', () async {
+    SharedPreferences.resetStatic();
+    SharedPreferences.setMockInitialValues({});
+    final repository = MyWorldRepositoryImpl(
+      await SharedPreferences.getInstance(),
+    );
+    await repository.publish(
+      content: '一起去骑行。',
+      imageSourcePaths: const [],
+      topics: const ['运动'],
+    );
+    final id = repository.posts.single.id;
+
+    await repository.setLiked(id, true);
+    await repository.addComment(id, '下次一起。');
+
+    final post = repository.posts.single;
+    expect(post.isLiked, isTrue);
+    expect(post.likeCount, 1);
+    expect(post.commentCount, 1);
+    expect(post.comments.single.content, '下次一起。');
+  });
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../../domain/entities/conversation.dart';
 import '../controllers/conversation_controller.dart';
-import 'message_feature_pages.dart';
+import '../controllers/message_center_controller.dart';
 import 'widgets/chat_visuals.dart';
 
 class ConversationPage extends GetView<ConversationController> {
@@ -25,7 +27,15 @@ class ConversationPage extends GetView<ConversationController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const _MessageHeader(),
-                _QuickEntryRow(controller: controller),
+                Obx(() {
+                  final unreadCounts = Map<MessageCenterSection, int>.from(
+                    controller.quickUnreadCounts,
+                  );
+                  return _QuickEntryRow(
+                    controller: controller,
+                    unreadCounts: unreadCounts,
+                  );
+                }),
                 Expanded(child: _ConversationList(controller: controller)),
               ],
             ),
@@ -52,19 +62,6 @@ abstract final class _MessagePageMetrics {
   static const quickBadgeRight = -8.0;
   static const conversationRowHeight = 76.0;
   static const avatarSize = 52.0;
-  static const conversationBadgeTop = -4.0;
-}
-
-abstract final class _MessageAssets {
-  static const underline =
-      'assets/images/content/figma_chat_title_underline.png';
-  static const quickSystem =
-      'assets/images/content/figma_chat_quick_system.png';
-  static const quickRelationship =
-      'assets/images/content/figma_chat_quick_relationship.png';
-  static const quickVisitors =
-      'assets/images/content/figma_chat_quick_visitors.png';
-  static const quickCalls = 'assets/images/content/figma_chat_quick_calls.png';
 }
 
 class _MessageHeader extends StatelessWidget {
@@ -77,12 +74,12 @@ class _MessageHeader extends StatelessWidget {
       height: _MessagePageMetrics.headerHeight,
       child: Stack(
         children: [
-          const Positioned(
+          Positioned(
             left: _MessagePageMetrics.titleLeft,
             top: _MessagePageMetrics.titleTop,
             child: Text(
-              '聊天',
-              style: TextStyle(
+              'page_messages'.tr,
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 17,
                 fontWeight: FontWeight.w500,
@@ -95,7 +92,7 @@ class _MessageHeader extends StatelessWidget {
             width: _MessagePageMetrics.underlineWidth,
             height: _MessagePageMetrics.underlineHeight,
             child: const AppImage(
-              _MessageAssets.underline,
+              AppImageString.chatConversationTitleUnderline,
               width: _MessagePageMetrics.underlineWidth,
               height: _MessagePageMetrics.underlineHeight,
               fit: BoxFit.fill,
@@ -109,48 +106,37 @@ class _MessageHeader extends StatelessWidget {
 }
 
 class _QuickEntryRow extends StatelessWidget {
-  const _QuickEntryRow({required this.controller});
+  const _QuickEntryRow({required this.controller, required this.unreadCounts});
 
   final ConversationController controller;
+  final Map<MessageCenterSection, int> unreadCounts;
 
   @override
   Widget build(BuildContext context) {
     final entries = [
       _QuickEntryData(
-        title: '系统消息',
-        assetPath: _MessageAssets.quickSystem,
-        onTap: () {
-          final assistant = controller.assistant;
-          Get.to<void>(
-            () => SystemMessagesPage(
-              repository: controller.messageCenter,
-              assistant: assistant,
-              onOpenChat: assistant == null
-                  ? null
-                  : () => controller.openChat(assistant),
-            ),
-          );
-        },
+        title: 'message_system_title'.tr,
+        assetPath: AppImageString.chatConversationQuickSystem,
+        badgeCount: unreadCounts[MessageCenterSection.system] ?? 0,
+        onTap: () => controller.openFeature(Routes.systemMessages),
       ),
       _QuickEntryData(
-        title: '亲密关系',
-        assetPath: _MessageAssets.quickRelationship,
-        onTap: () => _openContacts(
-          title: '亲密关系',
-          kind: MessageContactPageKind.relationship,
-        ),
+        title: 'message_relationship_title'.tr,
+        assetPath: AppImageString.chatConversationQuickRelationship,
+        badgeCount: unreadCounts[MessageCenterSection.relationships] ?? 0,
+        onTap: () => controller.openFeature(Routes.closeRelationships),
       ),
       _QuickEntryData(
-        title: '谁看过我',
-        assetPath: _MessageAssets.quickVisitors,
-        onTap: () =>
-            _openContacts(title: '谁看过我', kind: MessageContactPageKind.visitors),
+        title: 'message_visitors_title'.tr,
+        assetPath: AppImageString.chatConversationQuickVisitors,
+        badgeCount: unreadCounts[MessageCenterSection.visitors] ?? 0,
+        onTap: () => controller.openFeature(Routes.visitors),
       ),
       _QuickEntryData(
-        title: '通话记录',
-        assetPath: _MessageAssets.quickCalls,
-        onTap: () =>
-            _openContacts(title: '通话记录', kind: MessageContactPageKind.calls),
+        title: 'message_calls_title'.tr,
+        assetPath: AppImageString.chatConversationQuickCalls,
+        badgeCount: unreadCounts[MessageCenterSection.calls] ?? 0,
+        onTap: () => controller.openFeature(Routes.callHistory),
       ),
     ];
 
@@ -168,23 +154,6 @@ class _QuickEntryRow extends StatelessWidget {
       ),
     );
   }
-
-  void _openContacts({
-    required String title,
-    required MessageContactPageKind kind,
-  }) {
-    Get.to<void>(
-      () => MessageContactPage(
-        title: title,
-        kind: kind,
-        repository: controller.messageCenter,
-        onOpenChat: controller.openChat,
-        onCall: kind == MessageContactPageKind.calls
-            ? controller.startVoiceCall
-            : null,
-      ),
-    );
-  }
 }
 
 class _QuickEntryData {
@@ -192,11 +161,13 @@ class _QuickEntryData {
     required this.title,
     required this.assetPath,
     required this.onTap,
+    required this.badgeCount,
   });
 
   final String title;
   final String assetPath;
   final VoidCallback onTap;
+  final int badgeCount;
 }
 
 class _QuickEntry extends StatelessWidget {
@@ -227,11 +198,14 @@ class _QuickEntry extends StatelessWidget {
                     filterQuality: FilterQuality.high,
                   ),
                 ),
-                const Positioned(
-                  top: _MessagePageMetrics.quickBadgeTop,
-                  right: _MessagePageMetrics.quickBadgeRight,
-                  child: NotificationBadge(label: '99+'),
-                ),
+                if (data.badgeCount > 0)
+                  Positioned(
+                    top: _MessagePageMetrics.quickBadgeTop,
+                    right: _MessagePageMetrics.quickBadgeRight,
+                    child: NotificationBadge(
+                      count: data.badgeCount,
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -271,10 +245,13 @@ class _ConversationList extends StatelessWidget {
         );
       }
       if (controller.conversations.isEmpty) {
-        return const Center(
+        return Center(
           child: Text(
-            '还没有聊天，去认识新朋友吧',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            'chat_empty'.tr,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
           ),
         );
       }
@@ -306,10 +283,10 @@ class _ConversationList extends StatelessWidget {
 }
 
 const _figmaAvatarPaths = [
-  'assets/images/content/figma_chat_avatar_2.png',
-  'assets/images/content/figma_chat_avatar_1.png',
-  'assets/images/content/figma_chat_avatar_3.png',
-  'assets/images/content/figma_chat_avatar_4.png',
+  AppImageString.chatConversationAvatar2,
+  AppImageString.chatConversationAvatar1,
+  AppImageString.chatConversationAvatar3,
+  AppImageString.chatConversationAvatar4,
 ];
 
 class _ConversationRow extends StatelessWidget {
@@ -335,19 +312,9 @@ class _ConversationRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  ChatAvatar(
-                    assetPath: avatarAssetPath,
-                    size: _MessagePageMetrics.avatarSize,
-                  ),
-                  const Positioned(
-                    top: _MessagePageMetrics.conversationBadgeTop,
-                    right: 0,
-                    child: NotificationBadge(label: '99+'),
-                  ),
-                ],
+              ChatAvatar(
+                assetPath: avatarAssetPath,
+                size: _MessagePageMetrics.avatarSize,
               ),
               const SizedBox(width: 13),
               Expanded(

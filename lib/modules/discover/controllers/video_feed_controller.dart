@@ -5,18 +5,21 @@ import '../../../app/routes/routes.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/city_user.dart';
 import '../../../domain/entities/city_user_mapper.dart';
+import '../../../domain/entities/user.dart';
 import '../../../domain/repositories/home_city_repository.dart';
 import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/user_repository.dart';
+import '../../../domain/repositories/video_engagement_repository.dart';
 import '../../shared/actions/user_actions_sheet.dart';
 
 enum PartnerTab { recommended, nearby, newcomers }
 
 class VideoFeedController extends GetxController {
-  VideoFeedController(this._users, this._cities, this.social);
+  VideoFeedController(this._users, this._cities, this.social, this._engagement);
   final UserRepository _users;
   final HomeCityRepository _cities;
   final SocialStateRepository social;
+  final VideoEngagementRepository _engagement;
   final partnerTab = PartnerTab.recommended.obs;
   final users = <CityUser>[].obs;
   final videoUsers = <CityUser>[].obs;
@@ -34,17 +37,17 @@ class VideoFeedController extends GetxController {
     return unique.values.toList(growable: false);
   }
 
-  String coverPathFor(CityUser user) => user.isSeedData
-      ? 'assets/images/video_user/video_cover.png'
-      : user.avatarPath;
+  String coverPathFor(CityUser user) =>
+      user.videoCoverPath.isNotEmpty ? user.videoCoverPath : user.avatarPath;
 
-  String avatarPathFor(CityUser user) => user.isSeedData
-      ? 'assets/images/video_user/video_avatar.png'
-      : user.avatarPath;
+  String avatarPathFor(CityUser user) =>
+      user.videoAvatarPath.isNotEmpty ? user.videoAvatarPath : user.avatarPath;
 
   @override
   void onInit() {
     super.onInit();
+    likedIds.assignAll(_engagement.likedUserIds);
+    favoriteIds.assignAll(_engagement.favoriteUserIds);
     reload();
   }
 
@@ -91,24 +94,38 @@ class VideoFeedController extends GetxController {
   }
 
   void setIndex(int value) => currentIndex.value = value;
-  void toggleLike(int id) {
+
+  Future<User> resolveUser(CityUser cityUser) async {
+    final users = await _users.getUsers();
+    final matches = users.where((user) => user.id == cityUser.id);
+    return matches.isEmpty ? cityUser.toUser() : matches.first;
+  }
+
+  Future<void> openUser(CityUser cityUser) async {
+    final user = await resolveUser(cityUser);
+    await Get.toNamed(Routes.userDetail, arguments: user);
+  }
+
+  Future<void> toggleLike(int id) async {
     final next = Set<int>.from(likedIds);
     final added = !next.remove(id);
     if (added) next.add(id);
     likedIds.assignAll(next);
+    await _engagement.setLiked(id, added);
     _message(added ? 'video_liked'.tr : 'video_unliked'.tr);
   }
 
-  void toggleFavorite(int id) {
+  Future<void> toggleFavorite(int id) async {
     final next = Set<int>.from(favoriteIds);
     final added = !next.remove(id);
     if (added) next.add(id);
     favoriteIds.assignAll(next);
+    await _engagement.setFavorite(id, added);
     _message(added ? 'video_favorited'.tr : 'video_unfavorited'.tr);
   }
 
   Future<void> more(CityUser cityUser) async {
-    final user = cityUser.toUser();
+    final user = await resolveUser(cityUser);
     await showUserActionsSheet(
       onBlock: () async {
         await social.block(user.id);

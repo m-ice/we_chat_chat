@@ -6,9 +6,6 @@ import '../../home/team_publish/team_flow_assets.dart';
 import '../controllers/my_world_controller.dart';
 import 'profile_design.dart';
 
-String _worldPublishCopy(String zh, String en) =>
-    Get.locale?.languageCode == 'zh' ? zh : en;
-
 class MyWorldPublishPage extends GetView<MyWorldPublishController> {
   const MyWorldPublishPage({super.key});
 
@@ -32,9 +29,9 @@ class MyWorldPublishPage extends GetView<MyWorldPublishController> {
           key: const ValueKey('my-world-publish-panel'),
           radius: 20,
           child: SizedBox(
-            height: 327,
+            height: 325,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(15, 14, 15, 16),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               child: Column(
                 children: [
                   Expanded(
@@ -50,10 +47,7 @@ class MyWorldPublishPage extends GetView<MyWorldPublishController> {
                         color: Color(0xFF333333),
                       ),
                       decoration: InputDecoration(
-                        hintText: _worldPublishCopy(
-                          '请输入简短的活动描述！',
-                          'Add a short post description',
-                        ),
+                        hintText: 'world_content_hint'.tr,
                         hintStyle: const TextStyle(color: Color(0xFFCCCCCC)),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -100,6 +94,8 @@ class _ImageStrip extends StatelessWidget {
       builder: (context, constraints) {
         final size = (constraints.maxWidth - gap * 2) / 3;
         final visiblePaths = paths.take(3).toList(growable: false);
+        // These reference photos are picker placeholders only. They are never
+        // included in a post unless the user selects local photos.
         if (visiblePaths.isEmpty) {
           return Row(
             children: [
@@ -227,7 +223,7 @@ class _PickImage extends StatelessWidget {
             const AppImage(TeamFlowAssets.addPhotoIcon, width: 24, height: 24),
             const SizedBox(height: 6),
             Text(
-              _worldPublishCopy('选择照片', 'Choose photo'),
+              'team_choose_photo'.tr,
               style: const TextStyle(fontSize: 11, color: Color(0xFFCCCCCC)),
             ),
           ],

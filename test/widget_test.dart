@@ -7,6 +7,7 @@ import 'package:we_chat_chat/app/routes/routes.dart';
 import 'package:we_chat_chat/data/providers/asset_json_provider.dart';
 import 'package:we_chat_chat/data/repositories/home_city_repository_impl.dart';
 import 'package:we_chat_chat/data/repositories/social_state_repository_impl.dart';
+import 'package:we_chat_chat/core/widgets/app_image.dart';
 import 'package:we_chat_chat/main.dart';
 
 void main() {
@@ -22,7 +23,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     SharedPreferences.resetStatic();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wl_age_18_confirmed': true});
     final preferences = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       MiTuApp(
@@ -38,33 +39,21 @@ void main() {
     expect(find.text('广场'), findsOneWidget);
     expect(find.text('消息'), findsOneWidget);
     expect(find.text('我的'), findsOneWidget);
-    expect(find.text('附近找搭子'), findsOneWidget);
-    expect(find.text('羽毛球组局'), findsOneWidget);
-    expect(find.text('美食探店'), findsOneWidget);
-    expect(find.text('珠江夜跑'), findsOneWidget);
+    expect(find.text('有颜有趣的人·尽在附近搭子'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-activity-card')), findsWidgets);
     expect(find.text('创建活动'), findsOneWidget);
     final heroBackground = find.byKey(const ValueKey('home-hero-background'));
-    expect(tester.getSize(heroBackground), const Size(343, 177));
-    expect(tester.getTopLeft(heroBackground), const Offset(16, 0));
-    final heroDecoration = find.byWidgetPredicate(
-      (widget) =>
-          widget is Image &&
-          widget.image is AssetImage &&
-          (widget.image as AssetImage).assetName ==
-              'assets/images/content/figma_home_hero_decor.png',
-    );
-    expect(heroDecoration, findsOneWidget);
-    expect(tester.getSize(heroDecoration), const Size(136, 103));
-    expect(tester.getTopLeft(heroDecoration), const Offset(227, -15));
+    expect(tester.getSize(heroBackground), const Size(343, 185));
+    expect(tester.getTopLeft(heroBackground), const Offset(16, 1.5));
     expect(
       tester.getSize(find.byKey(const ValueKey('home-recommendation-panel'))),
-      const Size(319, 91),
+      const Size(319, 85),
     );
     expect(
       tester.getTopLeft(
         find.byKey(const ValueKey('home-recommendation-panel')),
       ),
-      const Offset(28, 51),
+      const Offset(28, 59),
     );
     expect(
       tester.getSize(find.byKey(const ValueKey('home-explore-nearby'))),
@@ -72,7 +61,7 @@ void main() {
     );
     expect(
       tester.getTopLeft(find.byKey(const ValueKey('home-explore-nearby'))),
-      const Offset(99, 154),
+      const Offset(98.5, 165),
     );
     expect(
       tester.getSize(find.byKey(const ValueKey('home-activity-card')).first),
@@ -80,20 +69,22 @@ void main() {
     );
     expect(
       tester.getTopLeft(find.byKey(const ValueKey('home-activity-card')).first),
-      const Offset(16, 214),
+      const Offset(16, 221),
     );
     expect(
       tester.getSize(find.byKey(const ValueKey('home-create-activity'))),
       const Size(114, 42),
     );
+    final createButtonTopLeft = tester.getTopLeft(
+      find.byKey(const ValueKey('home-create-activity')),
+    );
+    expect(createButtonTopLeft.dx, closeTo(249, 1));
+    expect(createButtonTopLeft.dy, closeTo(675, 2));
     expect(
       find.byWidgetPredicate(
         (widget) =>
-            widget is Image &&
-            widget.image is AssetImage &&
-            (widget.image as AssetImage).assetName.startsWith(
-              'assets/icons/tabbar/',
-            ),
+            widget is AppImage &&
+            widget.source.startsWith('assets/icons/tabbar/'),
       ),
       findsNWidgets(5),
     );
@@ -101,11 +92,10 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('home-recommendation-0')));
     await tester.pumpAndSettle();
-    expect(find.text('申请邀请'), findsOneWidget);
     expect(find.text('交谈'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    Get.back<void>();
     await tester.pumpAndSettle();
-    expect(find.text('附近找搭子'), findsOneWidget);
+    expect(find.text('有颜有趣的人·尽在附近搭子'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -118,7 +108,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     SharedPreferences.resetStatic();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wl_age_18_confirmed': true});
     final preferences = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       MiTuApp(
@@ -129,7 +119,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Friends nearby'), findsOneWidget);
+    expect(find.text('Interesting people are nearby'), findsOneWidget);
     expect(find.byKey(const ValueKey('home-create-activity')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -138,7 +128,7 @@ void main() {
     tester,
   ) async {
     SharedPreferences.resetStatic();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wl_age_18_confirmed': true});
     final preferences = await SharedPreferences.getInstance();
     final repository = HomeCityRepositoryImpl(AssetJsonProvider(), preferences);
     expect(repository.selectedCity, '全部');
@@ -176,7 +166,7 @@ void main() {
     tester,
   ) async {
     SharedPreferences.resetStatic();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wl_age_18_confirmed': true});
     final preferences = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       MiTuApp(

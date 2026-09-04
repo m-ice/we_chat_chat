@@ -66,7 +66,9 @@ class ChatPage extends GetView<ChatThreadController> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          controller.peer.id == -1 ? '官方助手' : '微撩好友',
+                          controller.peer.id == -1
+                              ? 'chat_assistant'.tr
+                              : 'chat_friend'.tr,
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,
@@ -82,7 +84,7 @@ class ChatPage extends GetView<ChatThreadController> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.phone_outlined),
-                  title: const Text('发起语音通话'),
+                  title: Text('chat_voice_call'.tr),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
                     Get.back<void>();
@@ -92,7 +94,10 @@ class ChatPage extends GetView<ChatThreadController> {
               ],
               SizedBox(
                 width: double.infinity,
-                child: TextButton(onPressed: Get.back, child: const Text('关闭')),
+                child: TextButton(
+                  onPressed: Get.back,
+                  child: Text('common_close'.tr),
+                ),
               ),
             ],
           ),
@@ -263,9 +268,9 @@ class _TypingBubble extends StatelessWidget {
               color: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
-              '正在输入…',
-              style: TextStyle(color: Colors.white, fontSize: 14),
+            child: Text(
+              'chat_typing'.tr,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
           ),
         ],
@@ -338,10 +343,10 @@ class _MessageComposerState extends State<_MessageComposer> {
       final canSend =
           controller.canSend.value && !controller.awaitingReply.value;
       final hint = controller.awaitingReply.value
-          ? '对方正在回复…'
+          ? 'chat_peer_replying'.tr
           : controller.canSend.value
-          ? '输入内容...'
-          : '等待对方回复后可继续发送';
+          ? 'chat_input_hint'.tr
+          : 'chat_wait_input'.tr;
       return Positioned(
         left: 16,
         right: 16,
@@ -408,9 +413,9 @@ class _MessageComposerState extends State<_MessageComposer> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            '发送',
-                            style: TextStyle(fontSize: 15),
+                          child: Text(
+                            'chat_send'.tr,
+                            style: const TextStyle(fontSize: 15),
                           ),
                         ),
                       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../../domain/entities/message_center_item.dart';
 import '../../../domain/entities/user.dart';
@@ -10,74 +11,6 @@ import '../controllers/message_center_controller.dart';
 import 'widgets/chat_visuals.dart';
 
 enum MessageContactPageKind { relationship, visitors, calls }
-
-class SystemMessagesPage extends StatelessWidget {
-  const SystemMessagesPage({
-    super.key,
-    required this.repository,
-    required this.assistant,
-    this.onOpenChat,
-  });
-
-  final MessageCenterRepository repository;
-  final User? assistant;
-  final VoidCallback? onOpenChat;
-
-  @override
-  Widget build(BuildContext context) {
-    return _MessageFeatureScaffold(
-      title: '系统消息',
-      section: MessageCenterSection.system,
-      repository: repository,
-      bodyBuilder: (_, controller) {
-        final notices = controller.systemNotices;
-        if (notices.isEmpty) return const _EmptyFeatureState();
-        return ListView.builder(
-          key: const ValueKey('system-message-list'),
-          padding: const EdgeInsets.fromLTRB(16, 3, 16, 24),
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: notices.length,
-          itemBuilder: (context, index) {
-            final notice = notices[index];
-            return Align(
-              alignment: Alignment.topLeft,
-              child: InkWell(
-                key: ValueKey('system-notice-${notice.id}'),
-                onTap: onOpenChat,
-                borderRadius: BorderRadius.circular(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ChatAvatar(assetPath: notice.avatarPath, size: 40),
-                    const SizedBox(width: 12),
-                    Flexible(
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 240),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.textPrimary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          notice.content,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            height: 1.35,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
 
 class MessageContactPage extends StatelessWidget {
   const MessageContactPage({
@@ -149,34 +82,22 @@ class _RelationshipList extends StatelessWidget {
           key: ValueKey('relationship-${relationship.person.id}'),
           person: relationship.person,
           onTap: () => onOpenChat(_toUser(relationship.person)),
-          onLongPress: () => _confirmRemove(context, relationship),
+          onLongPress: () => _confirmRemove(relationship),
         );
       },
     );
   }
 
-  Future<void> _confirmRemove(
-    BuildContext context,
-    IntimateRelationship relationship,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('解除亲密关系'),
-        content: Text('确定解除与${relationship.person.nickname}的亲密关系吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('解除'),
-          ),
-        ],
-      ),
+  Future<void> _confirmRemove(IntimateRelationship relationship) async {
+    final confirmed = await AppDialog.confirm(
+      title: 'relationship_remove_title'.tr,
+      message: 'relationship_remove_confirm'.trParams({
+        'name': relationship.person.nickname,
+      }),
+      confirmText: 'common_remove'.tr,
+      isDangerous: true,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       await controller.removeRelationship(relationship);
     }
   }
@@ -358,7 +279,7 @@ class _MessageFeatureScaffoldState extends State<_MessageFeatureScaffold> {
                         child: TextButton.icon(
                           onPressed: _controller.load,
                           icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('加载失败，点击重试'),
+                          label: Text('common_load_failed_retry'.tr),
                         ),
                       );
                     }
@@ -387,10 +308,13 @@ class _EmptyFeatureState extends StatelessWidget {
       children: [
         SizedBox(
           height: MediaQuery.sizeOf(context).height * .55,
-          child: const Center(
+          child: Center(
             child: Text(
-              '暂时没有新消息',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              'message_feature_empty'.tr,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
             ),
           ),
         ),

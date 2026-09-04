@@ -14,6 +14,8 @@ enum SlideInstantly {
 class CommonDraggableFloatWidget extends StatelessWidget {
   final Widget child;
   final Widget listView;
+  final double width;
+  final double height;
   final double borderBottom;
   final double borderTop;
   final double borderLeft;
@@ -29,6 +31,8 @@ class CommonDraggableFloatWidget extends StatelessWidget {
     required this.child,
     required this.listView,
     required this.eventStreamController,
+    this.width = defaultWidgetWidth,
+    this.height = defaultWidgetHeight,
     this.borderBottom = 50,
     this.borderTop = 0,
     this.borderLeft = 2,
@@ -113,22 +117,165 @@ class CommonDraggableFloatWidget extends StatelessWidget {
           },
           child: listView,
         ),
-        DraggableFloatWidget(
-          eventStreamController: eventStreamController,
-          config: DraggableFloatWidgetBaseConfig(
-            isFullScreen: isFullScreen,
-            initPositionYInTop: initPositionYInTop,
-            initPositionXInLeft: false,
+        Positioned.fill(
+          child: _DraggableFloatOverlay(
+            width: width,
+            height: height,
+            borderBottom: borderBottom,
+            borderTop: borderTop,
+            borderLeft: borderLeft,
+            borderRight: borderRight,
             initPositionYMarginBorder: initPositionYMarginBorder,
-            borderBottom: borderBottom + defaultBorderWidth,
-            borderTop: borderTop + defaultBorderWidth,
-            borderLeft: borderLeft + defaultBorderWidth,
-            borderRight: borderRight + defaultBorderWidth,
+            initPositionYInTop: initPositionYInTop,
+            isFullScreen: isFullScreen,
+            eventStreamController: eventStreamController,
+            onTap: onTap,
+            child: child,
           ),
-          onTap: onTap,
-          child: Center(child: child),
         ),
       ],
+    );
+  }
+}
+
+class _DraggableFloatOverlay extends StatefulWidget {
+  const _DraggableFloatOverlay({
+    required this.width,
+    required this.height,
+    required this.borderBottom,
+    required this.borderTop,
+    required this.borderLeft,
+    required this.borderRight,
+    required this.initPositionYMarginBorder,
+    required this.initPositionYInTop,
+    required this.isFullScreen,
+    required this.eventStreamController,
+    required this.child,
+    this.onTap,
+  });
+
+  final double width;
+  final double height;
+  final double borderBottom;
+  final double borderTop;
+  final double borderLeft;
+  final double borderRight;
+  final double initPositionYMarginBorder;
+  final bool initPositionYInTop;
+  final bool isFullScreen;
+  final StreamController<OperateEvent> eventStreamController;
+  final Widget child;
+  final VoidCallback? onTap;
+
+  @override
+  State<_DraggableFloatOverlay> createState() => _DraggableFloatOverlayState();
+}
+
+class _DraggableFloatOverlayState extends State<_DraggableFloatOverlay> {
+  StreamSubscription<OperateEvent>? _subscription;
+  Offset? _position;
+  Size? _layoutSize;
+  var _visible = true;
+  var _dragging = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.eventStreamController.stream.listen((event) {
+      final visible = event == OperateEvent.OPERATE_SHOW;
+      if (visible == _visible || !mounted) return;
+      setState(() => _visible = visible);
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.biggest;
+        final topInset = widget.isFullScreen
+            ? MediaQuery.paddingOf(context).top
+            : 0.0;
+        final bottomInset = widget.isFullScreen
+            ? MediaQuery.paddingOf(context).bottom
+            : 0.0;
+        final minX = widget.borderLeft;
+        final maxX = (size.width - widget.width - widget.borderRight).clamp(
+          minX,
+          double.infinity,
+        );
+        final minY = widget.borderTop + topInset;
+        final maxY =
+            (size.height - widget.height - widget.borderBottom - bottomInset)
+                .clamp(minY, double.infinity);
+
+        if (_position == null || _layoutSize != size) {
+          _layoutSize = size;
+          _position = Offset(
+            _position?.dx.clamp(minX, maxX) ?? maxX,
+            _position?.dy.clamp(minY, maxY) ??
+                (widget.initPositionYInTop
+                    ? (minY + widget.initPositionYMarginBorder).clamp(
+                        minY,
+                        maxY,
+                      )
+                    : (maxY - widget.initPositionYMarginBorder).clamp(
+                        minY,
+                        maxY,
+                      )),
+          );
+        }
+
+        final position = _position!;
+        final hiddenX = position.dx <= size.width / 2
+            ? -widget.width + 5
+            : size.width - 5;
+        return Stack(
+          children: [
+            AnimatedPositioned(
+              duration: _dragging
+                  ? Duration.zero
+                  : const Duration(milliseconds: 220),
+              curve: Curves.easeOut,
+              left: _visible ? position.dx : hiddenX,
+              top: position.dy,
+              width: widget.width,
+              height: widget.height,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.onTap,
+                onPanStart: (_) => setState(() => _dragging = true),
+                onPanUpdate: (details) {
+                  setState(() {
+                    _position = Offset(
+                      (position.dx + details.delta.dx).clamp(minX, maxX),
+                      (position.dy + details.delta.dy).clamp(minY, maxY),
+                    );
+                  });
+                },
+                onPanEnd: (_) {
+                  setState(() {
+                    _dragging = false;
+                    _position = Offset(
+                      _position!.dx + widget.width / 2 < size.width / 2
+                          ? minX
+                          : maxX,
+                      _position!.dy,
+                    );
+                  });
+                },
+                child: Center(child: widget.child),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

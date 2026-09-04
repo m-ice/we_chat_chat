@@ -17,7 +17,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     SharedPreferences.resetStatic();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wl_age_18_confirmed': true});
     final preferences = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       MiTuApp(
@@ -30,18 +30,18 @@ void main() {
 
     final user = (await Get.find<UserRepository>().getUsers()).first;
     await _open(tester, Routes.userDetail, arguments: user);
-    expect(find.text('Invite'), findsOneWidget);
     expect(find.text('Chat'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await _back(tester);
     await _open(tester, Routes.teamDetail, arguments: user);
-    expect(find.text('Organizer: 晓风'), findsOneWidget);
+    expect(find.byKey(const ValueKey('team-detail-chat')), findsOneWidget);
+    expect(find.text('Comments'), findsWidgets);
     expect(tester.takeException(), isNull);
 
     await _back(tester);
     await _open(tester, Routes.teamPublish);
-    expect(find.text('Create a Team'), findsOneWidget);
+    expect(find.text('Create a Partner Activity'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await _back(tester);

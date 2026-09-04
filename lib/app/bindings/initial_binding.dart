@@ -11,28 +11,34 @@ import '../../data/repositories/mock_ai_repository.dart';
 import '../../data/repositories/membership_wallet_repository_impl.dart';
 import '../../data/repositories/social_state_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
+import '../../data/repositories/user_detail_repository_impl.dart';
 import '../../data/repositories/team_publish_repository_impl.dart';
+import '../../data/repositories/team_detail_repository_impl.dart';
 import '../../data/repositories/profile_edit_repository_impl.dart';
-import '../../data/repositories/verification_repository_impl.dart';
 import '../../data/repositories/album_repository_impl.dart';
 import '../../data/repositories/my_world_repository_impl.dart';
 import '../../data/repositories/square_repository_impl.dart';
 import '../../data/repositories/report_repository_impl.dart';
 import '../../data/repositories/support_repository_impl.dart';
+import '../../data/repositories/message_center_repository_impl.dart';
+import '../../data/repositories/video_engagement_repository_impl.dart';
 import '../../domain/repositories/ai_repository.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../domain/repositories/home_city_repository.dart';
 import '../../domain/repositories/membership_wallet_repository.dart';
 import '../../domain/repositories/social_state_repository.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../../domain/repositories/user_detail_repository.dart';
 import '../../domain/repositories/team_publish_repository.dart';
+import '../../domain/repositories/team_detail_repository.dart';
 import '../../domain/repositories/profile_edit_repository.dart';
-import '../../domain/repositories/verification_repository.dart';
 import '../../domain/repositories/album_repository.dart';
 import '../../domain/repositories/my_world_repository.dart';
 import '../../domain/repositories/square_repository.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../../domain/repositories/support_repository.dart';
+import '../../domain/repositories/message_center_repository.dart';
+import '../../domain/repositories/video_engagement_repository.dart';
 
 class InitialBinding extends Bindings {
   InitialBinding(this._preferences);
@@ -44,8 +50,19 @@ class InitialBinding extends Bindings {
     Get.put(_preferences, permanent: true);
     Get.lazyPut<AssetJsonProvider>(AssetJsonProvider.new, fenix: true);
     Get.put(LocalChatStorage(_preferences), permanent: true);
+    Get.put<ProfileEditRepository>(
+      ProfileEditRepositoryImpl(_preferences),
+      permanent: true,
+    );
     Get.lazyPut<UserRepository>(
-      () => UserRepositoryImpl(Get.find()),
+      () => UserRepositoryImpl(
+        Get.find<AssetJsonProvider>(),
+        Get.find<ProfileEditRepository>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<UserDetailRepository>(
+      () => UserDetailRepositoryImpl(Get.find<AssetJsonProvider>(),_preferences),
       fenix: true,
     );
     Get.lazyPut<HomeCityRepository>(
@@ -83,13 +100,10 @@ class InitialBinding extends Bindings {
       TeamPublishRepositoryImpl(_preferences),
       permanent: true,
     );
-    Get.put<ProfileEditRepository>(
-      ProfileEditRepositoryImpl(_preferences),
-      permanent: true,
-    );
-    Get.put<VerificationRepository>(
-      VerificationRepositoryImpl(_preferences),
-      permanent: true,
+    Get.lazyPut<TeamDetailRepository>(
+      () =>
+          TeamDetailRepositoryImpl(Get.find<AssetJsonProvider>(), _preferences),
+      fenix: true,
     );
     Get.put<AlbumRepository>(
       AlbumRepositoryImpl(_preferences),
@@ -105,6 +119,14 @@ class InitialBinding extends Bindings {
     );
     Get.put<SupportRepository>(
       SupportRepositoryImpl(_preferences),
+      permanent: true,
+    );
+    Get.put<MessageCenterRepository>(
+      const MessageCenterRepositoryImpl(),
+      permanent: true,
+    );
+    Get.put<VideoEngagementRepository>(
+      VideoEngagementRepositoryImpl(_preferences),
       permanent: true,
     );
     Get.put<SquareRepository>(

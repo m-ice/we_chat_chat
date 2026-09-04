@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../core/widgets/app_image.dart';
+import '../../../core/widgets/app_refresh_view.dart';
+import '../../../core/widgets/app_text_input_dialog.dart';
+import '../../../domain/entities/team_detail_comment.dart';
 import '../../../domain/entities/user.dart';
 import '../controllers/home_controller.dart';
 import '../team_publish/team_flow_assets.dart';
 import 'team_detail_controller.dart';
 
 const _detailYellow = Color(0xFFFFCE45);
-
-String _detailCopy(String zh, String en) =>
-    Get.locale?.languageCode == 'zh' ? zh : en;
 
 class TeamDetailPage extends GetView<TeamDetailController> {
   const TeamDetailPage({super.key});
@@ -21,35 +22,17 @@ class TeamDetailPage extends GetView<TeamDetailController> {
     Get.back<HomeFeedTab>(result: HomeFeedTab.nearby);
   }
 
-  Future<void> _writeComment(BuildContext context) async {
-    final input = TextEditingController();
-    final value = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(_detailCopy('写评论', 'Write a comment')),
-        content: TextField(
-          controller: input,
-          autofocus: true,
-          minLines: 2,
-          maxLines: 4,
-          decoration: InputDecoration(
-            hintText: _detailCopy('说说你对活动的期待…', 'Share what you think…'),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text('common_cancel'.tr),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, input.text.trim()),
-            child: Text(_detailCopy('发布', 'Post')),
-          ),
-        ],
-      ),
+  Future<void> _writeComment() async {
+    final value = await AppTextInputDialog.show(
+      title: 'team_comment_write'.tr,
+      hint: 'team_comment_hint'.tr,
+      confirmText: 'team_comment_post'.tr,
+      minLines: 2,
+      maxLines: 4,
+      maxLength: 200,
     );
-    input.dispose();
-    if (value?.isNotEmpty == true) controller.addComment(value!);
+    final content = value?.trim();
+    if (content?.isNotEmpty == true) await controller.addComment(content!);
   }
 
   @override
@@ -60,36 +43,214 @@ class TeamDetailPage extends GetView<TeamDetailController> {
         : post.imagePaths.first;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 368,
-            pinned: false,
-            automaticallyImplyLeading: false,
-            backgroundColor: Colors.black,
-            surfaceTintColor: Colors.transparent,
-            systemOverlayStyle: SystemUiOverlayStyle.light,
-            flexibleSpace: FlexibleSpaceBar(
-              background: GestureDetector(
-                onTap: () => Get.toNamed(
-                  Routes.imagePreview,
-                  arguments: {
-                    'images': post.imagePaths.isEmpty
-                        ? [cover]
-                        : post.imagePaths,
-                    'index': 0,
-                  },
+      body: AppRefreshView(
+        onRefresh: controller.reload,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 368,
+              pinned: false,
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.black,
+              surfaceTintColor: Colors.transparent,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
+              flexibleSpace: FlexibleSpaceBar(
+                background: GestureDetector(
+                  onTap: () => Get.toNamed(
+                    Routes.imagePreview,
+                    arguments: {
+                      'images': post.imagePaths.isEmpty
+                          ? [cover]
+                          : post.imagePaths,
+                      'index': 0,
+                    },
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      AppImage(cover, fit: BoxFit.cover),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.center,
+                            colors: [Color(0x99000000), Color(0x00000000)],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Stack(
-                  fit: StackFit.expand,
+              ),
+              leading: _RoundTopButton(
+                assetPath: TeamFlowAssets.detailBackIcon,
+                onTap: Get.back,
+              ),
+              actions: [
+                _RoundTopButton(
+                  assetPath: TeamFlowAssets.detailMoreIcon,
+                  onTap: controller.openOrganizer,
+                ),
+              ],
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  14,
+                  16,
+                  MediaQuery.paddingOf(context).bottom + 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppImage(cover, fit: BoxFit.cover),
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.center,
-                          colors: [Color(0x99000000), Color(0x00000000)],
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _detailTitle(post),
+                            style: const TextStyle(
+                              color: Color(0xFF333333),
+                              fontSize: 19,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        _DetailCategoryChip(
+                          label: _detailCategory(post.activity),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      _detailDescription(post),
+                      style: const TextStyle(
+                        color: Color(0xFF999999),
+                        fontSize: 13,
+                        height: 1.45,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _DetailMeta(
+                      assetPath: TeamFlowAssets.detailTimeIcon,
+                      text: _detailDate(post.date),
+                    ),
+                    const SizedBox(height: 6),
+                    _DetailMeta(
+                      assetPath: TeamFlowAssets.detailLocationIcon,
+                      text: 'team_location_value'.trParams({
+                        'location': post.location,
+                      }),
+                    ),
+                    const SizedBox(height: 14),
+                    _ParticipantBar(controller: controller),
+                    const SizedBox(height: 12),
+                    _NearbyBanner(onExplore: _openNearby),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Divider(height: 1, color: Color(0xFFF0E9D7)),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'team_comments'.tr,
+                            style: const TextStyle(
+                              color: Color(0xFF333333),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+
+                        GestureDetector(
+                          onTap: _writeComment,
+                          child: Container(
+                            height: 27.h,
+                            constraints: BoxConstraints(minWidth: 62.w),
+                            padding: EdgeInsets.symmetric(horizontal: 8.w),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(26.r),
+                              border: Border.all(
+                                color: Color(0xFF999999),
+                                width: 1.w,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AppImage(
+                                  TeamFlowAssets.detailEditIcon,
+                                  width: 16.w,
+                                ),
+                                SizedBox(width: 5.w),
+                                Text(
+                                  'team_comments'.tr,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Color(0xFF999999),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // OutlinedButton.icon(
+                        //   onPressed: () => _writeComment(context),
+                        //   icon: const AppImage(
+                        //     TeamFlowAssets.detailEditIcon,
+                        //     width: 16,
+                        //     height: 16,
+                        //   ),
+                        //   label: Text('team_comments'.tr),
+                        //   style: OutlinedButton.styleFrom(
+                        //     foregroundColor: const Color(0xFF888888),
+                        //     side: const BorderSide(color: Color(0xFFAAAAAA)),
+                        //     minimumSize: const Size(62, 30),
+                        //     // padding: const EdgeInsets.symmetric(horizontal: 9),
+                        //     visualDensity: VisualDensity.compact,
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    Obx(
+                      () => Column(
+                        children: controller.comments
+                            .map(
+                              (comment) => _CommentRow(
+                                comment: comment,
+                                onGreeting: controller.openChat,
+                              ),
+                            )
+                            .toList(growable: false),
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    Center(
+                      child: SizedBox(
+                        width: 220,
+                        height: 52,
+                        child: FilledButton(
+                          key: const ValueKey('team-detail-chat'),
+                          onPressed: controller.openChat,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: _detailYellow,
+                            foregroundColor: Colors.black,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: Text(
+                            'team_chat'.tr,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -97,153 +258,8 @@ class TeamDetailPage extends GetView<TeamDetailController> {
                 ),
               ),
             ),
-            leadingWidth: 60,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: _RoundTopButton(
-                assetPath: TeamFlowAssets.detailBackIcon,
-                onTap: Get.back,
-              ),
-            ),
-            actions: [
-              _RoundTopButton(
-                assetPath: TeamFlowAssets.detailMoreIcon,
-                onTap: controller.openOrganizer,
-              ),
-              const SizedBox(width: 16),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                14,
-                16,
-                MediaQuery.paddingOf(context).bottom + 10,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _detailTitle(post),
-                          style: const TextStyle(
-                            color: Color(0xFF333333),
-                            fontSize: 19,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      _DetailCategoryChip(
-                        label: _detailCategory(post.activity),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    _detailDescription(post),
-                    style: const TextStyle(
-                      color: Color(0xFF999999),
-                      fontSize: 13,
-                      height: 1.45,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _DetailMeta(
-                    assetPath: TeamFlowAssets.detailTimeIcon,
-                    text: _detailDate(post.date),
-                  ),
-                  const SizedBox(height: 6),
-                  _DetailMeta(
-                    assetPath: TeamFlowAssets.detailLocationIcon,
-                    text: _detailCopy(
-                      '地址：${post.location}',
-                      'Location: ${post.location}',
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _ParticipantBar(controller: controller),
-                  const SizedBox(height: 12),
-                  _NearbyBanner(onExplore: _openNearby),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Divider(height: 1, color: Color(0xFFF0E9D7)),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _detailCopy('评论', 'Comments'),
-                          style: const TextStyle(
-                            color: Color(0xFF333333),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () => _writeComment(context),
-                        icon: const AppImage(
-                          TeamFlowAssets.detailEditIcon,
-                          width: 16,
-                          height: 16,
-                        ),
-                        label: Text(_detailCopy('评论', 'Comment')),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF888888),
-                          side: const BorderSide(color: Color(0xFFAAAAAA)),
-                          minimumSize: const Size(62, 30),
-                          padding: const EdgeInsets.symmetric(horizontal: 9),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 7),
-                  Obx(
-                    () => Column(
-                      children: controller.comments
-                          .map(
-                            (comment) => _CommentRow(
-                              comment: comment,
-                              onGreeting: controller.openChat,
-                            ),
-                          )
-                          .toList(growable: false),
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-                  Center(
-                    child: SizedBox(
-                      width: 220,
-                      height: 52,
-                      child: FilledButton(
-                        key: const ValueKey('team-detail-chat'),
-                        onPressed: controller.openChat,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: _detailYellow,
-                          foregroundColor: Colors.black,
-                          shape: const StadiumBorder(),
-                        ),
-                        child: Text(
-                          _detailCopy('聊一聊', 'Chat'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -257,16 +273,16 @@ class _RoundTopButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xAA1D1D1D),
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: SizedBox.square(
-          dimension: 34,
-          child: Center(child: AppImage(assetPath, width: 24, height: 24)),
+    return IconButton(
+      onPressed: onTap,
+      icon: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: const Color(0xAA1D1D1D),
+          borderRadius: BorderRadius.circular(32),
         ),
+        child: Center(child: AppImage(assetPath, width: 24)),
       ),
     );
   }
@@ -329,8 +345,8 @@ class _ParticipantBar extends StatelessWidget {
       () => Semantics(
         button: true,
         label: controller.pending.value
-            ? _detailCopy('报名申请审核中', 'Join request pending')
-            : _detailCopy('点击报名活动', 'Tap to join this activity'),
+            ? 'team_join_pending_semantics'.tr
+            : 'team_join_tap_semantics'.tr,
         child: Material(
           color: const Color(0xFFF2F2F2),
           borderRadius: BorderRadius.circular(12),
@@ -344,20 +360,25 @@ class _ParticipantBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
-                    const SizedBox(
+                    SizedBox(
                       width: 54,
                       height: 24,
                       child: Stack(
                         children: [
-                          _ParticipantAvatar(
-                            left: 0,
-                            assetPath: TeamFlowAssets.detailParticipant1,
-                          ),
-                          _ParticipantAvatar(
-                            left: 16,
-                            assetPath: TeamFlowAssets.detailParticipant2,
-                          ),
-                          Positioned(
+                          for (
+                            var index = 0;
+                            index <
+                                controller.participantAvatarPaths
+                                    .take(2)
+                                    .length;
+                            index++
+                          )
+                            _ParticipantAvatar(
+                              left: index * 16,
+                              assetPath:
+                                  controller.participantAvatarPaths[index],
+                            ),
+                          const Positioned(
                             left: 32,
                             child: AppImage(
                               TeamFlowAssets.detailParticipantAdd,
@@ -370,7 +391,7 @@ class _ParticipantBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${controller.participantCount}/${controller.participantTotal}',
+                      '${controller.participantCount}/${controller.participantTotal.value}',
                       style: const TextStyle(fontSize: 12),
                     ),
                   ],
@@ -434,7 +455,7 @@ class _NearbyBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _detailCopy('寻找更多搭子', 'Find more friends'),
+                  'team_nearby_title'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -444,10 +465,7 @@ class _NearbyBanner extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _detailCopy(
-                    '有颜有趣的人 · 尽在附近搭子',
-                    'Interesting people are nearby',
-                  ),
+                  'team_nearby_subtitle'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -467,7 +485,7 @@ class _NearbyBanner extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12),
             ),
             child: Text(
-              _detailCopy('前往寻找', 'Explore'),
+              'team_nearby_action'.tr,
               style: const TextStyle(fontSize: 12),
             ),
           ),
@@ -583,18 +601,22 @@ class _CommentRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          OutlinedButton(
-            onPressed: onGreeting,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: _detailYellow,
-              side: const BorderSide(color: _detailYellow),
-              minimumSize: const Size(54, 28),
-              padding: const EdgeInsets.symmetric(horizontal: 9),
-              visualDensity: VisualDensity.compact,
-            ),
-            child: Text(
-              _detailCopy('打招呼', 'Say hi'),
-              style: const TextStyle(fontSize: 11),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: onGreeting,
+            child: Container(
+              width: 54.w,
+              height: 27.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(26.r),
+                border: Border.all(color: Color(0xFFFFCE45), width: 1.w),
+              ),
+              child: Text(
+                'team_greet'.tr,
+                style: TextStyle(fontSize: 11.sp, color: Color(0xFFFFCE45)),
+              ),
             ),
           ),
         ],
@@ -620,19 +642,19 @@ String _detailCategory(String activity) {
   if (activity.contains('吃') ||
       activity.contains('美食') ||
       activity.contains('咖啡')) {
-    return _detailCopy('美食', 'Food');
+    return 'team_category_food'.tr;
   }
   if (activity.contains('山') ||
       activity.contains('露营') ||
       activity.contains('徒步')) {
-    return _detailCopy('户外', 'Outdoor');
+    return 'team_category_outdoor'.tr;
   }
   if (activity.contains('骑') ||
       activity.contains('球') ||
       activity.contains('跑')) {
-    return _detailCopy('运动', 'Sports');
+    return 'team_category_sports'.tr;
   }
-  return _detailCopy('娱乐', 'Fun');
+  return 'team_category_fun'.tr;
 }
 
 String _detailDate(DateTime value) {
@@ -643,8 +665,10 @@ String _detailDate(DateTime value) {
   final end = value.add(const Duration(hours: 1));
   final endHour = end.hour.toString().padLeft(2, '0');
   final endMinute = end.minute.toString().padLeft(2, '0');
-  return _detailCopy(
-    '时间：$month月$day日 $hour:$minute–$endHour:$endMinute',
-    'Date: $month/$day $hour:$minute–$endHour:$endMinute',
-  );
+  return 'team_time_range'.trParams({
+    'month': month,
+    'day': day,
+    'start': '$hour:$minute',
+    'end': '$endHour:$endMinute',
+  });
 }

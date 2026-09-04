@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../profile/views/profile_design.dart';
@@ -28,7 +29,7 @@ class CenterSearchPage extends GetView<CenterSearchController> {
           child: Row(
             children: [
               const AppImage(
-                'assets/icons/profile_edit/search.svg',
+                AppImageString.profileEditSearch,
                 width: 24,
                 height: 24,
               ),

@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../app/routes/routes.dart';
+import '../../../../core/widgets/app_dialog.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../domain/entities/user.dart';
 import '../../../../domain/repositories/home_city_repository.dart';
 import '../../../../domain/repositories/membership_wallet_repository.dart';
@@ -42,6 +43,7 @@ class ActivityFilterController extends GetxController {
         (await _users.getUsers()).where((user) {
           final post = user.teamPost;
           return post != null &&
+              !post.isExpired(DateTime.now()) &&
               !excluded.contains(user.id) &&
               (city == '全部' ||
                   post.location.contains(city) ||
@@ -76,31 +78,22 @@ class ActivityFilterController extends GetxController {
   }
 
   Future<void> join(User user) async {
+    if (user.teamPost?.isExpired(DateTime.now()) ?? true) {
+      AppToast.show('team_activity_ended'.tr);
+      await load();
+      return;
+    }
     if (!_wallet.isVipActive) {
-      await Get.dialog<void>(
-        AlertDialog(
-          title: Text('vip_privilege'.tr),
-          content: Text('vip_join_required'.tr),
-          actions: [
-            TextButton(onPressed: Get.back, child: Text('common_cancel'.tr)),
-            TextButton(
-              onPressed: () {
-                Get.back<void>();
-                Get.toNamed(Routes.vip);
-              },
-              child: Text('vip_open'.tr),
-            ),
-          ],
-        ),
+      final openVip = await AppDialog.confirm(
+        title: 'vip_privilege'.tr,
+        message: 'vip_join_required'.tr,
+        confirmText: 'vip_open'.tr,
       );
+      if (openVip) await Get.toNamed<void>(Routes.vip);
       return;
     }
     await _social.setPendingJoin(user.id, true);
     results.refresh();
-    Get.snackbar(
-      'common_tip'.tr,
-      'team_join_requested'.trParams({'name': user.nickname}),
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppToast.show('team_join_requested'.trParams({'name': user.nickname}));
   }
 }

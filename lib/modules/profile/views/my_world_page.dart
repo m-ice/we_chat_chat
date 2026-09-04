@@ -46,9 +46,9 @@ class _EmptyWorldState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            '还没有发布动态',
-            style: TextStyle(fontSize: 14, color: Color(0xFF999999)),
+          Text(
+            'world_no_posts'.tr,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 14),
           FilledButton(
@@ -60,7 +60,7 @@ class _EmptyWorldState extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: const StadiumBorder(),
             ),
-            child: const Text('发布第一条动态'),
+            child: Text('world_publish_first'.tr),
           ),
         ],
       ),
@@ -99,7 +99,10 @@ class _PostCard extends GetView<MyWorldController> {
           image: images.firstOrNull,
           time: _dateLabel(post.createdAt),
           onImageTap: images.isEmpty ? null : () => controller.preview(post, 0),
-          onAction: _showInteractionPending,
+          onAction: () => AppToast.show('world_own_greet'.tr),
+          onLike: () => controller.toggleLike(post),
+          onComment: () => controller.comment(post),
+          liked: post.isLiked,
           onMore: () => _showMore(context),
         );
       },
@@ -108,20 +111,24 @@ class _PostCard extends GetView<MyWorldController> {
 
   String _dateLabel(DateTime date) {
     final difference = DateTime.now().difference(date.toLocal());
-    if (!difference.isNegative && difference.inMinutes < 1) return '刚刚发布';
+    if (!difference.isNegative && difference.inMinutes < 1) {
+      return 'world_published_just_now'.tr;
+    }
     if (!difference.isNegative && difference.inHours < 1) {
-      return '${difference.inMinutes}分钟前发布';
+      return 'world_published_minutes_ago'.trParams({
+        'minutes': '${difference.inMinutes}',
+      });
     }
     if (!difference.isNegative && difference.inHours < 24) {
-      return '${difference.inHours}小时前发布';
+      return 'world_published_hours_ago'.trParams({
+        'hours': '${difference.inHours}',
+      });
     }
-    return '${date.month}月${date.day}日发布';
+    return 'world_published_on_date'.trParams({
+      'month': '${date.month}',
+      'day': '${date.day}',
+    });
   }
-
-  // LOGIC_PENDING(profile-world-interactions): the current controller/repository
-  // exposes publish, preview and delete only; greeting/like/comment endpoints are
-  // intentionally not fabricated in the UI layer.
-  void _showInteractionPending() => AppToast.show('互动功能暂未接入');
 
   Future<void> _showMore(BuildContext context) async {
     final action = await showModalBottomSheet<String>(
@@ -170,6 +177,9 @@ class _PostShell extends StatelessWidget {
     required this.content,
     required this.time,
     required this.onAction,
+    required this.onLike,
+    required this.onComment,
+    required this.liked,
     required this.onMore,
     this.image,
     this.onImageTap,
@@ -182,6 +192,9 @@ class _PostShell extends StatelessWidget {
   final String? image;
   final String time;
   final VoidCallback onAction;
+  final VoidCallback onLike;
+  final VoidCallback onComment;
+  final bool liked;
   final VoidCallback onMore;
   final VoidCallback? onImageTap;
 
@@ -243,7 +256,7 @@ class _PostShell extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              child: const Text('打招呼'),
+              child: Text('world_greet'.tr),
             ),
           ],
         ),
@@ -291,14 +304,15 @@ class _PostShell extends StatelessWidget {
             const Spacer(),
             _PostAction(
               icon: ProfileDetailAssets.worldLike,
-              label: '点赞',
-              onTap: () => AppToast.show('点赞功能暂未接入'),
+              label: 'video_like'.tr,
+              color: liked ? const Color(0xFFFF3D91) : null,
+              onTap: onLike,
             ),
             const Spacer(),
             _PostAction(
               icon: ProfileDetailAssets.worldComment,
-              label: '评论',
-              onTap: () => AppToast.show('评论功能暂未接入'),
+              label: 'world_comment'.tr,
+              onTap: onComment,
             ),
           ],
         ),
@@ -312,11 +326,13 @@ class _PostAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.color,
   });
 
   final String icon;
   final String label;
   final VoidCallback onTap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -325,7 +341,7 @@ class _PostAction extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppImage(icon, width: 24, height: 24),
+        AppImage(icon, width: 24, height: 24, color: color),
         const SizedBox(width: 4),
         Text(
           label,

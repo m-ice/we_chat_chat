@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:we_chat_chat/app/routes/routes.dart';
+import 'package:we_chat_chat/core/widgets/app_image.dart';
 import 'package:we_chat_chat/main.dart';
 
 void main() {
@@ -22,7 +23,7 @@ void main() {
     addTearDown(tester.view.resetViewPadding);
 
     SharedPreferences.resetStatic();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wl_age_18_confirmed': true});
     final preferences = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       MiTuApp(
@@ -80,8 +81,5 @@ void main() {
 }
 
 Finder _asset(String filename) => find.byWidgetPredicate(
-  (widget) =>
-      widget is Image &&
-      widget.image is AssetImage &&
-      (widget.image as AssetImage).assetName.endsWith(filename),
+  (widget) => widget is AppImage && widget.source.endsWith(filename),
 );

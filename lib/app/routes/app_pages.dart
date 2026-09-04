@@ -9,11 +9,16 @@ import '../../modules/home/activity_filter/controllers/activity_filter_controlle
 import '../../modules/home/activity_filter/views/activity_filter_page.dart';
 import '../../domain/repositories/social_state_repository.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../../domain/repositories/user_detail_repository.dart';
 import '../../domain/repositories/ai_repository.dart';
 import '../../domain/repositories/chat_repository.dart';
+import '../../domain/repositories/message_center_repository.dart';
 import '../../domain/entities/user.dart';
+import '../../modules/chat/controllers/conversation_controller.dart';
 import '../../modules/chat/controllers/chat_thread_controller.dart';
 import '../../modules/chat/views/chat_page.dart';
+import '../../modules/chat/views/message_feature_pages.dart';
+import '../../modules/chat/views/system_messages_page.dart';
 import '../../domain/repositories/membership_wallet_repository.dart';
 import '../../modules/profile/controllers/vip_controller.dart';
 import '../../modules/profile/controllers/wallet_controller.dart';
@@ -33,6 +38,7 @@ import '../../modules/home/team_detail/team_detail_page.dart';
 import '../../modules/home/team_detail/guide_article_page.dart';
 import '../../domain/entities/guide_article.dart';
 import '../../domain/repositories/team_publish_repository.dart';
+import '../../domain/repositories/team_detail_repository.dart';
 import '../../modules/home/team_publish/team_publish_controller.dart';
 import '../../modules/home/team_publish/team_publish_page.dart';
 import '../../modules/home/team_publish/team_activity_picker_page.dart';
@@ -42,9 +48,7 @@ import '../../domain/repositories/profile_edit_repository.dart';
 import '../../modules/profile/controllers/edit_profile_controller.dart';
 import '../../modules/profile/views/edit_profile_page.dart';
 import '../../modules/profile/views/profile_tags_page.dart';
-import '../../domain/repositories/verification_repository.dart';
-import '../../modules/profile/controllers/verification_controller.dart';
-import '../../modules/profile/views/verification_page.dart';
+import '../../modules/profile/views/profile_text_edit_page.dart';
 import '../../modules/profile/views/customer_service_page.dart';
 import '../../domain/entities/album_item.dart';
 import '../../domain/repositories/album_repository.dart';
@@ -66,6 +70,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'routes.dart';
 
 abstract final class AppPages {
+  static BindingsBuilder get _conversationFeatureBinding => BindingsBuilder(() {
+    if (!Get.isRegistered<ConversationController>()) {
+      Get.lazyPut(
+        () => ConversationController(
+          Get.find<ChatRepository>(),
+          Get.find<MessageCenterRepository>(),
+          Get.find<SocialStateRepository>(),
+        ),
+      );
+    }
+  });
+
+  static BindingsBuilder get _profileEditBinding => BindingsBuilder(() {
+    if (!Get.isRegistered<EditProfileController>()) {
+      Get.lazyPut(
+        () => EditProfileController(Get.find<ProfileEditRepository>()),
+      );
+    }
+  });
+
   static final pages = <GetPage<dynamic>>[
     GetPage(name: Routes.root, page: MainPage.new, binding: MainBinding()),
     GetPage(
@@ -93,6 +117,61 @@ abstract final class AppPages {
           ),
         );
       }),
+    ),
+    GetPage(
+      name: Routes.systemMessages,
+      binding: _conversationFeatureBinding,
+      page: () {
+        final controller = Get.find<ConversationController>();
+        final assistant = controller.assistant;
+        return SystemMessagesPage(
+          repository: controller.messageCenter,
+          assistant: assistant,
+          onOpenChat: assistant == null
+              ? null
+              : () => controller.openChat(assistant),
+        );
+      },
+    ),
+    GetPage(
+      name: Routes.closeRelationships,
+      binding: _conversationFeatureBinding,
+      page: () {
+        final controller = Get.find<ConversationController>();
+        return MessageContactPage(
+          title: 'message_relationship_title'.tr,
+          kind: MessageContactPageKind.relationship,
+          repository: controller.messageCenter,
+          onOpenChat: controller.openChat,
+        );
+      },
+    ),
+    GetPage(
+      name: Routes.visitors,
+      binding: _conversationFeatureBinding,
+      page: () {
+        final controller = Get.find<ConversationController>();
+        return MessageContactPage(
+          title: 'message_visitors_title'.tr,
+          kind: MessageContactPageKind.visitors,
+          repository: controller.messageCenter,
+          onOpenChat: controller.openChat,
+        );
+      },
+    ),
+    GetPage(
+      name: Routes.callHistory,
+      binding: _conversationFeatureBinding,
+      page: () {
+        final controller = Get.find<ConversationController>();
+        return MessageContactPage(
+          title: 'message_calls_title'.tr,
+          kind: MessageContactPageKind.calls,
+          repository: controller.messageCenter,
+          onOpenChat: controller.openChat,
+          onCall: controller.startVoiceCall,
+        );
+      },
     ),
     GetPage(
       name: Routes.homeActivityFilter,
@@ -145,6 +224,7 @@ abstract final class AppPages {
             Get.find<ChatRepository>(),
             Get.find<MembershipWalletRepository>(),
             Get.find<UserRepository>(),
+            Get.find<UserDetailRepository>(),
           ),
         );
       }),
@@ -187,15 +267,25 @@ abstract final class AppPages {
       name: Routes.teamDetail,
       page: TeamDetailPage.new,
       binding: BindingsBuilder(() {
-        final user = Get.arguments;
-        if (user is! User || user.teamPost == null) {
+        final arguments = Get.arguments;
+        final User user;
+        final TeamPost post;
+        if (arguments is TeamDetailArguments) {
+          user = arguments.user;
+          post = arguments.post;
+        } else if (arguments is User && arguments.teamPost != null) {
+          user = arguments;
+          post = arguments.teamPost!;
+        } else {
           throw ArgumentError('Team detail requires a user with a team post');
         }
         Get.lazyPut(
           () => TeamDetailController(
             user,
+            post,
             Get.find<SocialStateRepository>(),
             Get.find<MembershipWalletRepository>(),
+            Get.find<TeamDetailRepository>(),
           ),
         );
       }),
@@ -261,12 +351,19 @@ abstract final class AppPages {
       page: () => const ProfileTagsPage(personality: true),
     ),
     GetPage(
-      name: Routes.verification,
-      page: VerificationPage.new,
-      binding: BindingsBuilder(
-        () => Get.lazyPut(
-          () => VerificationController(Get.find<VerificationRepository>()),
-        ),
+      name: Routes.profileNickname,
+      binding: _profileEditBinding,
+      page: () => ProfileTextEditPage(
+        nickname: true,
+        initialValue: Get.arguments as String? ?? '',
+      ),
+    ),
+    GetPage(
+      name: Routes.profileBio,
+      binding: _profileEditBinding,
+      page: () => ProfileTextEditPage(
+        nickname: false,
+        initialValue: Get.arguments as String? ?? '',
       ),
     ),
     GetPage(name: Routes.customerService, page: CustomerServicePage.new),

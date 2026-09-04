@@ -4,11 +4,11 @@ import 'package:video_player/video_player.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../../core/widgets/seed_content_badge.dart';
 import '../../../domain/entities/city_user.dart';
-import '../../../domain/entities/city_user_mapper.dart';
 import '../../main/controllers/main_controller.dart';
 import '../controllers/video_feed_controller.dart';
 
@@ -29,7 +29,7 @@ class VideoFeedPage extends GetView<VideoFeedController> {
         top: 0,
         height: 255,
         child: const AppImage(
-          'assets/images/content/figma_discover_header_bg.png',
+          AppImageString.discoverHeaderBackground,
           fit: BoxFit.fill,
         ),
       ),
@@ -66,10 +66,8 @@ class VideoFeedPage extends GetView<VideoFeedController> {
                       key: ValueKey('partner-tile-$index'),
                       user: controller.users[index],
                       coverPath: _partnerCover(index),
-                      onOpen: () => Get.toNamed(
-                        Routes.userDetail,
-                        arguments: controller.users[index].toUser(),
-                      ),
+                      onOpen: () =>
+                          controller.openUser(controller.users[index]),
                     ),
                   ),
                 );
@@ -115,7 +113,7 @@ class _PartnerHeader extends StatelessWidget {
           tooltip: 'common_search'.tr,
           onPressed: () => Get.toNamed(Routes.centerSearch),
           icon: const AppImage(
-            'assets/images/content/figma_discover_icon_search.png',
+            AppImageString.discoverSearch,
             width: 24,
             height: 24,
           ),
@@ -163,7 +161,7 @@ class _PartnerTabButton extends StatelessWidget {
               height: 8,
               child: selected
                   ? const AppImage(
-                      'assets/images/content/figma_discover_tab_underline.png',
+                      AppImageString.discoverTabUnderline,
                       width: 23,
                       height: 8,
                     )
@@ -234,10 +232,7 @@ class _PartnerTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 2),
                   Text(
-                    _copy(
-                      zh: user.isOnline ? '在线' : '离线',
-                      en: user.isOnline ? 'Online' : 'Away',
-                    ),
+                    user.isOnline ? 'video_online'.tr : 'video_offline'.tr,
                     style: const TextStyle(fontSize: 10),
                   ),
                 ],
@@ -270,7 +265,7 @@ class _PartnerTile extends StatelessWidget {
                       Row(
                         children: [
                           const AppImage(
-                            'assets/images/content/figma_discover_icon_location.png',
+                            AppImageString.discoverLocation,
                             width: 16,
                             height: 16,
                           ),
@@ -320,8 +315,7 @@ class _PartnerTile extends StatelessWidget {
   );
 }
 
-String _partnerCover(int index) =>
-    'assets/images/content/figma_discover_partner_${((index % 6) + 1).toString().padLeft(2, '0')}.png';
+String _partnerCover(int index) => AppImageString.discoverPartnerCover(index);
 
 /// Immersive video content embedded below the Square page's shared tab strip.
 class SquareVideoPane extends GetView<VideoFeedController> {
@@ -519,10 +513,7 @@ class _VideoItemState extends State<_VideoItem> {
             right: 72,
             bottom: 28,
             child: GestureDetector(
-              onTap: () => Get.toNamed(
-                Routes.userDetail,
-                arguments: widget.user.toUser(),
-              ),
+              onTap: () => controller.openUser(widget.user),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -570,10 +561,9 @@ class _VideoItemState extends State<_VideoItem> {
                         const SizedBox(height: 2),
                         Text(
                           widget.user.isRealPersonVerified
-                              ? _copy(
-                                  zh: '真人认证用户，${widget.user.intro}',
-                                  en: 'Verified user · ${widget.user.intro}',
-                                )
+                              ? 'video_verified_intro'.trParams({
+                                  'intro': widget.user.intro,
+                                })
                               : widget.user.intro,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -598,20 +588,20 @@ class _VideoItemState extends State<_VideoItem> {
                 children: [
                   _Action(
                     assetPath: controller.likedIds.contains(widget.user.id)
-                        ? 'assets/icons/video_user/video_like_selected.svg'
-                        : 'assets/icons/video_user/video_like_unselected.svg',
+                        ? AppImageString.videoUserLikeSelected
+                        : AppImageString.videoUserLikeUnselected,
                     label: 'video_like'.tr,
                     onTap: () => controller.toggleLike(widget.user.id),
                   ),
                   _Action(
                     assetPath: controller.favoriteIds.contains(widget.user.id)
-                        ? 'assets/icons/video_user/video_favorite_selected.svg'
-                        : 'assets/icons/video_user/video_favorite_unselected.svg',
+                        ? AppImageString.videoUserFavoriteSelected
+                        : AppImageString.videoUserFavoriteUnselected,
                     label: 'video_favorite'.tr,
                     onTap: () => controller.toggleFavorite(widget.user.id),
                   ),
                   _Action(
-                    assetPath: 'assets/icons/video_user/video_more.svg',
+                    assetPath: AppImageString.videoUserMore,
                     label: 'common_more'.tr,
                     onTap: () => controller.more(widget.user),
                   ),
@@ -658,6 +648,3 @@ class _Action extends StatelessWidget {
     ),
   );
 }
-
-String _copy({required String zh, required String en}) =>
-    Get.locale?.languageCode == 'en' ? en : zh;

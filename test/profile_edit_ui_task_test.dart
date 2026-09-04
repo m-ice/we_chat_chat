@@ -4,10 +4,11 @@ import 'package:get/get.dart';
 
 import 'package:we_chat_chat/domain/entities/editable_profile.dart';
 import 'package:we_chat_chat/domain/repositories/profile_edit_repository.dart';
-import 'package:we_chat_chat/l10n/app_translations.dart';
 import 'package:we_chat_chat/modules/profile/controllers/edit_profile_controller.dart';
 import 'package:we_chat_chat/modules/profile/views/profile_tags_page.dart';
 import 'package:we_chat_chat/modules/profile/views/profile_text_edit_page.dart';
+
+import 'helpers/test_app.dart';
 
 void main() {
   tearDown(Get.reset);
@@ -22,11 +23,7 @@ void main() {
 
     Get.put(EditProfileController(_FakeProfileEditRepository()));
     await tester.pumpWidget(
-      GetMaterialApp(
-        translations: AppTranslations(),
-        locale: const Locale('zh', 'CN'),
-        home: const ProfileTextEditPage(nickname: true, initialValue: ''),
-      ),
+      buildTestApp(const ProfileTextEditPage(nickname: true, initialValue: '')),
     );
     await tester.pumpAndSettle();
 
@@ -45,11 +42,7 @@ void main() {
   ) async {
     Get.put(EditProfileController(_FakeProfileEditRepository()));
     await tester.pumpWidget(
-      GetMaterialApp(
-        translations: AppTranslations(),
-        locale: const Locale('zh', 'CN'),
-        home: const ProfileTagsPage(personality: false),
-      ),
+      buildTestApp(const ProfileTagsPage(personality: false)),
     );
     await tester.pumpAndSettle();
 

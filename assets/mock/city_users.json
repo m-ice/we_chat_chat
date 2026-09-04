@@ -1,71 +1,18 @@
 [
   {
-    "id": 101,
-    "nickname": "初夏",
-    "avatarPath": "assets/images/avatar/img_city_user_101.png",
-    "city": "深圳",
-    "age": 26,
-    "intent": "找搭子",
-    "occupation": "设计师",
-    "intro": "示例内容｜喜欢探店和夜景，周末常去清吧小酌，期待认识同频的你。",
-    "hobbies": [
-      "设计",
-      "清吧",
-      "探店"
-    ],
-    "galleryImagePaths": [
-      "assets/images/content/img_city_user_101_1.png"
-    ],
-    "isVideoVerified": false,
-    "isRealPersonVerified": false,
-    "videoPath": "assets/videos/city/user_101.mov",
-    "isOnline": false,
-    "isSeedData": true,
-    "source": "demo",
-    "moderationStatus": "approved"
-  },
-  {
-    "id": 102,
-    "nickname": "鹿野",
-    "avatarPath": "assets/images/avatar/img_city_user_102.png",
-    "city": "深圳",
-    "age": 28,
-    "intent": "找搭子",
-    "occupation": "产品经理",
-    "intro": "示例内容｜刚来深圳不久，喜欢户外运动和摄影，周末想去周边走走。",
-    "hobbies": [
-      "摄影",
-      "户外",
-      "徒步"
-    ],
-    "galleryImagePaths": [
-      "assets/images/content/img_city_user_102_1.png",
-      "assets/images/content/img_city_user_102_2.png"
-    ],
-    "isVideoVerified": false,
-    "isRealPersonVerified": false,
-    "videoPath": "",
-    "isOnline": false,
-    "isSeedData": true,
-    "source": "demo",
-    "moderationStatus": "approved"
-  },
-  {
     "id": 1,
     "nickname": "晓风",
-    "avatarPath": "assets/images/avatar/img_feed_user_1.png",
+    "avatarPath": "https://images.unsplash.com/photo-1541182388496-ac92a3230e4c?auto=format&fit=crop&w=320&h=320&q=82",
     "city": "深圳",
     "age": 26,
-    "intent": "找搭子",
-    "occupation": "摄影爱好者",
-    "intro": "示例内容｜周末沿深圳湾骑了一圈，海风很舒服，下次想找人一起骑到西丽～",
-    "hobbies": [
-      "骑行",
-      "摄影",
-      "海边散步"
-    ],
+    "intent": "找运动搭子",
+    "occupation": "视觉设计师",
+    "intro": "住在深圳的视觉设计师，喜欢清晨骑行和记录城市光影，希望认识守时、好沟通的同伴。",
+    "hobbies": ["骑行", "摄影", "海边散步"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_1_1.png"
+      "https://plus.unsplash.com/premium_photo-1675721844807-a3760e14353b?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1502675135487-e971002a6adb?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -78,19 +25,16 @@
   {
     "id": 2,
     "nickname": "沐野",
-    "avatarPath": "assets/images/avatar/img_feed_user_2.png",
+    "avatarPath": "https://plus.unsplash.com/premium_photo-1677368597077-009727e906db?auto=format&fit=crop&w=320&h=320&q=82",
     "city": "北京",
     "age": 24,
-    "intent": "找搭子",
-    "occupation": "户外达人",
-    "intro": "示例内容｜上次北京郊野露营太治愈了，星空和篝火都想再来一次！",
-    "hobbies": [
-      "露营",
-      "徒步",
-      "野餐"
-    ],
+    "intent": "找户外搭子",
+    "occupation": "自然教育从业者",
+    "intro": "在北京从事自然教育，休息日喜欢轻量徒步和无痕露营，重视安全与环保。",
+    "hobbies": ["露营", "徒步", "野餐"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_2_1.png"
+      "https://images.unsplash.com/photo-1534142499731-a32a99935397?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1518410240146-36aeeed0e4f9?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -102,20 +46,17 @@
   },
   {
     "id": 3,
-    "nickname": "芳华",
-    "avatarPath": "assets/images/avatar/img_feed_user_4.png",
-    "city": "广州",
-    "age": 58,
-    "intent": "找搭子",
-    "occupation": "退休教师",
-    "intro": "示例内容｜清晨从广州东站骑到南站，一路风景好，身体也舒坦，有同龄朋友一起更好。",
-    "hobbies": [
-      "骑行",
-      "太极",
-      "养花"
-    ],
+    "nickname": "清禾",
+    "avatarPath": "https://images.unsplash.com/photo-1616639943825-e0fbad20a3d3?auto=format&fit=crop&w=320&h=320&q=82",
+    "city": "上海",
+    "age": 31,
+    "intent": "找逛展搭子",
+    "occupation": "图书编辑",
+    "intro": "上海的图书编辑，喜欢安静的书店、植物园和有历史感的街区。",
+    "hobbies": ["植物", "阅读", "城市漫步"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_4_1.png"
+      "https://images.unsplash.com/photo-1576068036336-328de1be1f2f?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1531932594968-e5e5e9dee95a?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -128,19 +69,38 @@
   {
     "id": 4,
     "nickname": "云杉",
-    "avatarPath": "assets/images/avatar/img_feed_user_5.png",
-    "city": "深圳",
+    "avatarPath": "https://images.unsplash.com/photo-1623039497511-ff6a22f2aa86?auto=format&fit=crop&w=320&h=320&q=82",
+    "city": "杭州",
     "age": 27,
-    "intent": "找搭子",
+    "intent": "找登山搭子",
     "occupation": "瑜伽教练",
-    "intro": "示例内容｜梧桐山登顶打卡，腿酸但值得，山顶视野绝了！",
-    "hobbies": [
-      "爬山",
-      "瑜伽",
-      "看日出"
-    ],
+    "intro": "杭州的瑜伽教练，每月安排一次低难度登山，习惯提前确认天气和路线。",
+    "hobbies": ["登山", "瑜伽", "看日出"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_5_1.png"
+      "https://plus.unsplash.com/premium_photo-1661962946869-4cf54aa4c778?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1670261152337-53f033b68448?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "isVideoVerified": false,
+    "isRealPersonVerified": false,
+    "videoPath": "",
+    "isOnline": false,
+    "isSeedData": true,
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "id": 5,
+    "nickname": "星河",
+    "avatarPath": "https://images.unsplash.com/photo-1611417352875-b015dc152660?auto=format&fit=crop&w=320&h=320&q=82",
+    "city": "广州",
+    "age": 29,
+    "intent": "找看展搭子",
+    "occupation": "工业设计师",
+    "intro": "广州的工业设计师，喜欢博物馆和传统手作，周末常去看展。",
+    "hobbies": ["博物馆", "手作", "纪录片"],
+    "galleryImagePaths": [
+      "https://images.unsplash.com/photo-1564546139483-c4396542aa59?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1640696808792-073c6a492422?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -153,19 +113,16 @@
   {
     "id": 6,
     "nickname": "墨白",
-    "avatarPath": "assets/images/avatar/img_feed_user_6.png",
+    "avatarPath": "https://images.unsplash.com/photo-1490088715170-e367d03a58f7?auto=format&fit=crop&w=320&h=320&q=82",
     "city": "昆明",
     "age": 25,
-    "intent": "找搭子",
+    "intent": "找桌游搭子",
     "occupation": "游戏策划",
-    "intro": "示例内容｜昆明这家密室剧情太顶了，解谜烧脑但超爽，已二刷还想三刷！",
-    "hobbies": [
-      "密室逃脱",
-      "推理",
-      "桌游"
-    ],
+    "intro": "昆明的游戏策划，偏爱合作型桌游和轻推理，希望大家尊重规则、友好交流。",
+    "hobbies": ["桌游", "推理", "咖啡"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_6_1.png"
+      "https://images.unsplash.com/photo-1610892069029-f76f8b9c811f?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -178,19 +135,16 @@
   {
     "id": 7,
     "nickname": "川哥",
-    "avatarPath": "assets/images/avatar/img_feed_user_7.png",
-    "city": "重庆",
+    "avatarPath": "https://images.unsplash.com/photo-1724690336308-02af024b76ab?auto=format&fit=crop&w=320&h=320&q=82",
+    "city": "成都",
     "age": 29,
-    "intent": "找搭子",
-    "occupation": "美食博主",
-    "intro": "示例内容｜重庆火锅永远的神，辣得过瘾，下次还要带朋友来战！",
-    "hobbies": [
-      "美食",
-      "火锅",
-      "探店"
-    ],
+    "intent": "找探店搭子",
+    "occupation": "餐饮摄影师",
+    "intro": "成都的餐饮摄影师，喜欢沿街寻找老店，也会记录食物背后的地方故事。",
+    "hobbies": ["美食", "徒步", "地方文化"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_7_1.png"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -202,20 +156,17 @@
   },
   {
     "id": 8,
-    "nickname": "酒酿",
-    "avatarPath": "assets/images/avatar/img_feed_user_8.png",
-    "city": "上海",
-    "age": 24,
-    "intent": "找搭子",
-    "occupation": "品牌运营",
-    "intro": "示例内容｜上周在静安找了一家氛围感超棒的清吧，爵士 live 配威士忌，整个人慢下来，太治愈了～",
-    "hobbies": [
-      "清吧",
-      "爵士",
-      "城市夜生活"
-    ],
+    "nickname": "知夏",
+    "avatarPath": "https://images.unsplash.com/photo-1562671292-ce06ae7a9324?auto=format&fit=crop&w=320&h=320&q=82",
+    "city": "厦门",
+    "age": 28,
+    "intent": "找生活搭子",
+    "occupation": "营养师",
+    "intro": "厦门的营养师，喜欢做低糖烘焙，也常和朋友在公园练习基础瑜伽。",
+    "hobbies": ["瑜伽", "烘焙", "野餐"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_8_1.png"
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -227,20 +178,17 @@
   },
   {
     "id": 9,
-    "nickname": "霓虹",
-    "avatarPath": "assets/images/avatar/img_feed_user_9.png",
-    "city": "成都",
+    "nickname": "鹿鸣",
+    "avatarPath": "https://images.unsplash.com/photo-1660152988640-99bcdecf2bc5?auto=format&fit=crop&w=320&h=320&q=82",
+    "city": "南京",
     "age": 23,
-    "intent": "找搭子",
-    "occupation": "活动策划",
-    "intro": "示例内容｜昨晚 CL 的 set 太炸了，灯光和 bass 直接拉满，蹦到闭店还意犹未尽！",
-    "hobbies": [
-      "夜店",
-      "蹦迪",
-      "电子音乐"
-    ],
+    "intent": "找跑步搭子",
+    "occupation": "在读研究生",
+    "intro": "南京的研究生，保持每周三次慢跑，也会参加社区公益活动。",
+    "hobbies": ["跑步", "音乐", "公益"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_9_1.png"
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -253,19 +201,16 @@
   {
     "id": 10,
     "nickname": "阿泽",
-    "avatarPath": "assets/images/avatar/img_feed_user_10.png",
-    "city": "广州",
+    "avatarPath": "https://images.unsplash.com/photo-1659438053033-1775473ad163?auto=format&fit=crop&w=320&h=320&q=82",
+    "city": "青岛",
     "age": 27,
-    "intent": "找搭子",
+    "intent": "找摄影搭子",
     "occupation": "产品经理",
-    "intro": "示例内容｜珠江新城这家 speakeasy 藏得深但值得，单杯威士忌能聊一整晚，适合想认真认识新朋友的人。",
-    "hobbies": [
-      "清吧",
-      "威士忌",
-      "深聊"
-    ],
+    "intro": "青岛的产品经理，周末带着相机走街串巷，偏爱海边和老建筑。",
+    "hobbies": ["摄影", "旅行", "咖啡"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_10_1.png"
+      "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://plus.unsplash.com/premium_photo-1675721844807-a3760e14353b?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,
@@ -277,20 +222,17 @@
   },
   {
     "id": 11,
-    "nickname": "狼王",
-    "avatarPath": "assets/images/avatar/img_feed_user_11.png",
+    "nickname": "南乔",
+    "avatarPath": "https://images.unsplash.com/photo-1659438038602-6b3cf3e8e77b?auto=format&fit=crop&w=320&h=320&q=82",
     "city": "深圳",
     "age": 26,
-    "intent": "找搭子",
-    "occupation": "程序员",
-    "intro": "示例内容｜昨晚十二人局太精彩了，悍跳预言家被全场怀疑，最后反转获胜，桌游店的 DM 都说这局能写复盘。",
-    "hobbies": [
-      "狼人杀",
-      "桌游",
-      "推理"
-    ],
+    "intent": "找运动搭子",
+    "occupation": "软件工程师",
+    "intro": "深圳的软件工程师，工作之外常打羽毛球和研究家常菜，性格随和。",
+    "hobbies": ["羽毛球", "电影", "烹饪"],
     "galleryImagePaths": [
-      "assets/images/content/img_feed_user_11_1.png"
+      "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1502675135487-e971002a6adb?auto=format&fit=crop&w=1200&h=900&q=82"
     ],
     "isVideoVerified": false,
     "isRealPersonVerified": false,

@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/widgets/app_dialog.dart';
+import '../../../core/widgets/app_text_input_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/my_world_post.dart';
 import '../../../domain/repositories/my_world_repository.dart';
@@ -37,26 +39,38 @@ class MyWorldController extends GetxController {
   }
 
   Future<void> remove(MyWorldPost post) async {
-    final yes = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('world_delete_post'.tr),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text('common_cancel'.tr),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('common_delete'.tr),
-          ),
-        ],
-      ),
+    final yes = await AppDialog.confirm(
+      title: 'world_delete_post'.tr,
+      confirmText: 'common_delete'.tr,
+      isDangerous: true,
     );
-    if (yes == true) {
+    if (yes) {
       await repository.remove(post.id);
       reload();
-      AppToast.show('common_delete'.tr);
+      AppToast.show('common_deleted'.tr);
     }
+  }
+
+  Future<void> toggleLike(MyWorldPost post) async {
+    await repository.setLiked(post.id, !post.isLiked);
+    reload();
+    AppToast.show(post.isLiked ? 'video_unliked'.tr : 'video_liked'.tr);
+  }
+
+  Future<void> comment(MyWorldPost post) async {
+    final value = await AppTextInputDialog.show(
+      title: 'world_comment_title'.tr,
+      hint: 'world_comment_hint'.tr,
+      confirmText: 'common_submit'.tr,
+      minLines: 2,
+      maxLines: 4,
+      maxLength: 200,
+    );
+    final content = value?.trim();
+    if (content == null || content.isEmpty) return;
+    await repository.addComment(post.id, content);
+    reload();
+    AppToast.show('world_comment_saved'.tr);
   }
 }
 
@@ -92,23 +106,12 @@ class MyWorldPublishController extends GetxController {
       return;
     }
     if (!agreed.value) {
-      final accepted = await Get.dialog<bool>(
-        AlertDialog(
-          title: Text('common_tip'.tr),
-          content: Text('legal_agreement_required'.tr),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: Text('common_cancel'.tr),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: Text('common_done'.tr),
-            ),
-          ],
-        ),
+      final accepted = await AppDialog.confirm(
+        title: 'common_tip'.tr,
+        message: 'legal_agreement_required'.tr,
+        confirmText: 'common_done'.tr,
       );
-      if (accepted != true) return;
+      if (!accepted) return;
       agreed.value = true;
     }
     publishing.value = true;
@@ -119,11 +122,13 @@ class MyWorldPublishController extends GetxController {
         topics: selectedTopics.toList(),
       );
       if (!ok) {
-        AppToast.show('world_content_required'.tr);
+        AppToast.show('team_publish_failed'.tr);
         return;
       }
       AppToast.show('world_publish_success'.tr);
       Get.back(result: true);
+    } on Object {
+      AppToast.show('team_publish_failed'.tr);
     } finally {
       publishing.value = false;
     }

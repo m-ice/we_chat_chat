@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/theme/app_colors.dart';
@@ -51,24 +52,14 @@ class _AlbumPreviewPageState extends State<AlbumPreviewPage> {
   }
 
   Future<void> _delete() async {
-    final yes = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('album_delete_content'.tr),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text('common_cancel'.tr),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('common_delete'.tr),
-          ),
-        ],
-      ),
+    final yes = await AppDialog.confirm(
+      title: 'album_delete_content'.tr,
+      confirmText: 'common_delete'.tr,
+      isDangerous: true,
     );
-    if (yes == true) {
+    if (yes) {
       await repository.remove({widget.item.id}, widget.item.kind);
-      AppToast.show('common_delete'.tr);
+      AppToast.show('common_deleted'.tr);
       Get.back();
     }
   }

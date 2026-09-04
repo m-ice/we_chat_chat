@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/vaules/app_image_string.dart';
+import '../../../core/widgets/app_image.dart';
+
 typedef UserAction = FutureOr<void> Function();
 
 Future<void> showUserActionsSheet({
@@ -17,15 +20,19 @@ Future<void> showUserActionsSheet({
   return Get.bottomSheet<void>(
     Material(
       color: Colors.white,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      clipBehavior: Clip.antiAlias,
       child: SafeArea(
         top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _ActionRow(label: 'common_block'.tr, onTap: () => run(onBlock)),
-            const Divider(height: 1, color: Color(0xFFF1F1F1)),
+            _ActionRow(
+              label: 'common_block'.tr,
+              onTap: () => run(onBlock),
+              backgroundAsset: AppImageString.videoUserMoreSheet,
+            ),
             _ActionRow(label: 'common_report'.tr, onTap: () => run(onReport)),
-            const Divider(height: 1, color: Color(0xFFF1F1F1)),
             _ActionRow(label: 'common_cancel'.tr, onTap: Get.back),
           ],
         ),
@@ -38,10 +45,15 @@ Future<void> showUserActionsSheet({
 }
 
 class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.label, required this.onTap});
+  const _ActionRow({
+    required this.label,
+    required this.onTap,
+    this.backgroundAsset,
+  });
 
   final String label;
   final UserAction onTap;
+  final String? backgroundAsset;
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -49,11 +61,20 @@ class _ActionRow extends StatelessWidget {
     child: SizedBox(
       height: 54,
       width: double.infinity,
-      child: Center(
-        child: Text(
-          label,
-          style: const TextStyle(color: Color(0xFF333333), fontSize: 16),
-        ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (backgroundAsset case final asset?)
+            AppImage(asset, fit: BoxFit.fill),
+          Center(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Color(0xFF333333), fontSize: 16),
+            ),
+          ),
+        ],
       ),
     ),
   );

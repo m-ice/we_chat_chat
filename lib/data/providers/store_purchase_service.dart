@@ -26,9 +26,9 @@ class StorePurchaseService extends GetxService {
     super.onInit();
     _subscription = _store.purchaseStream.listen(
       _handlePurchases,
-      onError: (Object error) {
+      onError: (Object _) {
         isBusy.value = false;
-        errorMessage.value = error.toString();
+        errorMessage.value = 'store_purchase_failed'.tr;
       },
     );
     loadProducts();
@@ -48,9 +48,15 @@ class StorePurchaseService extends GetxService {
       products.assignAll({
         for (final product in response.productDetails) product.id: product,
       });
-      if (response.error != null) errorMessage.value = response.error!.message;
-    } on Object catch (error) {
-      errorMessage.value = error.toString();
+      if (response.error != null) {
+        errorMessage.value = 'store_load_failed'.tr;
+      } else if (response.notFoundIDs.isNotEmpty) {
+        errorMessage.value = 'store_products_missing'.trParams({
+          'ids': response.notFoundIDs.join(', '),
+        });
+      }
+    } on Object {
+      errorMessage.value = 'store_load_failed'.tr;
     }
   }
 
@@ -58,6 +64,7 @@ class StorePurchaseService extends GetxService {
       products[product.id]?.price ?? product.fallbackPrice;
 
   Future<void> purchase(StoreProduct product) async {
+    if (isBusy.value) return;
     final details = products[product.id];
     if (details == null) {
       errorMessage.value = 'store_products_unavailable'.tr;
@@ -65,24 +72,29 @@ class StorePurchaseService extends GetxService {
     }
     isBusy.value = true;
     errorMessage.value = null;
-    final parameter = PurchaseParam(productDetails: details);
-    final launched = product.coinAmount != null
-        ? await _store.buyConsumable(purchaseParam: parameter)
-        : await _store.buyNonConsumable(purchaseParam: parameter);
-    if (!launched) {
+    try {
+      final parameter = PurchaseParam(productDetails: details);
+      final launched = product.coinAmount != null
+          ? await _store.buyConsumable(purchaseParam: parameter)
+          : await _store.buyNonConsumable(purchaseParam: parameter);
+      if (launched) return;
       isBusy.value = false;
       errorMessage.value = 'store_purchase_not_started'.tr;
+    } on Object {
+      isBusy.value = false;
+      errorMessage.value = 'store_purchase_failed'.tr;
     }
   }
 
   Future<void> restore() async {
+    if (isBusy.value) return;
     isBusy.value = true;
     errorMessage.value = null;
     try {
       await _store.restorePurchases();
-    } on Object catch (error) {
+    } on Object {
       isBusy.value = false;
-      errorMessage.value = error.toString();
+      errorMessage.value = 'store_restore_failed'.tr;
     }
   }
 
@@ -100,8 +112,7 @@ class StorePurchaseService extends GetxService {
         case PurchaseStatus.restored:
           await _deliver(purchase);
         case PurchaseStatus.error:
-          errorMessage.value =
-              purchase.error?.message ?? 'store_purchase_failed'.tr;
+          errorMessage.value = 'store_purchase_failed'.tr;
         case PurchaseStatus.canceled:
           errorMessage.value = 'store_purchase_canceled'.tr;
       }

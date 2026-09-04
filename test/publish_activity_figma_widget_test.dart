@@ -11,7 +11,9 @@ import 'package:we_chat_chat/domain/repositories/membership_wallet_repository.da
 import 'package:we_chat_chat/domain/repositories/my_world_repository.dart';
 import 'package:we_chat_chat/domain/repositories/social_state_repository.dart';
 import 'package:we_chat_chat/domain/repositories/team_publish_repository.dart';
-import 'package:we_chat_chat/l10n/app_translations.dart';
+import 'package:we_chat_chat/domain/repositories/team_detail_repository.dart';
+import 'package:we_chat_chat/domain/entities/team_detail_comment.dart';
+import 'package:we_chat_chat/domain/entities/team_detail_seed_state.dart';
 import 'package:we_chat_chat/modules/home/team_detail/team_detail_controller.dart';
 import 'package:we_chat_chat/modules/home/team_detail/team_detail_page.dart';
 import 'package:we_chat_chat/modules/home/team_publish/team_flow_assets.dart';
@@ -19,6 +21,8 @@ import 'package:we_chat_chat/modules/home/team_publish/team_publish_controller.d
 import 'package:we_chat_chat/modules/home/team_publish/team_publish_page.dart';
 import 'package:we_chat_chat/modules/profile/controllers/my_world_controller.dart';
 import 'package:we_chat_chat/modules/profile/views/my_world_publish_page.dart';
+
+import 'helpers/test_app.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -79,8 +83,10 @@ void main() {
     Get.put(
       TeamDetailController(
         user,
+        user.teamPost!,
         _FakeSocialStateRepository(),
         _FakeWalletRepository(),
+        _FakeTeamDetailRepository(),
       ),
     );
 
@@ -124,11 +130,30 @@ void main() {
   });
 }
 
-Widget _app(Widget home) => GetMaterialApp(
-  translations: AppTranslations(),
-  locale: const Locale('zh', 'CN'),
-  home: home,
-);
+class _FakeTeamDetailRepository implements TeamDetailRepository {
+  @override
+  Future<void> addComment(int teamOwnerId, TeamDetailComment comment) async {}
+
+  @override
+  Future<List<TeamDetailComment>> getComments(int teamOwnerId) async =>
+      List.filled(
+        3,
+        const TeamDetailComment(nickname: '用户昵称', content: '我要报名，我也想去！！！'),
+      );
+
+  @override
+  Future<TeamDetailSeedState> getSeedState(int teamOwnerId) async =>
+      const TeamDetailSeedState(
+        participantTotal: 4,
+        participantCount: 3,
+        participantAvatarPaths: [
+          TeamFlowAssets.detailParticipant1,
+          TeamFlowAssets.detailParticipant2,
+        ],
+      );
+}
+
+Widget _app(Widget home) => buildTestApp(home);
 
 void _setFigmaViewport(WidgetTester tester) {
   tester.view.physicalSize = const Size(1125, 2436);
@@ -228,6 +253,9 @@ class _FakeMyWorldRepository implements MyWorldRepository {
   Future<List<String>> fullImagePaths(MyWorldPost post) async => const [];
 
   @override
+  Future<void> addComment(String id, String content) async {}
+
+  @override
   Future<bool> publish({
     required String content,
     required List<String> imageSourcePaths,
@@ -236,4 +264,7 @@ class _FakeMyWorldRepository implements MyWorldRepository {
 
   @override
   Future<void> remove(String id) async {}
+
+  @override
+  Future<void> setLiked(String id, bool liked) async {}
 }

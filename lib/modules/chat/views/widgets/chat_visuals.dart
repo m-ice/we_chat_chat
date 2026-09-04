@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/vaules/app_image_string.dart';
 import '../../../../core/widgets/app_image.dart';
 
-/// Figma-exported assets owned by the chat/system-message UI task.
-///
-/// Shared Component Request: move these paths into `AppImageString` after the
-/// owner of `lib/core/**` adds the chat-system asset namespace.
 abstract final class ChatSystemAssets {
-  static const headerBackground =
-      'assets/images/chat_system/header_background.svg';
-  static const currentUserAvatar =
-      'assets/images/chat_system/chat_current_avatar.png';
-  static const peerAvatar = 'assets/images/chat_system/chat_peer_avatar.png';
-  static const systemAvatar = 'assets/images/chat_system/system_avatar.png';
-  static const back = 'assets/icons/chat_system/back.svg';
-  static const more = 'assets/icons/chat_system/more.svg';
-  static const sendButton = 'assets/icons/chat_system/send_button.svg';
+  static const headerBackground = AppImageString.chatHeaderBackground;
+  static const currentUserAvatar = AppImageString.chatCurrentUserAvatar;
+  static const peerAvatar = AppImageString.chatPeerAvatar;
+  static const systemAvatar = AppImageString.chatSystemAvatar;
+  static const back = AppImageString.chatBack;
+  static const more = AppImageString.chatMore;
+  static const sendButton = AppImageString.chatSendButton;
 }
 
 class ChatHeaderBackdrop extends StatelessWidget {
@@ -79,6 +75,7 @@ class ChatPageBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
+      key: const ValueKey('chat-page-bar'),
       height: 48,
       child: Stack(
         alignment: Alignment.center,
@@ -127,7 +124,7 @@ class ChatPageBar extends StatelessWidget {
               height: 48,
               child: Semantics(
                 button: true,
-                label: '更多',
+                label: 'common_more'.tr,
                 child: InkResponse(
                   key: const ValueKey('chat-more-button'),
                   onTap: onMore,
@@ -150,25 +147,31 @@ class ChatPageBar extends StatelessWidget {
 }
 
 class NotificationBadge extends StatelessWidget {
-  const NotificationBadge({super.key, required this.label});
+  const NotificationBadge({super.key, required this.count});
 
-  final String label;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
+    final label = count > 99 ? '99+' : count.toString();
+
     return Container(
-      height: 16,
-      constraints: const BoxConstraints(minWidth: 28),
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      width: 22,
+      height: 22,
       decoration: BoxDecoration(
         color: const Color(0xFFFF416D),
-        borderRadius: BorderRadius.circular(17),
+        shape: BoxShape.circle,
         border: Border.all(color: Colors.white),
       ),
       alignment: Alignment.center,
       child: Text(
         label,
-        style: const TextStyle(color: Colors.white, fontSize: 11, height: 1),
+        maxLines: 1,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: count > 99 ? 9 : 11,
+          height: 1,
+        ),
       ),
     );
   }

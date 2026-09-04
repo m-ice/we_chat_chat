@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:we_chat_chat/core/widgets/figma_back_button.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class LegalWebPage extends StatefulWidget {
@@ -44,7 +45,12 @@ class _LegalWebPageState extends State<LegalWebPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(widget.title)),
+    appBar: AppBar(
+      title: Text(widget.title),
+      centerTitle: true,
+      automaticallyImplyLeading: false,
+      leading: FigmaBackButton(),
+    ),
     body: Stack(
       children: [
         WebViewWidget(controller: _controller),

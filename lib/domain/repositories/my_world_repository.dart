@@ -8,5 +8,7 @@ abstract interface class MyWorldRepository {
     required List<String> topics,
   });
   Future<void> remove(String id);
+  Future<void> setLiked(String id, bool liked);
+  Future<void> addComment(String id, String content);
   Future<List<String>> fullImagePaths(MyWorldPost post);
 }

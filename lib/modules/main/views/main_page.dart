@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 import '../controllers/main_controller.dart';
 import '../../home/views/home_page.dart';
@@ -13,20 +15,8 @@ import '../../discover/views/video_feed_page.dart';
 class MainPage extends GetView<MainController> {
   const MainPage({super.key});
 
-  static const _normalIcons = [
-    'assets/icons/tabbar/ic_tab_home.png',
-    'assets/icons/tabbar/ic_tab_video.png',
-    'assets/icons/tabbar/ic_tab_square.png',
-    'assets/icons/tabbar/ic_tab_message.png',
-    'assets/icons/tabbar/ic_tab_profile.png',
-  ];
-  static const _selectedIcons = [
-    'assets/icons/tabbar/ic_tab_home_selected.png',
-    'assets/icons/tabbar/ic_tab_video_selected.png',
-    'assets/icons/tabbar/ic_tab_square_selected.png',
-    'assets/icons/tabbar/ic_tab_message_selected.png',
-    'assets/icons/tabbar/ic_tab_profile_selected.png',
-  ];
+  static const _normalIcons = AppImageString.tabBarIcons;
+  static const _selectedIcons = AppImageString.tabBarSelectedIcons;
   static const _labels = [
     'tab_home',
     'tab_partner',
@@ -164,7 +154,33 @@ class _AgeGate extends StatelessWidget {
                   height: 1.6,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
+              Wrap(
+                alignment: WrapAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => Get.toNamed(
+                      Routes.legal,
+                      arguments: {
+                        'title': 'legal_user_agreement'.tr,
+                        'assetPath': 'assets/legal/user_agreement.html',
+                      },
+                    ),
+                    child: Text('legal_user_agreement'.tr),
+                  ),
+                  TextButton(
+                    onPressed: () => Get.toNamed(
+                      Routes.legal,
+                      arguments: {
+                        'title': 'legal_privacy'.tr,
+                        'assetPath': 'assets/legal/privacy_policy.html',
+                      },
+                    ),
+                    child: Text('legal_privacy'.tr),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 height: 52,

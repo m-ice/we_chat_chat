@@ -16,7 +16,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     SharedPreferences.resetStatic();
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wl_age_18_confirmed': true});
     final preferences = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       MiTuApp(
@@ -53,7 +53,8 @@ void main() {
     expect(tester.getTopLeft(first).dx, 8);
     expect(tester.getTopLeft(second).dx - tester.getTopLeft(first).dx, 183.5);
     expect(find.text('交谈'), findsWidgets);
-    expect(find.text('在线'), findsWidgets);
+    expect(find.text('离线'), findsWidgets);
+    expect(find.text('在线'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/album_item.dart';
 import '../../../domain/repositories/album_repository.dart';
@@ -71,28 +71,18 @@ class AlbumController extends GetxController {
 
   Future<void> deleteSelected() async {
     if (selectedIds.isEmpty) return;
-    final yes = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('album_delete_selected_confirm'.tr),
-        content: Text(
-          'album_selected_count'.trParams({'count': '${selectedIds.length}'}),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text('common_cancel'.tr),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('common_delete'.tr),
-          ),
-        ],
-      ),
+    final yes = await AppDialog.confirm(
+      title: 'album_delete_selected_confirm'.tr,
+      message: 'album_selected_count'.trParams({
+        'count': '${selectedIds.length}',
+      }),
+      confirmText: 'common_delete'.tr,
+      isDangerous: true,
     );
-    if (yes != true) return;
+    if (!yes) return;
     await repository.remove(Set.of(selectedIds), kind.value);
     reload();
     editing.value = false;
-    AppToast.show('common_delete'.tr);
+    AppToast.show('common_deleted'.tr);
   }
 }

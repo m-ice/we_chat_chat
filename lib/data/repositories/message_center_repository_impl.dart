@@ -12,6 +12,10 @@ class MessageCenterRepositoryImpl implements MessageCenterRepository {
   static const _assetPath = 'assets/mock/message_center.json';
   static const _readNoticeIdsKey = 'message_center_read_notice_ids_v1';
   static const _relationshipStatesKey = 'message_center_relationships_v1';
+  static const _readRelationshipIdsKey =
+      'message_center_read_relationship_ids_v1';
+  static const _readVisitorIdsKey = 'message_center_read_visitor_ids_v1';
+  static const _readCallIdsKey = 'message_center_read_call_ids_v1';
   static const _demoCallbacksKey = 'message_center_demo_callbacks_v1';
 
   @override
@@ -49,14 +53,18 @@ class MessageCenterRepositoryImpl implements MessageCenterRepository {
     final source = await _readSource();
     final preferences = await SharedPreferences.getInstance();
     final overrides = _decodeMap(preferences.getString(_relationshipStatesKey));
+    final readIds = preferences.getStringList(_readRelationshipIdsKey) ?? [];
     return _list(source, 'relationships')
         .map((json) {
           final person = _person(json);
           final stateName = overrides['${person.id}'] ?? json['state'];
           return IntimateRelationship(
             person: person,
-            state: RelationshipState.values.byName(stateName as String),
+            state: _relationshipState(stateName),
             since: DateTime.parse(json['since'] as String),
+            unreadCount: readIds.contains('${person.id}')
+                ? 0
+                : json['unreadCount'] as int? ?? 0,
           );
         })
         .toList(growable: false);
@@ -74,17 +82,28 @@ class MessageCenterRepositoryImpl implements MessageCenterRepository {
   }
 
   @override
+  Future<void> markRelationshipsRead(Iterable<int> personIds) =>
+      _markRead(_readRelationshipIdsKey, personIds.map((id) => '$id'));
+
+  @override
   Future<List<VisitorRecord>> getVisitors() async {
     final source = await _readSource();
+    final preferences = await SharedPreferences.getInstance();
+    final readIds = preferences.getStringList(_readVisitorIdsKey) ?? [];
     return _list(source, 'visitors')
         .map(
           (json) => VisitorRecord(
             person: _person(json),
             visitedAt: DateTime.parse(json['visitedAt'] as String),
+            isRead: readIds.contains('${json['personId']}'),
           ),
         )
         .toList(growable: false);
   }
+
+  @override
+  Future<void> markVisitorsRead(Iterable<int> personIds) =>
+      _markRead(_readVisitorIdsKey, personIds.map((id) => '$id'));
 
   @override
   Future<List<CallRecord>> getCallRecords() async {
@@ -93,12 +112,23 @@ class MessageCenterRepositoryImpl implements MessageCenterRepository {
     final preferences = await SharedPreferences.getInstance();
     final persisted = preferences.getStringList(_demoCallbacksKey) ?? const [];
     for (final value in persisted) {
-      final decoded = jsonDecode(value);
-      if (decoded is Map<String, dynamic>) records.add(_callRecord(decoded));
+      try {
+        final decoded = jsonDecode(value);
+        if (decoded is Map<String, dynamic>) records.add(_callRecord(decoded));
+      } on Object {
+        // Ignore one damaged local record without hiding the valid history.
+      }
     }
     records.sort((a, b) => b.happenedAt.compareTo(a.happenedAt));
-    return records;
+    final readIds = preferences.getStringList(_readCallIdsKey) ?? [];
+    return records
+        .map((record) => record.copyWith(isRead: readIds.contains(record.id)))
+        .toList(growable: false);
   }
+
+  @override
+  Future<void> markCallRecordsRead(Iterable<String> recordIds) =>
+      _markRead(_readCallIdsKey, recordIds);
 
   @override
   Future<CallRecord> addDemoCallback(MessageCenterPerson person) async {
@@ -129,7 +159,14 @@ class MessageCenterRepositoryImpl implements MessageCenterRepository {
   }
 
   List<Map<String, dynamic>> _list(Map<String, dynamic> source, String key) =>
-      (source[key] as List<dynamic>).cast<Map<String, dynamic>>();
+      (source[key] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .where(
+            (item) =>
+                item['source'] == 'demo' &&
+                item['moderationStatus'] == 'approved',
+          )
+          .toList(growable: false);
 
   MessageCenterPerson _person(Map<String, dynamic> json) => MessageCenterPerson(
     id: json['personId'] as int,
@@ -157,9 +194,28 @@ class MessageCenterRepositoryImpl implements MessageCenterRepository {
     'durationSeconds': record.durationSeconds,
   };
 
+  Future<void> _markRead(String key, Iterable<String> ids) async {
+    final preferences = await SharedPreferences.getInstance();
+    final readIds = preferences.getStringList(key)?.toSet() ?? <String>{};
+    readIds.addAll(ids);
+    await preferences.setStringList(key, readIds.toList()..sort());
+  }
+
   Map<String, dynamic> _decodeMap(String? value) {
     if (value == null || value.isEmpty) return {};
-    final decoded = jsonDecode(value);
-    return decoded is Map<String, dynamic> ? decoded : {};
+    try {
+      final decoded = jsonDecode(value);
+      return decoded is Map<String, dynamic> ? decoded : {};
+    } on Object {
+      return {};
+    }
+  }
+
+  RelationshipState _relationshipState(Object? value) {
+    final name = value is String ? value : '';
+    return RelationshipState.values
+            .where((item) => item.name == name)
+            .firstOrNull ??
+        RelationshipState.pending;
   }
 }

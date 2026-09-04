@@ -1,10 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
+import '../../../core/widgets/app_image.dart';
+import '../../../core/widgets/app_refresh_view.dart';
+import '../../../core/widgets/common_draggable_float.dart';
 import '../../../domain/entities/square_feed.dart';
 import '../controllers/square_controller.dart';
 import 'video_feed_page.dart';
@@ -38,8 +40,8 @@ class SquarePage extends GetView<SquareController> {
           right: 0,
           top: 0,
           height: 255,
-          child: Image.asset(
-            'assets/images/content/figma_discover_header_bg.png',
+          child: const AppImage(
+            AppImageString.discoverHeaderBackground,
             fit: BoxFit.fill,
           ),
         ),
@@ -85,8 +87,8 @@ class _SquareHeader extends GetView<SquareController> {
         IconButton(
           tooltip: 'common_search'.tr,
           onPressed: () => Get.toNamed(Routes.centerSearch),
-          icon: Image.asset(
-            'assets/images/content/figma_discover_icon_search.png',
+          icon: AppImage(
+            AppImageString.discoverSearch,
             width: 24,
             height: 24,
             color: dark ? Colors.white : null,
@@ -134,8 +136,8 @@ class _SquareTabButton extends StatelessWidget {
             width: 23,
             height: 8,
             child: selected
-                ? Image.asset(
-                    'assets/images/content/figma_discover_tab_underline.png',
+                ? const AppImage(
+                    AppImageString.discoverTabUnderline,
                     width: 23,
                     height: 8,
                   )
@@ -151,14 +153,18 @@ class _SquareFeed extends GetView<SquareController> {
   const _SquareFeed();
 
   @override
-  Widget build(BuildContext context) => Stack(
-    children: [
-      Positioned.fill(
-        child: RefreshIndicator(
-          onRefresh: controller.reload,
-          child: Obx(() {
-            if (controller.items.isEmpty) {
-              return ListView(
+  Widget build(BuildContext context) => CommonDraggableFloatWidget(
+    eventStreamController: controller.floatingActionEvents,
+    width: 92,
+    height: 36,
+    borderRight: 16,
+    borderBottom: 16,
+    initPositionYMarginBorder: 0,
+    listView: Obx(
+      () => AppRefreshView(
+        onRefresh: controller.reload,
+        child: controller.items.isEmpty
+            ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   SizedBox(
@@ -168,51 +174,49 @@ class _SquareFeed extends GetView<SquareController> {
                         controller.tab.value == SquareTab.following
                             ? 'square_following_empty'.tr
                             : 'square_empty'.tr,
-                        style: const TextStyle(color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
                   ),
                 ],
-              );
-            }
-            return ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 76),
-              itemCount: controller.items.length,
-              itemBuilder: (_, index) =>
-                  _SquarePost(item: controller.items[index], index: index),
-            );
-          }),
-        ),
-      ),
-      Positioned(
-        right: 16,
-        bottom: 16,
-        child: GestureDetector(
-          key: const ValueKey('square-publish'),
-          onTap: controller.publish,
-          child: Container(
-            width: 92,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.accentYellow,
-              border: Border.all(color: AppColors.textPrimary, width: 2),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              'world_publish'.tr,
-              maxLines: 1,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              )
+            : ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(0, 8, 0, 76),
+                itemCount: controller.items.length,
+                itemBuilder: (_, index) => _SquarePost(
+                  item: controller.items[index],
+                  index: index,
+                ),
               ),
-            ),
+      ),
+    ),
+    child: GestureDetector(
+      key: const ValueKey('square-publish'),
+      behavior: HitTestBehavior.opaque,
+      onTap: controller.publish,
+      child: Container(
+        width: 92,
+        height: 36,
+        decoration: BoxDecoration(
+          color: AppColors.accentYellow,
+          border: Border.all(color: AppColors.textPrimary, width: 2),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          'world_publish'.tr,
+          maxLines: 1,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
-    ],
+    ),
   );
 }
 
@@ -242,11 +246,15 @@ class _SquarePost extends GetView<SquareController> {
             Row(
               children: [
                 GestureDetector(
+                  key: ValueKey('square-author-${item.postId}'),
                   onTap: _openUser,
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage(
-                      figmaVisual?.avatarPath ?? item.user.avatarPath,
+                  child: SizedBox.square(
+                    dimension: 40,
+                    child: ClipOval(
+                      child: AppImage(
+                        figmaVisual?.avatarPath ?? item.user.avatarPath,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -313,7 +321,6 @@ class _SquarePost extends GetView<SquareController> {
               const SizedBox(height: 8),
               _PostImageGrid(
                 paths: staticPaths,
-                usesFiles: false,
                 onPreview: (imageIndex) =>
                     controller.previewAssets(staticPaths, imageIndex),
               ),
@@ -323,7 +330,6 @@ class _SquarePost extends GetView<SquareController> {
                 future: controller.repository.resolvedImages(item),
                 builder: (_, snapshot) => _PostImageGrid(
                   paths: snapshot.data ?? const [],
-                  usesFiles: item.usesSandboxImages,
                   onPreview: (imageIndex) =>
                       controller.preview(item, imageIndex),
                 ),
@@ -349,18 +355,13 @@ class _SquarePost extends GetView<SquareController> {
     return fields.join('｜');
   }
 
-  void _openUser() => Get.toNamed(Routes.userDetail, arguments: item.user);
+  void _openUser() => controller.openUser(item);
 }
 
 class _PostImageGrid extends StatelessWidget {
-  const _PostImageGrid({
-    required this.paths,
-    required this.usesFiles,
-    required this.onPreview,
-  });
+  const _PostImageGrid({required this.paths, required this.onPreview});
 
   final List<String> paths;
-  final bool usesFiles;
   final ValueChanged<int> onPreview;
 
   @override
@@ -403,9 +404,7 @@ class _PostImageGrid extends StatelessWidget {
     clipBehavior: Clip.antiAlias,
     child: InkWell(
       onTap: () => onPreview(imageIndex),
-      child: usesFiles
-          ? Image.file(File(path), fit: BoxFit.cover)
-          : Image.asset(path, fit: BoxFit.cover),
+      child: AppImage(path, fit: BoxFit.cover),
     ),
   );
 }
@@ -420,7 +419,7 @@ class _PostActionRow extends GetView<SquareController> {
   Widget build(BuildContext context) => Row(
     children: [
       _FigmaAction(
-        assetPath: 'assets/images/content/figma_discover_icon_more.png',
+        assetPath: AppImageString.discoverMore,
         rotateQuarterTurns: 1,
         onTap: () => controller.more(item),
       ),
@@ -428,18 +427,18 @@ class _PostActionRow extends GetView<SquareController> {
       Obx(() {
         final liked = controller.likedIds.contains(item.postId);
         return _FigmaAction(
-          assetPath: 'assets/images/content/figma_discover_icon_like.png',
+          assetPath: liked?AppImageString.discoverLiked:AppImageString.discoverLike,
           label: 'video_like'.tr,
           color: liked ? const Color(0xFFFF3D91) : null,
           onTap: () => controller.toggleLike(item),
         );
       }),
-      const SizedBox(width: 28),
-      _FigmaAction(
-        assetPath: 'assets/images/content/figma_discover_icon_comment.png',
-        label: _copy(zh: '评论', en: 'Comment'),
-        onTap: onComment,
-      ),
+      // const SizedBox(width: 28),
+      // _FigmaAction(
+      //   assetPath: AppImageString.discoverComment,
+      //   label: _copy(zh: '评论', en: 'Comment'),
+      //   onTap: onComment,
+      // ),
     ],
   );
 }
@@ -475,7 +474,7 @@ class _FigmaAction extends StatelessWidget {
                 color ?? const Color(0xFFCCCCCC),
                 BlendMode.srcIn,
               ),
-              child: Image.asset(assetPath, width: 24, height: 24),
+              child: AppImage(assetPath, width: 24, height: 24),
             ),
           ),
           if (label case final value?) ...[
@@ -506,52 +505,52 @@ _FeedVisual _visualFor(int index) =>
 
 const _figmaVisuals = [
   _FeedVisual(
-    avatarPath: 'assets/images/content/figma_discover_square_avatar_01.png',
-    imagePaths: ['assets/images/content/figma_discover_square_post_01_01.png'],
+    avatarPath: AppImageString.discoverSquareAvatar1,
+    imagePaths: [AppImageString.discoverSquarePost0101],
   ),
   _FeedVisual(
-    avatarPath: 'assets/images/content/figma_discover_square_avatar_02.png',
+    avatarPath: AppImageString.discoverSquareAvatar2,
     imagePaths: [
-      'assets/images/content/figma_discover_square_post_02_01.png',
-      'assets/images/content/figma_discover_square_post_02_02.png',
+      AppImageString.discoverSquarePost0201,
+      AppImageString.discoverSquarePost0202,
     ],
   ),
   _FeedVisual(
-    avatarPath: 'assets/images/content/figma_discover_square_avatar_03.png',
+    avatarPath: AppImageString.discoverSquareAvatar3,
     imagePaths: [
-      'assets/images/content/figma_discover_square_post_02_02.png',
-      'assets/images/content/figma_discover_square_post_03_01.png',
-      'assets/images/content/figma_discover_square_post_03_02.png',
+      AppImageString.discoverSquarePost0202,
+      AppImageString.discoverSquarePost0301,
+      AppImageString.discoverSquarePost0302,
     ],
   ),
   _FeedVisual(
-    avatarPath: 'assets/images/content/figma_discover_square_avatar_04.png',
+    avatarPath: AppImageString.discoverSquareAvatar4,
     imagePaths: [
-      'assets/images/content/figma_discover_square_post_04_01.png',
-      'assets/images/content/figma_discover_square_post_04_02.png',
-      'assets/images/content/figma_discover_square_post_03_01.png',
-      'assets/images/content/figma_discover_square_post_04_03.png',
+      AppImageString.discoverSquarePost0401,
+      AppImageString.discoverSquarePost0402,
+      AppImageString.discoverSquarePost0301,
+      AppImageString.discoverSquarePost0403,
     ],
   ),
   _FeedVisual(
-    avatarPath: 'assets/images/content/figma_discover_square_avatar_05.png',
+    avatarPath: AppImageString.discoverSquareAvatar5,
     imagePaths: [
-      'assets/images/content/figma_discover_square_post_05_01.png',
-      'assets/images/content/figma_discover_square_post_05_02.png',
-      'assets/images/content/figma_discover_square_post_05_03.png',
-      'assets/images/content/figma_discover_square_post_05_04.png',
-      'assets/images/content/figma_discover_square_post_02_01.png',
+      AppImageString.discoverSquarePost0501,
+      AppImageString.discoverSquarePost0502,
+      AppImageString.discoverSquarePost0503,
+      AppImageString.discoverSquarePost0504,
+      AppImageString.discoverSquarePost0201,
     ],
   ),
   _FeedVisual(
-    avatarPath: 'assets/images/content/figma_discover_square_avatar_06.png',
+    avatarPath: AppImageString.discoverSquareAvatar6,
     imagePaths: [
-      'assets/images/content/figma_discover_square_post_06_01.png',
-      'assets/images/content/figma_discover_square_post_05_01.png',
-      'assets/images/content/figma_discover_square_post_06_02.png',
-      'assets/images/content/figma_discover_square_post_05_03.png',
-      'assets/images/content/figma_discover_square_post_01_01.png',
-      'assets/images/content/figma_discover_square_post_03_02.png',
+      AppImageString.discoverSquarePost0601,
+      AppImageString.discoverSquarePost0501,
+      AppImageString.discoverSquarePost0602,
+      AppImageString.discoverSquarePost0503,
+      AppImageString.discoverSquarePost0101,
+      AppImageString.discoverSquarePost0302,
     ],
   ),
 ];

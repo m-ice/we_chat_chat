@@ -4,7 +4,9 @@
       "id": "welcome",
       "content": "欢迎来到微撩！",
       "avatarPath": "assets/images/chat_detail/system_assistant.png",
-      "createdAt": "2026-09-03T09:41:00+08:00"
+      "createdAt": "2026-09-03T09:41:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     }
   ],
   "relationships": [
@@ -13,28 +15,40 @@
       "nickname": "陆遥",
       "avatarPath": "assets/images/chat_detail/relationship_luyao.png",
       "state": "intimate",
-      "since": "2026-07-12T18:20:00+08:00"
+      "unreadCount": 2,
+      "since": "2026-07-12T18:20:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "personId": 302,
       "nickname": "青柠",
       "avatarPath": "assets/images/chat_detail/relationship_qingning.png",
       "state": "intimate",
-      "since": "2026-07-19T20:10:00+08:00"
+      "unreadCount": 1,
+      "since": "2026-07-19T20:10:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "personId": 303,
       "nickname": "星河设计师",
       "avatarPath": "assets/images/chat_detail/relationship_xinghe.png",
       "state": "intimate",
-      "since": "2026-08-04T12:35:00+08:00"
+      "unreadCount": 0,
+      "since": "2026-08-04T12:35:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "personId": 304,
       "nickname": "黑马青年",
       "avatarPath": "assets/images/chat_detail/relationship_heima.png",
       "state": "intimate",
-      "since": "2026-08-16T16:05:00+08:00"
+      "unreadCount": 0,
+      "since": "2026-08-16T16:05:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     }
   ],
   "visitors": [
@@ -42,25 +56,33 @@
       "personId": 301,
       "nickname": "陆遥",
       "avatarPath": "assets/images/chat_detail/visitor_luyao.png",
-      "visitedAt": "2026-09-03T09:28:00+08:00"
+      "visitedAt": "2026-09-03T09:28:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "personId": 302,
       "nickname": "青柠",
       "avatarPath": "assets/images/chat_detail/visitor_qingning.jpeg",
-      "visitedAt": "2026-09-03T08:45:00+08:00"
+      "visitedAt": "2026-09-03T08:45:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "personId": 303,
       "nickname": "星河设计师",
       "avatarPath": "assets/images/chat_detail/visitor_xinghe.png",
-      "visitedAt": "2026-09-02T22:16:00+08:00"
+      "visitedAt": "2026-09-02T22:16:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "personId": 304,
       "nickname": "黑马青年",
       "avatarPath": "assets/images/chat_detail/visitor_heima.png",
-      "visitedAt": "2026-09-02T18:32:00+08:00"
+      "visitedAt": "2026-09-02T18:32:00+08:00",
+      "source": "demo",
+      "moderationStatus": "approved"
     }
   ],
   "calls": [
@@ -72,7 +94,9 @@
       "direction": "incoming",
       "state": "completed",
       "happenedAt": "2026-09-03T09:12:00+08:00",
-      "durationSeconds": 286
+      "durationSeconds": 286,
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "id": "call-302",
@@ -82,7 +106,9 @@
       "direction": "outgoing",
       "state": "completed",
       "happenedAt": "2026-09-02T21:20:00+08:00",
-      "durationSeconds": 94
+      "durationSeconds": 94,
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "id": "call-303",
@@ -92,7 +118,9 @@
       "direction": "incoming",
       "state": "missed",
       "happenedAt": "2026-09-02T19:43:00+08:00",
-      "durationSeconds": 0
+      "durationSeconds": 0,
+      "source": "demo",
+      "moderationStatus": "approved"
     },
     {
       "id": "call-304",
@@ -102,7 +130,9 @@
       "direction": "outgoing",
       "state": "cancelled",
       "happenedAt": "2026-09-01T16:18:00+08:00",
-      "durationSeconds": 0
+      "durationSeconds": 0,
+      "source": "demo",
+      "moderationStatus": "approved"
     }
   ]
 }

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/repositories/membership_wallet_repository.dart';
 import '../../../domain/repositories/team_publish_repository.dart';
@@ -21,6 +22,8 @@ class TeamPublishController extends GetxController {
   };
   static List<String> get activities =>
       activityGroups.values.expand((items) => items).toList(growable: false);
+  // Figma default-state references only; selected user files remain the sole
+  // imagePaths submitted to the repository.
   static const designPreviewImagePaths = <String>[
     TeamFlowAssets.publishSampleBadminton,
     TeamFlowAssets.publishSampleCourt,
@@ -73,7 +76,7 @@ class TeamPublishController extends GetxController {
       final selected = await ImagePicker().pickMultiImage(limit: remaining);
       imagePaths.addAll(selected.take(remaining).map((file) => file.path));
     } on Object {
-      AppToast.show(_copy('无法读取照片，请检查照片权限', 'Unable to access photos'));
+      AppToast.show('photo_access_failed'.tr);
     }
   }
 
@@ -81,23 +84,12 @@ class TeamPublishController extends GetxController {
 
   Future<void> submit(BuildContext context) async {
     if (!agreed.value) {
-      final accepted = await Get.dialog<bool>(
-        AlertDialog(
-          title: Text('common_tip'.tr),
-          content: Text('legal_agreement_required'.tr),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: Text('common_cancel'.tr),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: Text('common_done'.tr),
-            ),
-          ],
-        ),
+      final accepted = await AppDialog.confirm(
+        title: 'common_tip'.tr,
+        message: 'legal_agreement_required'.tr,
+        confirmText: 'common_done'.tr,
       );
-      if (accepted != true) return;
+      if (!accepted) return;
       agreed.value = true;
     }
     if (activity.value == null) {
@@ -105,56 +97,37 @@ class TeamPublishController extends GetxController {
       return;
     }
     if (!_wallet.isVipActive) {
-      await Get.dialog<void>(
-        AlertDialog(
-          title: Text('vip_privilege'.tr),
-          content: Text('vip_publish_required'.tr),
-          actions: [
-            TextButton(onPressed: Get.back, child: Text('common_cancel'.tr)),
-            TextButton(
-              onPressed: () {
-                Get.back<void>();
-                Get.toNamed(Routes.vip);
-              },
-              child: Text('vip_open'.tr),
-            ),
-          ],
-        ),
+      final openVip = await AppDialog.confirm(
+        title: 'vip_privilege'.tr,
+        message: 'vip_publish_required'.tr,
+        confirmText: 'vip_open'.tr,
       );
+      if (openVip) await Get.toNamed<void>(Routes.vip);
       return;
     }
     if (!isVerified) {
-      final proceed = await Get.dialog<bool>(
-        AlertDialog(
-          content: Text('verification_publish_confirm'.tr),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: Text('common_no'.tr),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: Text('common_yes'.tr),
-            ),
-          ],
-        ),
+      final proceed = await AppDialog.confirm(
+        title: 'common_tip'.tr,
+        message: 'verification_publish_confirm'.tr,
+        cancelText: 'common_no'.tr,
+        confirmText: 'common_yes'.tr,
       );
-      if (proceed != true) return;
+      if (!proceed) return;
     }
     if (title.text.trim().isEmpty) {
-      AppToast.show(_copy('请设置活动标题', 'Enter an activity title'));
+      AppToast.show('team_title_required'.tr);
       return;
     }
     if (content.text.trim().isEmpty) {
-      AppToast.show(_copy('请输入活动描述', 'Enter an activity description'));
+      AppToast.show('team_description_required'.tr);
       return;
     }
     if (date.value == null) {
-      AppToast.show(_copy('请选择活动时间', 'Choose the activity time'));
+      AppToast.show('team_time_required'.tr);
       return;
     }
     if (location.text.trim().isEmpty) {
-      AppToast.show(_copy('请输入活动地址', 'Enter the activity location'));
+      AppToast.show('team_location_required'.tr);
       return;
     }
     submitting.value = true;
@@ -165,7 +138,7 @@ class TeamPublishController extends GetxController {
         date: dateText,
         content: '${title.text.trim()}\n${content.text.trim()}',
         contact: contact.text.trim().isEmpty
-            ? _copy('站内消息联系', 'Contact via in-app messages')
+            ? 'team_contact_in_app'.tr
             : contact.text,
         imageSourcePaths: imagePaths,
       );
@@ -173,15 +146,14 @@ class TeamPublishController extends GetxController {
         AppToast.show('review_pending_title'.tr);
         await Get.offNamed(Routes.teamPublishReview);
       } else {
-        AppToast.show(_copy('发布失败，请稍后重试', 'Publishing failed. Try again'));
+        AppToast.show('team_publish_failed'.tr);
       }
+    } on Object {
+      AppToast.show('team_publish_failed'.tr);
     } finally {
       submitting.value = false;
     }
   }
-
-  String _copy(String zh, String en) =>
-      Get.locale?.languageCode == 'zh' ? zh : en;
 
   @override
   void onClose() {

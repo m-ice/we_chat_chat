@@ -45,25 +45,39 @@ class IntimateRelationship {
     required this.person,
     required this.state,
     required this.since,
+    this.unreadCount = 0,
   });
 
   final MessageCenterPerson person;
   final RelationshipState state;
   final DateTime since;
+  final int unreadCount;
 
-  IntimateRelationship copyWith({RelationshipState? state}) =>
+  IntimateRelationship copyWith({RelationshipState? state, int? unreadCount}) =>
       IntimateRelationship(
         person: person,
         state: state ?? this.state,
         since: since,
+        unreadCount: unreadCount ?? this.unreadCount,
       );
 }
 
 class VisitorRecord {
-  const VisitorRecord({required this.person, required this.visitedAt});
+  const VisitorRecord({
+    required this.person,
+    required this.visitedAt,
+    this.isRead = false,
+  });
 
   final MessageCenterPerson person;
   final DateTime visitedAt;
+  final bool isRead;
+
+  VisitorRecord copyWith({bool? isRead}) => VisitorRecord(
+    person: person,
+    visitedAt: visitedAt,
+    isRead: isRead ?? this.isRead,
+  );
 }
 
 class CallRecord {
@@ -74,6 +88,7 @@ class CallRecord {
     required this.state,
     required this.happenedAt,
     required this.durationSeconds,
+    this.isRead = false,
   });
 
   final String id;
@@ -82,4 +97,15 @@ class CallRecord {
   final CallState state;
   final DateTime happenedAt;
   final int durationSeconds;
+  final bool isRead;
+
+  CallRecord copyWith({bool? isRead}) => CallRecord(
+    id: id,
+    person: person,
+    direction: direction,
+    state: state,
+    happenedAt: happenedAt,
+    durationSeconds: durationSeconds,
+    isRead: isRead ?? this.isRead,
+  );
 }

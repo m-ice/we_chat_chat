@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../../domain/entities/store_product.dart';
@@ -15,9 +16,7 @@ class CoinsPage extends GetView<WalletController> {
 
   @override
   Widget build(BuildContext context) => ProfileDecoratedScaffold(
-    title: Localizations.localeOf(context).languageCode == 'zh'
-        ? '充值中心'
-        : 'Recharge',
+    title: 'coins_recharge_center'.tr,
     actions: [
       IconButton(
         tooltip: 'coins_help_title'.tr,
@@ -75,7 +74,9 @@ class CoinsPage extends GetView<WalletController> {
               children: [
                 Obx(
                   () => ProfilePrimaryButton(
-                    label: controller.store.isBusy.value ? '正在处理…' : '立即充值',
+                    label: controller.store.isBusy.value
+                        ? 'store_processing'.tr
+                        : 'coins_recharge_now'.tr,
                     onPressed: controller.store.isBusy.value
                         ? null
                         : () => controller.purchase(controller.selected.value),
@@ -86,12 +87,12 @@ class CoinsPage extends GetView<WalletController> {
                   onTap: () => Get.toNamed(
                     Routes.legal,
                     arguments: {
-                      'title': '用户充值协议',
-                      'assetPath': 'assets/legal/user_agreement.html',
+                      'title': 'legal_recharge_agreement'.tr,
+                      'assetPath': 'assets/legal/recharge_agreement.html',
                     },
                   ),
-                  child: const Text(
-                    '充值即代表你已同意《用户充值协议》',
+                  child: Text(
+                    'coins_recharge_consent'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 11, color: Colors.black),
                   ),
@@ -104,18 +105,9 @@ class CoinsPage extends GetView<WalletController> {
     ),
   );
 
-  Future<void> _showHelp(BuildContext context) => showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text('coins_help_title'.tr),
-      content: Text('coins_help_body'.tr),
-      actions: [
-        TextButton(
-          onPressed: Navigator.of(context).pop,
-          child: Text('common_got_it'.tr),
-        ),
-      ],
-    ),
+  Future<void> _showHelp(BuildContext _) => AppDialog.alert(
+    title: 'coins_help_title'.tr,
+    message: 'coins_help_body'.tr,
   );
 }
 
@@ -229,10 +221,10 @@ class _ProductTile extends StatelessWidget {
                     color: Color(0xFF333333),
                     fontWeight: FontWeight.w500,
                   ),
-                  children: const [
+                  children: [
                     TextSpan(
-                      text: '  (微撩)',
-                      style: TextStyle(
+                      text: '  (${'coins_product_unit'.tr})',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: profileMutedText,
                         fontWeight: FontWeight.w400,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/errors/data_exception.dart';
 import '../../domain/entities/report_record.dart';
 import '../../domain/repositories/report_repository.dart';
 
@@ -40,10 +41,11 @@ class ReportRepositoryImpl implements ReportRepository {
       status: ReportDeliveryStatus.queued,
     );
     final reports = [...queuedReports, record];
-    await _preferences.setString(
+    final saved = await _preferences.setString(
       storageKey,
       jsonEncode(reports.map(_toJson).toList(growable: false)),
     );
+    if (!saved) throw const DataException('Unable to queue report');
     return record;
   }
 

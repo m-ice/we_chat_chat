@@ -3,6 +3,10 @@ abstract final class Routes {
   static const homeCityPicker = '/home/city-picker';
   static const homeActivityFilter = '/home/activity-filter';
   static const chat = '/chat';
+  static const systemMessages = '/messages/system';
+  static const closeRelationships = '/messages/relationships';
+  static const visitors = '/messages/visitors';
+  static const callHistory = '/messages/calls';
   static const coins = '/profile/coins';
   static const vip = '/profile/vip';
   static const userDetail = '/user-detail';
@@ -18,7 +22,8 @@ abstract final class Routes {
   static const profileEdit = '/profile/edit';
   static const profileInterests = '/profile/edit/interests';
   static const profilePersonality = '/profile/edit/personality';
-  static const verification = '/profile/verification';
+  static const profileNickname = '/profile/edit/nickname';
+  static const profileBio = '/profile/edit/bio';
   static const customerService = '/profile/customer-service';
   static const album = '/profile/album';
   static const albumPreview = '/profile/album/preview';

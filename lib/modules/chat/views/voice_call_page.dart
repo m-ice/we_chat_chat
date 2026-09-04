@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/widgets/app_image.dart';
 import '../controllers/voice_call_controller.dart';
 
 class VoiceCallPage extends GetView<VoiceCallController> {
@@ -17,7 +18,7 @@ class VoiceCallPage extends GetView<VoiceCallController> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(controller.peer.avatarPath, fit: BoxFit.cover),
+            AppImage(controller.peer.avatarPath, fit: BoxFit.cover),
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
               child: const ColoredBox(color: Color(0x40000000)),
@@ -26,9 +27,14 @@ class VoiceCallPage extends GetView<VoiceCallController> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 44,
-                    backgroundImage: AssetImage(controller.peer.avatarPath),
+                  SizedBox.square(
+                    dimension: 88,
+                    child: ClipOval(
+                      child: AppImage(
+                        controller.peer.avatarPath,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 18),
                   Text(

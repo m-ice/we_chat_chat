@@ -46,6 +46,6 @@
 
 ## 验收门槛
 
-- `dart format`、`flutter analyze`、单元/Widget 测试和 iOS Simulator build 全部通过。
-- 每个页面保留 Figma 基准图和 App 375×812 截图；独立 View 审核按结构、间距、字体、颜色、资源、安全区、变化内容和交互入口评审。
+- `dart format`、`flutter analyze`、单元/Widget 测试、iOS device 无签名构建和 iOS Simulator build 全部通过。
+- 独立 View 审核已按用户 2026-09-04 的最新要求暂停；本轮不得为了旧审核结论恢复或重排用户调整后的布局。
 - P0 必须为 0；P1 应在交付前清零，不能清零的合规差异必须在报告中说明。

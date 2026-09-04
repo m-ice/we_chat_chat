@@ -1,289 +1,328 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../domain/entities/user.dart';
+import '../../../core/vaules/app_image_string.dart';
+import '../../../core/widgets/app_image.dart';
+import '../../../core/widgets/app_refresh_view.dart';
+import '../../shared/actions/user_actions_sheet.dart';
 import '../controllers/user_detail_controller.dart';
 
 class UserDetailPage extends GetView<UserDetailController> {
   const UserDetailPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final user = controller.user;
-    final gallery = user.galleryImagePaths.isEmpty
-        ? [user.avatarPath]
-        : user.galleryImagePaths;
+  Widget build(BuildContext context) => Obx(() {
+    controller.seedProfile.value;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: 440,
-                  pinned: false,
-                  stretch: true,
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black,
-                  leading: IconButton(
-                    onPressed: Get.back,
-                    icon: const Icon(Icons.arrow_back),
-                  ),
-                  actions: [
-                    IconButton(
-                      tooltip: 'common_more'.tr,
-                      onPressed: _showMore,
-                      icon: const Icon(Icons.more_horiz),
+      body: AppRefreshView(
+        onRefresh: controller.reloadProfile,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            _ProfileHero(controller: controller, onMore: _showMore),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _ProfileSummary(controller: controller),
+                    const SizedBox(height: 18),
+                    _ProfileTag(
+                      text: 'user_interests'.trParams({
+                        'value': controller.user.hobbies.isEmpty
+                            ? 'user_none'.tr
+                            : controller.user.hobbies
+                                  .map((item) => item.tr)
+                                  .join(' / '),
+                      }),
+                      background: const Color(0x1A4A86F7),
+                      foreground: const Color(0xFF4A86F7),
                     ),
-                    const SizedBox(width: 6),
-                  ],
-                  flexibleSpace: FlexibleSpaceBar(
-                    stretchModes: const [StretchMode.zoomBackground],
-                    background: GestureDetector(
-                      onTap: () => Get.toNamed(
-                        Routes.imagePreview,
-                        arguments: {'images': gallery, 'index': 0},
-                      ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.asset(gallery.first, fit: BoxFit.cover),
-                          const DecoratedBox(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Color(0x59000000),
-                                  Colors.transparent,
-                                  Color(0x33000000),
-                                ],
-                                stops: [0, .42, 1],
-                              ),
-                            ),
-                          ),
-                          if (gallery.length > 1)
-                            Positioned(
-                              right: 16,
-                              bottom: 12,
-                              child: _GalleryPreview(paths: gallery),
-                            ),
-                        ],
-                      ),
+                    const SizedBox(height: 8),
+                    _ProfileTag(
+                      text: 'user_personality'.trParams({
+                        'value': controller.generatedPersonalityTags
+                            .map((item) => item.tr)
+                            .join(' / '),
+                      }),
+                      background: const Color(0x1AF8A88F),
+                      foreground: const Color(0xFFF8A88F),
                     ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 116),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _ProfileSummary(controller: controller),
-                        const SizedBox(height: 20),
-                        _ProfileTag(
-                          icon: Icons.camera_alt_outlined,
-                          text: 'user_interests'.trParams({
-                            'value': user.hobbies.isEmpty
-                                ? 'user_none'.tr
-                                : user.hobbies
-                                      .map((item) => item.tr)
-                                      .join(' / '),
-                          }),
-                          background: const Color(0xFFEAF3FF),
-                          foreground: const Color(0xFF4A86F7),
-                        ),
-                        const SizedBox(height: 8),
-                        _ProfileTag(
-                          icon: Icons.favorite_border,
-                          text: 'user_personality'.trParams({
-                            'value': controller.generatedPersonalityTags
-                                .map((item) => item.tr)
-                                .join(' / '),
-                          }),
-                          background: const Color(0xFFFFEEE9),
-                          foreground: const Color(0xFFF08B70),
-                        ),
-                        const SizedBox(height: 24),
-                        _SectionTitle(
-                          title: _copy(zh: '基本资料', en: 'Basic profile'),
-                        ),
+                    const _SectionDivider(),
+                    _SectionTitle(title: 'user_basic_profile'.tr),
+                    const SizedBox(height: 12),
+                    _BasicInfoGrid(items: controller.facts),
+                    if (controller.activities.isNotEmpty) ...[
+                      const _SectionDivider(),
+                      _SectionTitle(title: 'user_published_activities'.tr),
+                      const SizedBox(height: 12),
+                      for (final item in controller.activities) ...[
+                        _ActivityCard(controller: controller, item: item),
                         const SizedBox(height: 12),
-                        _BasicInfoGrid(user: user),
-                        if (user.teamPost case final team?) ...[
-                          const _SectionDivider(),
-                          _SectionTitle(
-                            title: _copy(
-                              zh: '发布的活动',
-                              en: 'Published activities',
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _ActivityCard(user: user, team: team),
-                        ],
-                        const _SectionDivider(),
-                        _SectionTitle(
-                          title: _copy(
-                            zh: '${user.nickname}的动态',
-                            en: "${user.nickname}'s posts",
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        if (user.moment == null)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 28),
-                            child: Center(
-                              child: Text(
-                                'user_no_posts'.tr,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          _MomentCard(user: user),
                       ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: AppColors.separator)),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-                  child: Row(
-                    children: [
-                      if (user.isVerified) ...[
-                        SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: OutlinedButton(
-                            onPressed: controller.startCall,
-                            style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              foregroundColor: AppColors.textPrimary,
-                              side: const BorderSide(
-                                color: AppColors.textPrimary,
-                              ),
-                              shape: const CircleBorder(),
-                            ),
-                            child: const Icon(Icons.phone_outlined),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-                      Expanded(
-                        child: SizedBox(
-                          height: 48,
-                          child: FilledButton.icon(
-                            onPressed: controller.startChat,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.accentYellow,
-                              foregroundColor: AppColors.textPrimary,
-                              elevation: 0,
-                            ),
-                            icon: const Icon(Icons.chat_bubble_outline),
-                            label: Text('user_chat'.tr),
-                          ),
-                        ),
-                      ),
                     ],
-                  ),
+                    const _SectionDivider(),
+                    _SectionTitle(title: 'user_posts'.tr),
+                    const SizedBox(height: 12),
+                    if (controller.moments.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 28),
+                        child: Center(
+                          child: Text(
+                            'user_no_posts'.tr,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      for (final item in controller.moments) ...[
+                        _MomentCard(item: item, onMore: _showMore),
+                        const SizedBox(height: 18),
+                      ],
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showMore() {
-    Get.bottomSheet<void>(
-      SafeArea(
-        child: ColoredBox(
-          color: Colors.white,
-          child: Wrap(
-            children: [
-              ListTile(
-                title: Text('common_report'.tr),
-                onTap: () {
-                  Get.back<void>();
-                  Get.toNamed(Routes.report, arguments: controller.user);
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'common_block'.tr,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                onTap: controller.block,
-              ),
-              ListTile(
-                title: Text(
-                  'common_shield'.tr,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                onTap: controller.shield,
-              ),
-              ListTile(title: Text('common_cancel'.tr), onTap: Get.back),
-            ],
-          ),
+          ],
         ),
       ),
-      backgroundColor: Colors.white,
+
+      // CommonDraggableFloatWidget(
+      //   width: 70,
+      //   height: 32,
+      //   eventStreamController: controller.floatingActionEvents,
+      //   borderTop: 0,
+      //   borderRight: 12,
+      //   borderBottom: 70,
+      //   initPositionYInTop: true,
+      //   initPositionYMarginBorder: chatButtonTop,
+      //   slideInstantly: SlideInstantly.instantly,
+      //   onTap: controller.startChat,
+      //   listView:
+      //   child:
+      // ),
+    );
+  });
+
+  void _showMore() {
+    showUserActionsSheet(
+      onBlock: controller.block,
+      onReport: () => Get.toNamed(Routes.report, arguments: controller.user),
     );
   }
 }
 
+class _ProfileHero extends StatelessWidget {
+  const _ProfileHero({required this.controller, required this.onMore});
+
+  final UserDetailController controller;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final images = [
+      controller.heroImagePath,
+      ...controller.galleryPreviewPaths,
+    ];
+
+    return SliverAppBar(
+      expandedHeight: 440,
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+      automaticallyImplyLeading: false,
+      stretch: true,
+      leadingWidth: 64,
+      leading: _HeroActionButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        assetPath: AppImageString.videoUserProfileBack,
+        onTap: Get.back,
+      ),
+      actions: [
+        _HeroActionButton(
+          tooltip: 'common_more'.tr,
+          assetPath: AppImageString.videoUserProfileMore,
+          onTap: onMore,
+        ),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [StretchMode.zoomBackground],
+        background: GestureDetector(
+          onTap: () => Get.toNamed(
+            Routes.imagePreview,
+            arguments: {
+              'images': images,
+              'index': controller.imageCarouselIndex.value,
+            },
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              PageView.builder(
+                itemCount: images.length,
+                controller: controller.imageCarouselC,
+                onPageChanged: (index) =>
+                    controller.imageCarouselIndex.value = index,
+                itemBuilder: (context, index) {
+                  return AppImage(
+                    images[index],
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  );
+                },
+              ),
+              // const DecoratedBox(
+              //   decoration: BoxDecoration(
+              //     gradient: LinearGradient(
+              //       begin: Alignment.topCenter,
+              //       end: Alignment.bottomCenter,
+              //       colors: [Color(0xB3000000), Colors.transparent],
+              //       stops: [0, .24],
+              //     ),
+              //   ),
+              // ),
+              if (images.length > 1)
+                Positioned(
+                  right: 16,
+                  bottom: 12,
+                  child: Obx(
+                    () => _GalleryPreview(
+                      paths: images,
+                      currentIndex: controller.imageCarouselIndex.value,
+                      onTap: controller.selectCarouselImage,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroActionButton extends StatelessWidget {
+  const _HeroActionButton({
+    required this.tooltip,
+    required this.assetPath,
+    required this.onTap,
+  });
+
+  final String tooltip;
+  final String assetPath;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: tooltip,
+    onPressed: onTap,
+    icon: Container(
+      width: 32.w,
+      height: 32.w,
+      decoration: BoxDecoration(
+        color: const Color(0xB3000000),
+        borderRadius: BorderRadius.circular(32.w),
+      ),
+      child: Center(child: AppImage(assetPath, width: 24.w)),
+    ),
+  );
+}
+
 class _GalleryPreview extends StatelessWidget {
-  const _GalleryPreview({required this.paths});
+  const _GalleryPreview({
+    required this.paths,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  final ValueChanged<int> onTap;
 
   final List<String> paths;
+  final int currentIndex;
 
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      for (var index = 0; index < paths.take(3).length; index++)
+      for (var index = 0; index < paths.length; index++)
         Padding(
-          padding: const EdgeInsets.only(left: 6),
+          padding: EdgeInsets.only(left: index == 0 ? 0 : 4),
           child: GestureDetector(
-            onTap: () => Get.toNamed(
-              Routes.imagePreview,
-              arguments: {'images': paths, 'index': index},
-            ),
+            key: ValueKey('user-detail-gallery-thumbnail-$index'),
+            onTap: () => onTap(index),
             child: Container(
-              width: 44,
-              height: 44,
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
-              ),
+              width: 44.w,
+              height: 44.w,
+              decoration: currentIndex != index
+                  ? null
+                  : BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2.w),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+              clipBehavior: currentIndex != index ? Clip.none : Clip.antiAlias,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(paths[index], fit: BoxFit.cover),
+                borderRadius: BorderRadius.circular(12.r),
+                clipBehavior: Clip.hardEdge,
+                child: AppImage(paths[index], fit: BoxFit.cover),
               ),
             ),
           ),
         ),
     ],
+  );
+}
+
+class _ChatPill extends StatelessWidget {
+  const _ChatPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey('user-detail-chat'),
+    width: 70,
+    height: 32,
+    padding: const EdgeInsets.symmetric(horizontal: 9),
+    decoration: BoxDecoration(
+      color: AppColors.accentYellow,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x1A000000),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const AppImage(
+          AppImageString.videoUserProfileChat,
+          width: 16,
+          height: 16,
+        ),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }
 
@@ -299,103 +338,101 @@ class _ProfileSummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
-              child: Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      user.nickname,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.nickname,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
                   ),
-                  if (user.isVerified) ...[
-                    const SizedBox(width: 5),
-                    Image.asset(
-                      'assets/icons/status/ic_verified.png',
-                      width: 20,
-                      height: 20,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Obx(() {
-              final invited = controller.invited.value;
-              return FilledButton(
-                onPressed: controller.invite,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(70, 32),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  backgroundColor: invited
-                      ? const Color(0xFFF3F3F3)
-                      : AppColors.accentYellow,
-                  foregroundColor: invited
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
-                  elevation: 0,
-                  visualDensity: VisualDensity.compact,
                 ),
-                child: Text(
-                  invited ? 'user_invited'.tr : 'user_invite'.tr,
-                  style: const TextStyle(fontSize: 13),
-                ),
-              );
-            }),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            if (user.gender.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF3FF),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                SizedBox(height: 5.h),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 5,
                   children: [
-                    Icon(
-                      user.gender == '女' ? Icons.female : Icons.male,
-                      color: const Color(0xFF4A86F7),
-                      size: 13,
-                    ),
-                    const SizedBox(width: 2),
+                    if (user.gender.isNotEmpty)
+                      Container(
+                        height: 20.h,
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF4AC3FF),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const AppImage(
+                              AppImageString.videoUserProfileGender,
+                              width: 14,
+                              height: 14,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              '${user.age}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     Text(
-                      '${user.age}',
+                      'ID: ${user.id + 1237500}',
                       style: const TextStyle(
-                        color: Color(0xFF4A86F7),
-                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
                       ),
                     ),
+                    // if (user.isSeedData) const SeedContentBadge(compact: true),
+                    // Obx(
+                    //       () => TextButton(
+                    //     key: const ValueKey('user-detail-invite'),
+                    //     onPressed: controller.invite,
+                    //     style: TextButton.styleFrom(
+                    //       minimumSize: const Size(0, 28),
+                    //       padding: const EdgeInsets.symmetric(horizontal: 6),
+                    //       visualDensity: VisualDensity.compact,
+                    //       foregroundColor: AppColors.textPrimary,
+                    //     ),
+                    //     child: Text(
+                    //       controller.invited.value
+                    //           ? 'user_invited'.tr
+                    //           : 'user_invite'.tr,
+                    //       style: const TextStyle(fontSize: 12),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
-              ),
-            const SizedBox(width: 8),
-            Text(
-              '${_copy(zh: '微撩号', en: 'ID')}: ${user.id + 1237500}',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-              ),
+              ],
+            ),
+            SizedBox(width: 10.w),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: controller.startChat,
+              child: _ChatPill(label: 'user_chat'.tr),
             ),
           ],
         ),
-        const SizedBox(height: 9),
+
+        const SizedBox(height: 6),
         Text(
           user.intro.isEmpty ? 'user_default_intro'.tr : user.intro,
           style: const TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 14,
+            fontSize: 13,
             height: 1.5,
           ),
         ),
@@ -406,13 +443,11 @@ class _ProfileSummary extends StatelessWidget {
 
 class _ProfileTag extends StatelessWidget {
   const _ProfileTag({
-    required this.icon,
     required this.text,
     required this.background,
     required this.foreground,
   });
 
-  final IconData icon;
   final String text;
   final Color background;
   final Color foreground;
@@ -420,24 +455,15 @@ class _ProfileTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+    constraints: const BoxConstraints(minHeight: 30),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
     decoration: BoxDecoration(
       color: background,
       borderRadius: BorderRadius.circular(12),
     ),
-    child: Row(
-      children: [
-        Icon(icon, size: 15, color: foreground),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: foreground, fontSize: 12),
-          ),
-        ),
-      ],
+    child: Text(
+      text,
+      style: TextStyle(color: foreground, fontSize: 13, height: 1.35),
     ),
   );
 }
@@ -451,7 +477,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Text(
     title,
     style: const TextStyle(
-      color: AppColors.textPrimary,
+      color: Colors.black,
       fontSize: 15,
       fontWeight: FontWeight.w600,
     ),
@@ -463,240 +489,299 @@ class _SectionDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Padding(
-    padding: EdgeInsets.symmetric(vertical: 22),
-    child: Divider(height: 1, color: AppColors.separator),
+    padding: EdgeInsets.symmetric(vertical: 17),
+    child: Divider(height: .5, color: AppColors.separator),
   );
 }
 
 class _BasicInfoGrid extends StatelessWidget {
-  const _BasicInfoGrid({required this.user});
+  const _BasicInfoGrid({required this.items});
 
-  final User user;
+  final List<UserDetailFact> items;
 
   @override
-  Widget build(BuildContext context) {
-    final values = [
-      (_copy(zh: '微撩号', en: 'ID'), '${user.id + 1237500}'),
-      (
-        _copy(zh: '性别', en: 'Gender'),
-        user.gender.isEmpty ? 'user_none'.tr : user.gender.tr,
+  Widget build(BuildContext context) => GridView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    padding: EdgeInsets.zero,
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 3,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
+      mainAxisExtent: 64,
+    ),
+    itemCount: items.length,
+    itemBuilder: (_, index) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(12),
       ),
-      (_copy(zh: '年龄', en: 'Age'), 'user_age'.trParams({'age': '${user.age}'})),
-      (
-        _copy(zh: '兴趣', en: 'Interest'),
-        user.hobbies.firstOrNull?.tr ?? 'user_none'.tr,
-      ),
-      (
-        _copy(zh: '真人认证', en: 'Verified'),
-        user.isVerified ? 'common_yes'.tr : 'common_no'.tr,
-      ),
-      (
-        _copy(zh: '动态', en: 'Posts'),
-        user.moment == null ? 'user_none'.tr : 'common_yes'.tr,
-      ),
-    ];
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
-        mainAxisExtent: 56,
-      ),
-      itemCount: values.length,
-      itemBuilder: (_, index) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF7F7F7),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              values[index].$1,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 10,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            items[index].label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              height: 1.05,
             ),
-            const SizedBox(height: 3),
-            Text(
-              values[index].$2,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 12,
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            items[index].value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _ActivityCard extends StatelessWidget {
-  const _ActivityCard({required this.user, required this.team});
+  const _ActivityCard({required this.controller, required this.item});
 
-  final User user;
-  final TeamPost team;
+  final UserDetailController controller;
+  final UserDetailActivityData item;
 
   @override
-  Widget build(BuildContext context) {
-    final cover = team.imagePaths.firstOrNull ?? user.avatarPath;
-    return Material(
-      color: const Color(0xFFF7F7F7),
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => Get.toNamed(Routes.teamDetail, arguments: user),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  cover,
-                  width: 118,
-                  height: 128,
-                  fit: BoxFit.cover,
-                ),
+  Widget build(BuildContext context) => Material(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(18),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      key: ValueKey('user-detail-activity-${item.post.id}'),
+      onTap: () => controller.openActivity(item),
+      child: Container(
+        height: 198,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFF1F1F1)),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 128,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: AppImage(
+                      item.coverPath,
+                      width: 118,
+                      height: 128,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF666666),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            height: 1.35,
+                          ),
+                        ),
+                        const Spacer(),
+                        _ActivityLine(
+                          prefix: 'user_time_prefix'.tr,
+                          value: _formatDateTime(item.date),
+                        ),
+                        const SizedBox(height: 5),
+                        _ActivityLine(
+                          prefix: 'user_place_prefix'.tr,
+                          value: item.location,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F3F3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      team.content,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                    SizedBox(
+                      width: 54,
+                      child: Stack(
+                        children: [
+                          for (
+                            var index = 0;
+                            index < item.participantPaths.take(3).length;
+                            index++
+                          )
+                            Positioned(
+                              left: index * 16,
+                              top: 4,
+                              child: ClipOval(
+                                child: AppImage(
+                                  item.participantPaths[index],
+                                  width: 22,
+                                  height: 22,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    _ActivityLine(
-                      icon: Icons.location_on_outlined,
-                      value: team.location,
-                    ),
-                    const SizedBox(height: 6),
-                    _ActivityLine(
-                      icon: Icons.schedule,
-                      value: _formatDate(team.date),
-                    ),
-                    const SizedBox(height: 6),
-                    _ActivityLine(
-                      icon: Icons.local_activity_outlined,
-                      value: team.activity.tr,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'user_interested_count'.trParams({
+                          'count': '${item.interestedCount}',
+                        }),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _ActivityLine extends StatelessWidget {
-  const _ActivityLine({required this.icon, required this.value});
+  const _ActivityLine({required this.prefix, required this.value});
 
-  final IconData icon;
+  final String prefix;
   final String value;
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) => Text(
+    '$prefix$value',
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
+  );
+}
+
+class _MomentCard extends GetView<UserDetailController> {
+  const _MomentCard({required this.item, required this.onMore});
+
+  final UserDetailMomentData item;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Icon(icon, size: 14, color: AppColors.textSecondary),
-      const SizedBox(width: 4),
-      Expanded(
-        child: Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+      Text(
+        _formatDate(item.createdAt),
+        style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        item.content,
+        style: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 14,
+          height: 1.45,
         ),
       ),
+      const SizedBox(height: 12),
+      GestureDetector(
+        onTap: () => Get.toNamed(
+          Routes.imagePreview,
+          arguments: {
+            'images': [item.imagePath],
+            'index': 0,
+          },
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: AspectRatio(
+            aspectRatio: 343 / 299,
+            child: AppImage(item.imagePath, fit: BoxFit.cover),
+          ),
+        ),
+      ),
+      const SizedBox(height: 9),
+      Row(
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onMore,
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: AppImage(
+                AppImageString.videoUserProfileOverflow,
+                width: 24,
+                height: 24,
+              ),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            key: ValueKey('user-moment-like-${item.id}'),
+            behavior: HitTestBehavior.opaque,
+            onTap: () => controller.toggleMomentLike(item),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: AppImage(
+                controller.isLiked(item)
+                    ? AppImageString.videoUserLikeSelected
+                    : AppImageString.videoUserProfileLike,
+                width: 24,
+                height: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            controller.likeCount(item) > 0
+                ? '${controller.likeCount(item)}'
+                : 'video_like'.tr,
+            style: TextStyle(
+              color: controller.isLiked(item)
+                  ? const Color(0xFFFF416D)
+                  : const Color(0xFFCCCCCC),
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+      const Divider(height: 17, color: AppColors.separator),
     ],
   );
 }
 
-class _MomentCard extends StatelessWidget {
-  const _MomentCard({required this.user});
+String _formatDate(DateTime value) => 'user_date_month_day'.trParams({
+  'month': '${value.month}',
+  'day': '${value.day}',
+});
 
-  final User user;
-
-  @override
-  Widget build(BuildContext context) {
-    final moment = user.moment!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          _formatDate(moment.createdAt),
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          moment.content,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 13,
-            height: 1.45,
-          ),
-        ),
-        if (moment.imagePaths.isNotEmpty) ...[
-          const SizedBox(height: 9),
-          GestureDetector(
-            onTap: () => Get.toNamed(
-              Routes.imagePreview,
-              arguments: {'images': moment.imagePaths, 'index': 0},
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: AspectRatio(
-                aspectRatio: 1.12,
-                child: Image.asset(moment.imagePaths.first, fit: BoxFit.cover),
-              ),
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Icon(Icons.more_horiz, color: Color(0xFFCCCCCC), size: 20),
-            const Spacer(),
-            const Icon(
-              Icons.thumb_up_alt_outlined,
-              color: Color(0xFFCCCCCC),
-              size: 18,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'video_like'.tr,
-              style: const TextStyle(color: Color(0xFFCCCCCC), fontSize: 11),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-String _formatDate(DateTime value) =>
-    '${value.year}.${value.month.toString().padLeft(2, '0')}.${value.day.toString().padLeft(2, '0')}';
-
-String _copy({required String zh, required String en}) =>
-    Get.locale?.languageCode == 'en' ? en : zh;
+String _formatDateTime(DateTime value) =>
+    '${value.month}/${value.day} ${value.hour.toString().padLeft(2, '0')}:00';

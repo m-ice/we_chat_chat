@@ -30,7 +30,7 @@ class VoiceCallController extends GetxController {
   }
 
   Future<void> _start() async {
-    AppToast.show('当前为演示呼叫，不会扣除微撩币');
+    AppToast.show('call_demo_no_charge'.tr);
     try {
       await _player.setReleaseMode(ReleaseMode.loop);
       await _player.play(AssetSource('audio/call/mitu_call.mp3'));

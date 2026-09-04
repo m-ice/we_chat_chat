@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_image.dart';
 import '../controllers/verification_controller.dart';
 
 class VerificationPage extends GetView<VerificationController> {
@@ -147,7 +146,7 @@ class _Upload extends StatelessWidget {
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
             )
-          : Image.file(File(path!), fit: BoxFit.cover),
+          : AppImage(path!, fit: BoxFit.cover),
     ),
   );
 }

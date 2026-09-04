@@ -85,7 +85,11 @@ class SquareRepositoryImpl implements SquareRepository {
     final map = <String, TopicItem>{};
     for (final user in await _users.getUsers()) {
       final post = user.teamPost;
-      if (post == null || map.containsKey(post.activity)) continue;
+      if (post == null ||
+          post.isExpired(DateTime.now()) ||
+          map.containsKey(post.activity)) {
+        continue;
+      }
       map[post.activity] = TopicItem(
         id: post.activity,
         title: '#${post.activity}',

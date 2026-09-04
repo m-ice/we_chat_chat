@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 import 'report_controller.dart';
 
@@ -19,7 +20,7 @@ class ReportPage extends GetView<ReportController> {
             left: 0,
             right: 0,
             child: AppImage(
-              'assets/images/content/figma_profile_header.png',
+              AppImageString.videoUserReportHeader,
               height: 255,
               fit: BoxFit.cover,
               alignment: Alignment.topCenter,
@@ -76,21 +77,28 @@ class ReportPage extends GetView<ReportController> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            TextField(
-                              controller: controller.details,
-                              minLines: 6,
-                              maxLines: 8,
-                              maxLength: 300,
-                              textInputAction: TextInputAction.newline,
-                              decoration: InputDecoration(
-                                hintText: 'report_details_hint'.tr,
-                                counterText: '',
-                                filled: true,
-                                fillColor: const Color(0xFFF4F4F4),
-                                contentPadding: const EdgeInsets.all(12),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
+                            SizedBox(
+                              height: 142,
+                              child: TextField(
+                                key: const ValueKey('report-details'),
+                                controller: controller.details,
+                                expands: true,
+                                minLines: null,
+                                maxLines: null,
+                                maxLength: 300,
+                                textAlignVertical: TextAlignVertical.top,
+                                textInputAction: TextInputAction.newline,
+                                decoration: InputDecoration(
+                                  hintText: 'report_details_hint'.tr,
+                                  hintMaxLines: 3,
+                                  counterText: '',
+                                  filled: true,
+                                  fillColor: const Color(0xFFF4F4F4),
+                                  contentPadding: const EdgeInsets.all(12),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
                                 ),
                               ),
                             ),
@@ -108,6 +116,7 @@ class ReportPage extends GetView<ReportController> {
                       width: double.infinity,
                       height: 52,
                       child: FilledButton(
+                        key: const ValueKey('report-submit'),
                         onPressed: controller.isSubmitting.value
                             ? null
                             : controller.submit,

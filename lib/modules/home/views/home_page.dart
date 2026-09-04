@@ -3,11 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:we_chat_chat/core/vaules/app_image_string.dart';
 import 'package:we_chat_chat/core/widgets/app_image.dart';
+import 'package:we_chat_chat/core/widgets/app_refresh_view.dart';
 import 'package:we_chat_chat/core/widgets/common_draggable_float.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../domain/entities/city_user.dart';
-import '../../../domain/entities/city_user_mapper.dart';
 import '../../../domain/entities/user.dart';
 import '../../main/controllers/main_controller.dart';
 import '../controllers/home_controller.dart';
@@ -15,14 +15,7 @@ import '../controllers/home_controller.dart';
 const _figmaYellow = Color(0xFFFFCE45);
 const _figmaText = Color(0xFF333333);
 const _figmaSecondary = Color(0xFF999999);
-const _figmaAssetRoot = 'assets/images/content';
-const _figmaAvatars = [
-  '$_figmaAssetRoot/figma_home_avatar_1.png',
-  '$_figmaAssetRoot/figma_home_avatar_2.jpg',
-  '$_figmaAssetRoot/figma_home_avatar_3.png',
-  '$_figmaAssetRoot/figma_home_avatar_4.png',
-  '$_figmaAssetRoot/figma_home_avatar_5.png',
-];
+const _figmaAvatars = AppImageString.homeRecommendationAvatars;
 
 String _copy(String zh, String en) =>
     Get.locale?.languageCode == 'zh' ? zh : en;
@@ -42,47 +35,55 @@ class HomePage extends GetView<HomeController> {
       backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
-        child: Obx((){
+        child: Obx(() {
           if (controller.hasError.value) {
             return Center(child: Text('home_load_failed'.tr));
           }
           return Column(
             children: [
-              _NearbyHero(users: controller.nearbyUsers),
+              _NearbyHero(
+                users: controller.nearbyUsers,
+                onUserTap: controller.openUser,
+              ),
               Expanded(
-                  child: CommonDraggableFloatWidget(
-                      eventStreamController: controller.eventStreamController,
-                      listView: RefreshIndicator(
-                        onRefresh: controller.load,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 84),
-                          itemCount: controller.activityUsers.length,
-                          itemBuilder: (context, index) {
-                            final user = controller.activityUsers[index];
-                            return ActivityCard(
-                              user: user,
-                              isPendingJoin: controller.pendingJoinIds.contains(
-                                user.id,
-                              ),
-                              onJoin: () => controller.join(user),
-                              onOpen: () async {
-                                final result = await Get.toNamed(
-                                  Routes.teamDetail,
-                                  arguments: user,
-                                );
-                                if (result == HomeFeedTab.nearby) _openPartnerTab();
-                                controller.refreshSocialState();
-                              },
-                            );
+                child: CommonDraggableFloatWidget(
+                  eventStreamController: controller.eventStreamController,
+                  width: 114.w,
+                  height: 42.h,
+                  borderBottom: 39.h,
+                  borderRight: 12.w,
+                  initPositionYMarginBorder: 0,
+                  listView: AppRefreshView(
+                    onRefresh: controller.load,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 84),
+                      itemCount: controller.activityUsers.length,
+                      itemBuilder: (context, index) {
+                        final user = controller.activityUsers[index];
+                        return ActivityCard(
+                          user: user,
+                          isPendingJoin: controller.pendingJoinIds.contains(
+                            user.id,
+                          ),
+                          onJoin: () => controller.join(user),
+                          onOpen: () async {
+                            final result = await controller.openActivity(user);
+                            if (result == HomeFeedTab.nearby) _openPartnerTab();
+                            controller.refreshSocialState();
                           },
-                        ),
-                      ),
-                      child: _CreateActivityButton(
-                        onPressed: () async {
-                          await Get.toNamed(Routes.teamPublish);
-                          controller.refreshSocialState();
-                        },
-                      )))
+                        );
+                      },
+                    ),
+                  ),
+                  child: _CreateActivityButton(
+                    onPressed: () async {
+                      await Get.toNamed(Routes.teamPublish);
+                      controller.refreshSocialState();
+                    },
+                  ),
+                ),
+              ),
             ],
           );
         }),
@@ -92,9 +93,10 @@ class HomePage extends GetView<HomeController> {
 }
 
 class _NearbyHero extends StatelessWidget {
-  const _NearbyHero({required this.users});
+  const _NearbyHero({required this.users, required this.onUserTap});
 
   final List<CityUser> users;
+  final ValueChanged<CityUser> onUserTap;
 
   void _openRecommendation(int index) {
     if (users.isEmpty) {
@@ -102,13 +104,13 @@ class _NearbyHero extends StatelessWidget {
       return;
     }
     final user = users[index % users.length];
-    Get.toNamed(Routes.userDetail, arguments: user.toUser());
+    onUserTap(user);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 16.w,right: 16.w,bottom: 12.h),
+      margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
       height: 209.h,
       child: Stack(
         clipBehavior: Clip.none,
@@ -119,7 +121,7 @@ class _NearbyHero extends StatelessWidget {
             child: AppImage(
               AppImageString.homeTopNearbyCard,
               key: const ValueKey('home-hero-background'),
-              // width: MediaQuery.sizeOf(context).width - 32.w,
+              width: double.infinity,
               height: 185.h,
               fit: BoxFit.cover,
               filterQuality: FilterQuality.high,
@@ -138,8 +140,8 @@ class _NearbyHero extends StatelessWidget {
           //   width: 136,
           //   height: 103,
           //   child: IgnorePointer(
-          //     child: Image.asset(
-          //       '$_figmaAssetRoot/figma_home_hero_decor.png',
+          //     child: AppImage(
+          //       AppImageString.homeHeroDecor,
           //       fit: BoxFit.fill,
           //       alignment: Alignment.bottomCenter,
           //       filterQuality: FilterQuality.high,
@@ -164,8 +166,6 @@ class _NearbyHero extends StatelessWidget {
     );
   }
 }
-
-
 
 class _RecommendationPanel extends StatelessWidget {
   const _RecommendationPanel({required this.onAvatarPressed});
@@ -233,7 +233,7 @@ class _RecommendationPanel extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
-                      child: Image.asset(
+                      child: AppImage(
                         _figmaAvatars[index],
                         width: 57,
                         height: 57,
@@ -252,7 +252,7 @@ class _RecommendationPanel extends StatelessWidget {
           top: -4,
           width: 55,
           height: 55,
-          child: AppImage(AppImageString.homeTopNearbyTag,width: 56.98.w,),
+          child: AppImage(AppImageString.homeTopNearbyTag, width: 56.98.w),
         ),
       ],
     );
@@ -286,8 +286,8 @@ class _RecommendationPanel extends StatelessWidget {
 //           top: 25,
 //           width: 117,
 //           height: 10,
-//           child: Image.asset(
-//             '$_figmaAssetRoot/figma_home_title_underline.png',
+//           child: AppImage(
+//             AppImageString.homeTitleUnderline,
 //             fit: BoxFit.fill,
 //             filterQuality: FilterQuality.high,
 //           ),
@@ -337,8 +337,8 @@ class _RecommendationPanel extends StatelessWidget {
 //         clipBehavior: Clip.none,
 //         children: [
 //           Positioned.fill(
-//             child: Image.asset(
-//               '$_figmaAssetRoot/figma_home_recommend_ribbon.png',
+//             child: AppImage(
+//               AppImageString.homeRecommendationRibbon,
 //               fit: BoxFit.fill,
 //               filterQuality: FilterQuality.high,
 //             ),
@@ -396,8 +396,8 @@ class _HeroExploreButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                '$_figmaAssetRoot/figma_home_cta_left.png',
+              const AppImage(
+                AppImageString.homeCtaLeft,
                 width: 9,
                 height: 10,
                 fit: BoxFit.fill,
@@ -412,8 +412,8 @@ class _HeroExploreButton extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 7),
-              Image.asset(
-                '$_figmaAssetRoot/figma_home_cta_right.png',
+              const AppImage(
+                AppImageString.homeCtaRight,
                 width: 9,
                 height: 10,
                 fit: BoxFit.fill,
@@ -459,8 +459,8 @@ class _CreateActivityButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                '$_figmaAssetRoot/figma_home_publish.png',
+              AppImage(
+                AppImageString.homePublish,
                 width: 19.w,
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.high,
@@ -519,7 +519,7 @@ class ActivityCard extends StatelessWidget {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap:
-          onOpen ?? () => Get.toNamed(Routes.teamDetail, arguments: user),
+              onOpen ?? () => Get.toNamed(Routes.teamDetail, arguments: user),
           onLongPress: onJoin,
           child: Container(
             key: const ValueKey('home-activity-card'),
@@ -582,7 +582,7 @@ class ActivityCard extends StatelessWidget {
                   top: 60,
                   right: 106,
                   child: _MetaRow(
-                    asset: '$_figmaAssetRoot/figma_home_clock.png',
+                    asset: AppImageString.homeClock,
                     text: _eventDate(post.date),
                   ),
                 ),
@@ -591,7 +591,7 @@ class ActivityCard extends StatelessWidget {
                   top: 80,
                   right: 106,
                   child: _MetaRow(
-                    asset: '$_figmaAssetRoot/figma_home_map.png',
+                    asset: AppImageString.homeMap,
                     text: _copy(
                       '地址：${post.location}',
                       'Place: ${post.location}',
@@ -610,7 +610,7 @@ class ActivityCard extends StatelessWidget {
                   height: 82,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
+                    child: AppImage(
                       cover,
                       width: 82,
                       height: 82,
@@ -660,7 +660,7 @@ class _MetaRow extends StatelessWidget {
       height: 16,
       child: Row(
         children: [
-          Image.asset(
+          AppImage(
             asset,
             width: 16,
             height: 16,
@@ -703,7 +703,7 @@ class _ParticipantStrip extends StatelessWidget {
                   border: Border.all(color: Colors.white),
                 ),
                 child: ClipOval(
-                  child: Image.asset(
+                  child: AppImage(
                     _figmaAvatars[index],
                     width: 22,
                     height: 22,

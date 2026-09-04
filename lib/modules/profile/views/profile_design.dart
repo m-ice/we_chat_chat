@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:we_chat_chat/core/widgets/figma_back_button.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 
 const profilePanelBorder = Color(0xFFEEEEEE);
@@ -8,18 +10,18 @@ const profileFieldBackground = Color(0xFFF4F4F4);
 const profileMutedText = Color(0xFF999999);
 
 abstract final class ProfileDetailAssets {
-  static const headerBackground = 'assets/images/profile_detail/header_bg.svg';
-  static const editAvatar = 'assets/images/profile_detail/edit_avatar.jpeg';
-  static const coin = 'assets/images/profile_detail/coin.png';
-  static const worldAvatar = 'assets/images/profile_detail/world_avatar.png';
-  static const worldPost = 'assets/images/profile_detail/world_post.jpeg';
-  static const albumPhoto1 = 'assets/images/profile_detail/album_photo_1.png';
-  static const albumPhoto2 = 'assets/images/profile_detail/album_photo_2.png';
-  static const chevronRight = 'assets/icons/profile_detail/chevron_right.svg';
-  static const rechargeHelp = 'assets/icons/profile_detail/recharge_help.svg';
-  static const worldMore = 'assets/icons/profile_detail/world_more.svg';
-  static const worldLike = 'assets/icons/profile_detail/world_like.svg';
-  static const worldComment = 'assets/icons/profile_detail/world_comment.svg';
+  static const headerBackground = AppImageString.profileHeaderBackground;
+  static const editAvatar = AppImageString.profileEditAvatar;
+  static const coin = AppImageString.profileCoin;
+  static const worldAvatar = AppImageString.profileWorldAvatar;
+  static const worldPost = AppImageString.profileWorldPost;
+  static const albumPhoto1 = AppImageString.profileAlbumPhoto1;
+  static const albumPhoto2 = AppImageString.profileAlbumPhoto2;
+  static const chevronRight = AppImageString.profileChevronRight;
+  static const rechargeHelp = AppImageString.profileRechargeHelp;
+  static const worldMore = AppImageString.profileWorldMore;
+  static const worldLike = AppImageString.profileWorldLike;
+  static const worldComment = AppImageString.profileWorldComment;
 }
 
 class ProfileDecoratedScaffold extends StatelessWidget {
@@ -60,6 +62,8 @@ class ProfileDecoratedScaffold extends StatelessWidget {
           elevation: 0,
           scrolledUnderElevation: 0,
           toolbarHeight: 48,
+          automaticallyImplyLeading: false,
+          leading: FigmaBackButton(),
           titleTextStyle: const TextStyle(
             color: Color(0xFF333333),
             fontSize: 16,

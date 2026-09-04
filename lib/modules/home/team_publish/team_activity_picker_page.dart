@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'team_publish_controller.dart';
@@ -51,9 +52,11 @@ class _TeamActivityPickerSheetState extends State<TeamActivityPickerSheet> {
       child: SizedBox(
         key: const ValueKey('team-activity-picker-sheet'),
         height: 448,
+        width: MediaQuery.sizeOf(context).width,
         child: Padding(
           padding: EdgeInsets.fromLTRB(18, 12, 16, 12 + safeBottom),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _PickerHeader(
                 selectedCount: selected == null ? 0 : 1,
@@ -62,6 +65,7 @@ class _TeamActivityPickerSheetState extends State<TeamActivityPickerSheet> {
               const SizedBox(height: 5),
               Expanded(
                 child: SingleChildScrollView(
+                  padding: EdgeInsets.zero,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: TeamPublishController.activityGroups.entries
@@ -124,11 +128,9 @@ class _PickerHeader extends StatelessWidget {
           const SizedBox(width: 32),
           Expanded(
             child: Text(
-              Get.locale?.languageCode == 'zh'
-                  ? '选择类型 $selectedCount/1'
-                  : 'Choose type $selectedCount/1',
+              'team_type_count'.trParams({'count': '$selectedCount'}),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16.sp,color: Colors.black),
             ),
           ),
           IconButton(

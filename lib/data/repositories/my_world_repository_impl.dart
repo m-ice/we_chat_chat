@@ -36,6 +36,20 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
           reviewStatus: json['mtReviewStatus'] == 'mtApproved'
               ? MyWorldReviewStatus.approved
               : MyWorldReviewStatus.pending,
+          isLiked: json['mtIsLiked'] as bool? ?? false,
+          likeCount: json['mtLikeCount'] as int? ?? 0,
+          comments: (json['mtComments'] as List? ?? const [])
+              .whereType<Map>()
+              .map(
+                (value) => MyWorldComment(
+                  id: value['mtId'] as String,
+                  content: value['mtContent'] as String,
+                  createdAt: DateTime.fromMillisecondsSinceEpoch(
+                    (((value['mtCreatedAt'] as num?) ?? 0) * 1000).round(),
+                  ),
+                ),
+              )
+              .toList(growable: false),
         );
       }).toList();
       result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -99,6 +113,40 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
   }
 
   @override
+  Future<void> setLiked(String id, bool liked) async {
+    final current = posts.toList();
+    final index = current.indexWhere((post) => post.id == id);
+    if (index < 0 || current[index].isLiked == liked) return;
+    final post = current[index];
+    current[index] = post.copyWith(
+      isLiked: liked,
+      likeCount: (post.likeCount + (liked ? 1 : -1)).clamp(0, 1 << 31),
+    );
+    await _persist(current);
+  }
+
+  @override
+  Future<void> addComment(String id, String content) async {
+    final text = content.trim();
+    if (text.isEmpty) return;
+    final current = posts.toList();
+    final index = current.indexWhere((post) => post.id == id);
+    if (index < 0) return;
+    final post = current[index];
+    current[index] = post.copyWith(
+      comments: [
+        ...post.comments,
+        MyWorldComment(
+          id: 'comment-${DateTime.now().microsecondsSinceEpoch}',
+          content: text,
+          createdAt: DateTime.now(),
+        ),
+      ],
+    );
+    await _persist(current);
+  }
+
+  @override
   Future<List<String>> fullImagePaths(MyWorldPost post) async {
     final documents = await getApplicationDocumentsDirectory();
     return post.imageRelativePaths
@@ -121,6 +169,18 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
                   post.reviewStatus == MyWorldReviewStatus.approved
                   ? 'mtApproved'
                   : 'mtPending',
+              'mtIsLiked': post.isLiked,
+              'mtLikeCount': post.likeCount,
+              'mtComments': post.comments
+                  .map(
+                    (comment) => {
+                      'mtId': comment.id,
+                      'mtContent': comment.content,
+                      'mtCreatedAt':
+                          comment.createdAt.millisecondsSinceEpoch / 1000,
+                    },
+                  )
+                  .toList(growable: false),
             },
           )
           .toList(),

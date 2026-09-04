@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:we_chat_chat/domain/repositories/chat_repository.dart';
 import 'package:we_chat_chat/main.dart';
+import 'package:we_chat_chat/modules/chat/views/widgets/chat_visuals.dart';
 
 void main() {
   tearDown(Get.reset);
@@ -22,6 +23,7 @@ void main() {
 
     SharedPreferences.resetStatic();
     SharedPreferences.setMockInitialValues({
+      'wl_age_18_confirmed': true,
       'chat_seed_initialized_v1': true,
       'chat_messages_v1':
           '[{"id":"assistant-welcome","peerId":-1,"text":"欢迎来到微撩组队","isFromCurrentUser":false,"createdAt":"2026-09-02T09:00:00+08:00"}]',
@@ -34,8 +36,8 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('main-tab-3')));
     await tester.pumpAndSettle();
-    expect(find.text('聊天'), findsOneWidget);
-    expect(tester.getTopLeft(find.text('聊天')), const Offset(16, 60));
+    expect(find.text('消息'), findsNWidgets(2));
+    expect(tester.getTopLeft(find.text('消息').first), const Offset(16, 60));
     expect(
       tester.getSize(find.byKey(const ValueKey('message-header-artwork'))),
       const Size(375, 255),
@@ -46,7 +48,8 @@ void main() {
     expect(tester.getSize(systemEntry), const Size(52, 52));
     expect(tester.getTopLeft(systemEntry).dx, closeTo(20.875, .1));
     expect(tester.getTopLeft(systemEntry).dy, closeTo(106, .1));
-    expect(find.text('99+'), findsNWidgets(5));
+    expect(find.byType(NotificationBadge), findsNWidgets(4));
+    expect(find.text('99+'), findsNothing);
     final conversationRow = find.byKey(const ValueKey('conversation--1'));
     expect(tester.getSize(conversationRow).height, 76);
     expect(tester.getTopLeft(conversationRow).dy, closeTo(193, .1));

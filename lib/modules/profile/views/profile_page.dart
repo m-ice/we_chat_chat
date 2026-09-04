@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -6,24 +5,10 @@ import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
+import '../../../core/widgets/app_image.dart';
+import '../../../core/widgets/app_refresh_view.dart';
 import '../controllers/profile_controller.dart';
-
-abstract final class _ProfileAssets {
-  static const header = 'assets/images/content/figma_profile_header.png';
-  static const avatar = 'assets/images/content/figma_profile_avatar.png';
-  static const summaryBackground =
-      'assets/images/content/figma_profile_card.png';
-  static const coins = 'assets/images/content/figma_profile_quick_coin.png';
-  static const membership = 'assets/images/content/figma_profile_quick_vip.png';
-  static const album = 'assets/images/content/figma_profile_quick_album.png';
-  static const edit = 'assets/images/content/figma_profile_icon_edit.png';
-  static const world = 'assets/images/content/figma_profile_icon_world.png';
-  static const support = 'assets/images/content/figma_profile_icon_support.png';
-  static const privacy = 'assets/images/content/figma_profile_icon_privacy.png';
-  static const agreement =
-      'assets/images/content/figma_profile_icon_agreement.png';
-  static const arrow = 'assets/images/content/figma_profile_arrow.png';
-}
 
 class ProfilePage extends GetView<ProfileController> {
   const ProfilePage({super.key});
@@ -39,79 +24,83 @@ class ProfilePage extends GetView<ProfileController> {
         bottom: false,
         child: Obx(() {
           final user = controller.currentUser.value;
-          final ImageProvider<Object> avatar;
+          final String avatar;
           if (controller.avatarFilePath.value != null) {
-            avatar = FileImage(File(controller.avatarFilePath.value!));
+            avatar = controller.avatarFilePath.value!;
           } else if (user?.avatarPath.isNotEmpty == true) {
-            avatar = AssetImage(user!.avatarPath);
+            avatar = user!.avatarPath;
           } else {
-            avatar = const AssetImage(_ProfileAssets.avatar);
+            avatar = AppImageString.profileFigmaAvatar;
           }
-          return ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              _ProfileHeader(
-                avatar: avatar,
-                nickname: controller.nickname.value,
-                userId: user?.id,
-              ),
-              _SummaryPanel(
-                coinsLabel: _isChinese ? '撩币' : 'profile_coins'.tr,
-                membershipLabel: 'profile_vip'.tr,
-                albumLabel: 'profile_album'.tr,
-                onCoinsTap: () async {
-                  await Get.toNamed(Routes.coins);
-                  controller.refreshWallet();
-                },
-                onMembershipTap: () async {
-                  await Get.toNamed(Routes.vip);
-                  controller.refreshWallet();
-                },
-                onAlbumTap: () => Get.toNamed(Routes.album),
-              ),
-              const SizedBox(height: 8),
-              _MenuRow(
-                icon: _ProfileAssets.edit,
-                label: 'profile_edit'.tr,
-                onTap: () async {
-                  await Get.toNamed(Routes.profileEdit);
-                  await controller.load();
-                },
-              ),
-              _MenuRow(
-                icon: _ProfileAssets.world,
-                label: _isChinese ? '我的动态' : 'profile_world'.tr,
-                onTap: () => Get.toNamed(Routes.myWorld),
-              ),
-              _MenuRow(
-                icon: _ProfileAssets.support,
-                label: 'profile_customer_service'.tr,
-                onTap: () => Get.toNamed(Routes.customerService),
-              ),
-              _MenuRow(
-                icon: _ProfileAssets.privacy,
-                label: 'legal_privacy'.tr,
-                onTap: () => Get.toNamed(
-                  Routes.legal,
-                  arguments: {
-                    'title': 'legal_privacy'.tr,
-                    'assetPath': 'assets/legal/privacy_policy.html',
+          return AppRefreshView(
+            onRefresh: controller.load,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: [
+                _ProfileHeader(
+                  avatar: avatar,
+                  nickname: controller.nickname.value,
+                  userId: user?.id,
+                ),
+                _SummaryPanel(
+                  coinsLabel: _isChinese ? '撩币' : 'profile_coins'.tr,
+                  membershipLabel: 'profile_vip'.tr,
+                  albumLabel: 'profile_album'.tr,
+                  onCoinsTap: () async {
+                    await Get.toNamed(Routes.coins);
+                    controller.refreshWallet();
+                  },
+                  onMembershipTap: () async {
+                    await Get.toNamed(Routes.vip);
+                    controller.refreshWallet();
+                  },
+                  onAlbumTap: () => Get.toNamed(Routes.album),
+                ),
+                const SizedBox(height: 8),
+                _MenuRow(
+                  icon: AppImageString.profileFigmaEdit,
+                  label: 'profile_edit'.tr,
+                  onTap: () async {
+                    await Get.toNamed(Routes.profileEdit);
+                    await controller.load();
                   },
                 ),
-              ),
-              _MenuRow(
-                icon: _ProfileAssets.agreement,
-                label: 'legal_user_agreement'.tr,
-                onTap: () => Get.toNamed(
-                  Routes.legal,
-                  arguments: {
-                    'title': 'legal_user_agreement'.tr,
-                    'assetPath': 'assets/legal/user_agreement.html',
-                  },
+                _MenuRow(
+                  icon: AppImageString.profileFigmaWorld,
+                  label: _isChinese ? '我的动态' : 'profile_world'.tr,
+                  onTap: () => Get.toNamed(Routes.myWorld),
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
+                _MenuRow(
+                  icon: AppImageString.profileFigmaSupport,
+                  label: 'profile_customer_service'.tr,
+                  onTap: () => Get.toNamed(Routes.customerService),
+                ),
+                _MenuRow(
+                  icon: AppImageString.profileFigmaPrivacy,
+                  label: 'legal_privacy'.tr,
+                  onTap: () => Get.toNamed(
+                    Routes.legal,
+                    arguments: {
+                      'title': 'legal_privacy'.tr,
+                      'assetPath': 'assets/legal/privacy_policy.html',
+                    },
+                  ),
+                ),
+                _MenuRow(
+                  icon: AppImageString.profileFigmaAgreement,
+                  label: 'legal_user_agreement'.tr,
+                  onTap: () => Get.toNamed(
+                    Routes.legal,
+                    arguments: {
+                      'title': 'legal_user_agreement'.tr,
+                      'assetPath': 'assets/legal/user_agreement.html',
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           );
         }),
       ),
@@ -128,8 +117,8 @@ class _ProfileBackdrop extends StatelessWidget {
     top: 0,
     right: 0,
     height: 255,
-    child: Image.asset(
-      _ProfileAssets.header,
+    child: AppImage(
+      AppImageString.profileFigmaHeader,
       width: double.infinity,
       height: 255,
       fit: BoxFit.fill,
@@ -144,7 +133,7 @@ class _ProfileHeader extends StatelessWidget {
     required this.userId,
   });
 
-  final ImageProvider avatar;
+  final String avatar;
   final String nickname;
   final int? userId;
 
@@ -163,9 +152,7 @@ class _ProfileHeader extends StatelessWidget {
             color: Colors.white,
             shape: BoxShape.circle,
           ),
-          child: ClipOval(
-            child: Image(image: avatar, fit: BoxFit.cover),
-          ),
+          child: ClipOval(child: AppImage(avatar, fit: BoxFit.cover)),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -222,8 +209,8 @@ class _SummaryPanel extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            _ProfileAssets.summaryBackground,
+          const AppImage(
+            AppImageString.profileFigmaCard,
             width: double.infinity,
             height: 93,
             fit: BoxFit.fill,
@@ -233,7 +220,7 @@ class _SummaryPanel extends StatelessWidget {
               SizedBox(
                 width: 112,
                 child: _SummaryAction(
-                  icon: _ProfileAssets.coins,
+                  icon: AppImageString.profileFigmaQuickCoin,
                   label: coinsLabel,
                   onTap: onCoinsTap,
                 ),
@@ -241,7 +228,7 @@ class _SummaryPanel extends StatelessWidget {
               SizedBox(
                 width: 116,
                 child: _SummaryAction(
-                  icon: _ProfileAssets.membership,
+                  icon: AppImageString.profileFigmaQuickVip,
                   label: membershipLabel,
                   onTap: onMembershipTap,
                 ),
@@ -250,7 +237,7 @@ class _SummaryPanel extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 1),
                   child: _SummaryAction(
-                    icon: _ProfileAssets.album,
+                    icon: AppImageString.profileFigmaQuickAlbum,
                     label: albumLabel,
                     onTap: onAlbumTap,
                   ),
@@ -282,7 +269,7 @@ class _SummaryAction extends StatelessWidget {
       padding: const EdgeInsets.only(top: 12, bottom: 13),
       child: Column(
         children: [
-          Image.asset(icon, width: 44, height: 44),
+          AppImage(icon, width: 44, height: 44),
           const SizedBox(height: 7),
           Text(
             label,
@@ -321,7 +308,7 @@ class _MenuRow extends StatelessWidget {
         padding: const EdgeInsets.only(left: 20, right: 15),
         child: Row(
           children: [
-            Image.asset(icon, width: 28, height: 28),
+            AppImage(icon, width: 28, height: 28),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -336,7 +323,11 @@ class _MenuRow extends StatelessWidget {
             ),
             Transform.rotate(
               angle: -math.pi / 2,
-              child: Image.asset(_ProfileAssets.arrow, width: 20, height: 20),
+              child: const AppImage(
+                AppImageString.profileFigmaArrow,
+                width: 20,
+                height: 20,
+              ),
             ),
           ],
         ),

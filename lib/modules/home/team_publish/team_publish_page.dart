@@ -3,15 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../core/widgets/app_image.dart';
+import '../../../core/widgets/app_text_input_dialog.dart';
 import 'team_activity_picker_page.dart';
 import 'team_flow_assets.dart';
 import 'team_publish_controller.dart';
 
 const _publishYellow = Color(0xFFFFCE45);
 const _publishBorder = Color(0xFFEDEDED);
-
-String _publishCopy(String zh, String en) =>
-    Get.locale?.languageCode == 'zh' ? zh : en;
 
 class TeamPublishPage extends GetView<TeamPublishController> {
   const TeamPublishPage({super.key});
@@ -45,37 +43,18 @@ class TeamPublishPage extends GetView<TeamPublishController> {
     if (time != null) controller.updateDate(day, time);
   }
 
-  Future<void> _editText(
-    BuildContext context, {
+  Future<void> _editText({
     required String title,
     required String hint,
     required TextEditingController target,
   }) async {
-    final draft = TextEditingController(text: target.text);
-    final value = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: draft,
-          autofocus: true,
-          maxLines: 2,
-          decoration: InputDecoration(hintText: hint),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text('common_cancel'.tr),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, draft.text),
-            child: Text(_publishCopy('确定', 'Confirm')),
-          ),
-        ],
-      ),
+    final value = await AppTextInputDialog.show(
+      title: title,
+      hint: hint,
+      initialValue: target.text,
+      maxLines: 2,
     );
     if (value != null) target.text = value;
-    draft.dispose();
   }
 
   @override
@@ -84,7 +63,7 @@ class TeamPublishPage extends GetView<TeamPublishController> {
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(_publishCopy('创建搭子', 'Create a partner')),
+        title: Text('team_create'.tr),
         toolbarHeight: 48,
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
@@ -118,7 +97,7 @@ class TeamPublishPage extends GetView<TeamPublishController> {
                 key: const ValueKey('team-publish-detail-card'),
                 height: 170,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  padding: const EdgeInsets.symmetric(vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -129,10 +108,8 @@ class TeamPublishPage extends GetView<TeamPublishController> {
                       Obx(
                         () => _FormRow(
                           icon: TeamFlowAssets.activityIcon,
-                          label: _publishCopy('选择活动', 'Activity type'),
-                          value:
-                              controller.activity.value ??
-                              _publishCopy('请选择', 'Choose'),
+                          label: 'team_choose_activity'.tr,
+                          value: controller.activity.value ?? 'team_choose'.tr,
                           onTap: () => _chooseActivity(context),
                         ),
                       ),
@@ -140,7 +117,7 @@ class TeamPublishPage extends GetView<TeamPublishController> {
                       Obx(
                         () => _FormRow(
                           icon: TeamFlowAssets.timeIcon,
-                          label: _publishCopy('活动时间', 'Date & time'),
+                          label: 'team_activity_time'.tr,
                           value: controller.dateText,
                           onTap: () => _chooseDateTime(context),
                         ),
@@ -148,11 +125,10 @@ class TeamPublishPage extends GetView<TeamPublishController> {
                       const _InsetDivider(),
                       _FormRow(
                         icon: TeamFlowAssets.locationIcon,
-                        label: _publishCopy('活动地址', 'Location'),
+                        label: 'team_activity_address'.tr,
                         valueListenable: controller.location,
                         emptyValue: 'team_location_hint'.tr,
                         onTap: () => _editText(
-                          context,
                           title: 'team_location'.tr,
                           hint: 'team_location_hint'.tr,
                           target: controller.location,
@@ -235,7 +211,7 @@ class _MainContentCard extends StatelessWidget {
               maxLength: 30,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               decoration: InputDecoration(
-                hintText: _publishCopy('请设置活动标题', 'Set an activity title'),
+                hintText: 'team_title_hint'.tr,
                 hintStyle: const TextStyle(color: Color(0xFFCCCCCC)),
                 border: InputBorder.none,
                 counterText: '',
@@ -254,10 +230,7 @@ class _MainContentCard extends StatelessWidget {
               maxLength: 240,
               textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
-                hintText: _publishCopy(
-                  '请输入简短的活动描述！',
-                  'Add a short activity description',
-                ),
+                hintText: 'team_short_description_hint'.tr,
                 hintStyle: const TextStyle(color: Color(0xFFCCCCCC)),
                 border: InputBorder.none,
                 counterText: '',
@@ -267,7 +240,13 @@ class _MainContentCard extends StatelessWidget {
           ),
           SizedBox(
             height: 118,
-            child: Obx(() => _PublishImageStrip(controller: controller)),
+            child: Obx(
+              () => _PublishImageStrip(
+                imagePaths: controller.imagePaths.toList(),
+                onPick: controller.pickImages,
+                onRemove: controller.removeImage,
+              ),
+            ),
           ),
         ],
       ),
@@ -276,9 +255,15 @@ class _MainContentCard extends StatelessWidget {
 }
 
 class _PublishImageStrip extends StatelessWidget {
-  const _PublishImageStrip({required this.controller});
+  const _PublishImageStrip({
+    required this.imagePaths,
+    required this.onPick,
+    required this.onRemove,
+  });
 
-  final TeamPublishController controller;
+  final List<String> imagePaths;
+  final VoidCallback onPick;
+  final ValueChanged<int> onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -288,23 +273,23 @@ class _PublishImageStrip extends StatelessWidget {
         final width = (constraints.maxWidth - gap * 2) / 3;
         return Row(
           children: List.generate(3, (index) {
-            final isImage = index < controller.imagePaths.length;
-            final isAdd = index == 2 && controller.imagePaths.length < 3;
+            final isImage = index < imagePaths.length;
+            final isAdd = index == 2 && imagePaths.length < 3;
             final showsPreview =
                 !isImage &&
                 !isAdd &&
                 index < TeamPublishController.designPreviewImagePaths.length;
             final child = isImage
                 ? _SelectedImage(
-                    path: controller.imagePaths[index],
-                    onRemove: () => controller.removeImage(index),
+                    path: imagePaths[index],
+                    onRemove: () => onRemove(index),
                   )
                 : showsPreview
                 ? _SampleImage(
                     path: TeamPublishController.designPreviewImagePaths[index],
-                    onTap: controller.pickImages,
+                    onTap: onPick,
                   )
-                : _AddImage(onTap: controller.pickImages);
+                : _AddImage(onTap: onPick);
             return Padding(
               padding: EdgeInsets.only(right: index == 2 ? 0 : gap),
               child: SizedBox(width: width, height: 118, child: child),
@@ -392,7 +377,7 @@ class _AddImage extends StatelessWidget {
             const AppImage(TeamFlowAssets.addPhotoIcon, width: 24, height: 24),
             const SizedBox(height: 5),
             Text(
-              _publishCopy('选择照片', 'Add photo'),
+              'team_choose_photo'.tr,
               style: const TextStyle(color: Color(0xFFCCCCCC), fontSize: 11),
             ),
           ],

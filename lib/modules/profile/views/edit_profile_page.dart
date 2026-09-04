@@ -6,7 +6,6 @@ import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../controllers/edit_profile_controller.dart';
 import 'profile_design.dart';
-import 'profile_text_edit_page.dart';
 
 class EditProfilePage extends GetView<EditProfileController> {
   const EditProfilePage({super.key});
@@ -46,11 +45,9 @@ class EditProfilePage extends GetView<EditProfileController> {
                     title: 'profile_nickname'.tr,
                     value: profile.nickname,
                     onTap: () async {
-                      await Get.to(
-                        () => ProfileTextEditPage(
-                          nickname: true,
-                          initialValue: profile.nickname,
-                        ),
+                      await Get.toNamed(
+                        Routes.profileNickname,
+                        arguments: profile.nickname,
                       );
                       await controller.refreshProfile();
                     },
@@ -62,11 +59,9 @@ class EditProfilePage extends GetView<EditProfileController> {
                         : profile.bio,
                     muted: profile.bio.isEmpty,
                     onTap: () async {
-                      await Get.to(
-                        () => ProfileTextEditPage(
-                          nickname: false,
-                          initialValue: profile.bio,
-                        ),
+                      await Get.toNamed(
+                        Routes.profileBio,
+                        arguments: profile.bio,
                       );
                       await controller.refreshProfile();
                     },

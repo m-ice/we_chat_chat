@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/errors/data_exception.dart';
 import '../../domain/entities/support_ticket.dart';
 import '../../domain/repositories/support_repository.dart';
 
@@ -40,10 +41,11 @@ class SupportRepositoryImpl implements SupportRepository {
       status: SupportTicketStatus.queued,
     );
     final tickets = [...queuedTickets, ticket];
-    await _preferences.setString(
+    final saved = await _preferences.setString(
       storageKey,
       jsonEncode(tickets.map(_toJson).toList(growable: false)),
     );
+    if (!saved) throw const DataException('Unable to queue support ticket');
     return ticket;
   }
 

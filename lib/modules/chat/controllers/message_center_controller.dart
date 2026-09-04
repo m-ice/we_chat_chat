@@ -41,11 +41,30 @@ class MessageCenterController extends GetxController {
             notices.map((notice) => notice.copyWith(isRead: true)),
           );
         case MessageCenterSection.relationships:
-          relationships.assignAll(await repository.getRelationships());
+          final values = await repository.getRelationships();
+          relationships.assignAll(values);
+          await repository.markRelationshipsRead(
+            values
+                .where((item) => item.unreadCount > 0)
+                .map((item) => item.person.id),
+          );
+          relationships.assignAll(
+            values.map((item) => item.copyWith(unreadCount: 0)),
+          );
         case MessageCenterSection.visitors:
-          visitors.assignAll(await repository.getVisitors());
+          final values = await repository.getVisitors();
+          visitors.assignAll(values);
+          await repository.markVisitorsRead(
+            values.where((item) => !item.isRead).map((item) => item.person.id),
+          );
+          visitors.assignAll(values.map((item) => item.copyWith(isRead: true)));
         case MessageCenterSection.calls:
-          calls.assignAll(await repository.getCallRecords());
+          final values = await repository.getCallRecords();
+          calls.assignAll(values);
+          await repository.markCallRecordsRead(
+            values.where((item) => !item.isRead).map((item) => item.id),
+          );
+          calls.assignAll(values.map((item) => item.copyWith(isRead: true)));
       }
     } on Object {
       hasError.value = true;
@@ -62,7 +81,9 @@ class MessageCenterController extends GetxController {
     relationships.removeWhere(
       (item) => item.person.id == relationship.person.id,
     );
-    AppToast.show('已解除与${relationship.person.nickname}的亲密关系');
+    AppToast.show(
+      'relationship_removed'.trParams({'name': relationship.person.nickname}),
+    );
   }
 
   Future<CallRecord?> addDemoCallback(MessageCenterPerson person) async {
@@ -71,7 +92,7 @@ class MessageCenterController extends GetxController {
       calls.insert(0, record);
       return record;
     } on Object {
-      AppToast.show('暂时无法发起呼叫，请稍后再试');
+      AppToast.show('call_start_failed'.tr);
       return null;
     }
   }

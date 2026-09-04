@@ -15,7 +15,8 @@ class SocialStateRepositoryImpl implements SocialStateRepository {
 
   Set<int> _read(String key) =>
       (_preferences.getStringList(key) ?? const <String>[])
-          .map(int.parse)
+          .map(int.tryParse)
+          .whereType<int>()
           .toSet();
 
   Future<void> _set(String key, int id, bool value) async {

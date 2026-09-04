@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/repositories/profile_edit_repository.dart';
 
@@ -57,22 +58,11 @@ class EditProfileController extends GetxController {
   Future<void> pickAvatar() async {
     final file = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (file == null) return;
-    final save = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('profile_save_avatar'.tr),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text('common_cancel'.tr),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('common_save'.tr),
-          ),
-        ],
-      ),
+    final save = await AppDialog.confirm(
+      title: 'profile_save_avatar'.tr,
+      confirmText: 'common_save'.tr,
     );
-    if (save != true) return;
+    if (!save) return;
     if (await _repository.updateAvatar(file.path)) {
       await refreshProfile();
       AppToast.show('profile_avatar_saved'.tr);
@@ -88,57 +78,19 @@ class EditProfileController extends GetxController {
       return false;
     }
     if (nickname && text.characters.length > 16) {
-      AppToast.show('昵称最多16个字');
+      AppToast.show('profile_nickname_limit'.trParams({'count': '16'}));
       return false;
     }
     if (!nickname && text.characters.length > 100) {
-      AppToast.show('简介最多100个字');
+      AppToast.show('profile_bio_limit'.trParams({'count': '100'}));
       return false;
     }
     nickname
         ? await _repository.updateNickname(text)
         : await _repository.updateBio(text);
     await refreshProfile();
-    AppToast.show('common_save'.tr);
+    AppToast.show('common_saved'.tr);
     return true;
-  }
-
-  Future<void> editText({
-    required String title,
-    required String placeholder,
-    required String current,
-    required bool nickname,
-  }) async {
-    final field = TextEditingController(text: current);
-    final value = await Get.dialog<String>(
-      AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: field,
-          decoration: InputDecoration(hintText: placeholder),
-        ),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common_cancel'.tr)),
-          TextButton(
-            onPressed: () {
-              final text = field.text.trim();
-              if (text.isEmpty) {
-                AppToast.show('common_content_required'.tr);
-                return;
-              }
-              Get.back(result: text);
-            },
-            child: Text('common_save'.tr),
-          ),
-        ],
-      ),
-    );
-    field.dispose();
-    if (value == null) return;
-    nickname
-        ? await _repository.updateNickname(value)
-        : await _repository.updateBio(value);
-    await refreshProfile();
   }
 
   Future<void> saveTags(
@@ -149,5 +101,6 @@ class EditProfileController extends GetxController {
         ? await _repository.updatePersonalityTags(values)
         : await _repository.updateInterests(values);
     await refreshProfile();
+    AppToast.show('common_saved'.tr);
   }
 }

@@ -1,0 +1,493 @@
+[
+  {
+    "userId": 1,
+    "heroImagePath": "https://plus.unsplash.com/premium_photo-1675721844807-a3760e14353b?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://plus.unsplash.com/premium_photo-1675721844807-a3760e14353b?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1502675135487-e971002a6adb?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["守时靠谱", "热爱运动", "善于记录"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "深圳", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "视觉设计师", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "广东惠州", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-001-a",
+        "ownerId": 1,
+        "titleKey": "深圳湾周末休闲骑行",
+        "coverPath": "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "深圳·深圳湾公园",
+        "date": "2026-10-13T09:00:00+08:00",
+        "interestedCount": 16
+      },
+      {
+        "id": "profile-activity-001-b",
+        "ownerId": 1,
+        "titleKey": "海边日落摄影散步",
+        "coverPath": "https://images.unsplash.com/photo-1502675135487-e971002a6adb?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "深圳·人才公园",
+        "date": "2026-12-05T16:30:00+08:00",
+        "interestedCount": 9
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-001-moment-001",
+        "contentKey": "周末沿深圳湾完成了二十公里休闲骑，海风和日落都很舒服。",
+        "imagePath": "https://plus.unsplash.com/premium_photo-1675721844807-a3760e14353b?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-20T18:10:00+08:00",
+        "initialLikeCount": 18
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 2,
+    "heroImagePath": "https://images.unsplash.com/photo-1534142499731-a32a99935397?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1534142499731-a32a99935397?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1518410240146-36aeeed0e4f9?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["自然友好", "耐心细致", "安全意识强"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "北京", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "自然教育从业者", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "河北承德", "valueIsTranslationKey": false}
+    ],
+    "activities": [],
+    "moments": [
+      {
+        "id": "user-002-moment-001",
+        "contentKey": "整理了上次郊野露营的照片，也把垃圾全部带回了城里。",
+        "imagePath": "https://images.unsplash.com/photo-1534142499731-a32a99935397?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-22T20:30:00+08:00",
+        "initialLikeCount": 24
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 3,
+    "heroImagePath": "https://images.unsplash.com/photo-1576068036336-328de1be1f2f?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1576068036336-328de1be1f2f?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1531932594968-e5e5e9dee95a?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["安静随和", "喜欢阅读", "观察细腻"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "上海", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "图书编辑", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "江苏苏州", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-003-a",
+        "ownerId": 3,
+        "titleKey": "老街与独立书店漫步",
+        "coverPath": "https://images.unsplash.com/photo-1531932594968-e5e5e9dee95a?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "上海·徐汇衡复风貌区",
+        "date": "2026-10-18T14:00:00+08:00",
+        "interestedCount": 11
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-003-moment-001",
+        "contentKey": "雨后的植物园很清新，慢慢走一圈正好读完一篇随笔。",
+        "imagePath": "https://images.unsplash.com/photo-1576068036336-328de1be1f2f?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-24T16:40:00+08:00",
+        "initialLikeCount": 13
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 4,
+    "heroImagePath": "https://plus.unsplash.com/premium_photo-1661962946869-4cf54aa4c778?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://plus.unsplash.com/premium_photo-1661962946869-4cf54aa4c778?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1670261152337-53f033b68448?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["积极自律", "路线规划", "体贴队友"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "杭州", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "瑜伽教练", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "浙江绍兴", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-004-a",
+        "ownerId": 4,
+        "titleKey": "北高峰晨间徒步",
+        "coverPath": "https://images.unsplash.com/photo-1670261152337-53f033b68448?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "杭州·北高峰",
+        "date": "2026-10-24T07:30:00+08:00",
+        "interestedCount": 21
+      },
+      {
+        "id": "profile-activity-004-b",
+        "ownerId": 4,
+        "titleKey": "公园基础拉伸练习",
+        "coverPath": "https://plus.unsplash.com/premium_photo-1661962946869-4cf54aa4c778?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "杭州·太子湾公园",
+        "date": "2026-12-12T08:30:00+08:00",
+        "interestedCount": 14
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-004-moment-001",
+        "contentKey": "清晨登顶后做了十分钟拉伸，状态比上次轻松了很多。",
+        "imagePath": "https://plus.unsplash.com/premium_photo-1661962946869-4cf54aa4c778?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-26T08:20:00+08:00",
+        "initialLikeCount": 31
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 5,
+    "heroImagePath": "https://images.unsplash.com/photo-1564546139483-c4396542aa59?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1564546139483-c4396542aa59?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1640696808792-073c6a492422?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["理性温和", "热爱设计", "求知欲强"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "广州", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "工业设计师", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "湖南长沙", "valueIsTranslationKey": false}
+    ],
+    "activities": [],
+    "moments": [
+      {
+        "id": "user-005-moment-001",
+        "contentKey": "今天的器物展很有启发，最喜欢关于材料演变的那一部分。",
+        "imagePath": "https://images.unsplash.com/photo-1564546139483-c4396542aa59?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-27T17:50:00+08:00",
+        "initialLikeCount": 9
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 6,
+    "heroImagePath": "https://images.unsplash.com/photo-1610892069029-f76f8b9c811f?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1610892069029-f76f8b9c811f?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["逻辑清晰", "规则友好", "耐心讲解"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "昆明", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "游戏策划", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "云南大理", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-006-a",
+        "ownerId": 6,
+        "titleKey": "新手友好合作桌游局",
+        "coverPath": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "昆明·翠湖附近",
+        "date": "2026-11-01T14:30:00+08:00",
+        "interestedCount": 8
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-006-moment-001",
+        "contentKey": "新入手的合作桌游顺利通关，团队沟通比输赢更有意思。",
+        "imagePath": "https://images.unsplash.com/photo-1610892069029-f76f8b9c811f?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-28T21:10:00+08:00",
+        "initialLikeCount": 15
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 7,
+    "heroImagePath": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["乐于分享", "尊重口味", "熟悉本地"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "成都", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "餐饮摄影师", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "四川乐山", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-007-a",
+        "ownerId": 7,
+        "titleKey": "玉林街区本地小店探访",
+        "coverPath": "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "成都·玉林街区",
+        "date": "2026-11-07T12:00:00+08:00",
+        "interestedCount": 19
+      },
+      {
+        "id": "profile-activity-007-b",
+        "ownerId": 7,
+        "titleKey": "河畔慢走与城市摄影",
+        "coverPath": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "成都·锦江绿道",
+        "date": "2026-12-19T15:00:00+08:00",
+        "interestedCount": 12
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-007-moment-001",
+        "contentKey": "沿河散步时发现一家经营多年的小店，味道朴实，老板也很健谈。",
+        "imagePath": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-29T19:00:00+08:00",
+        "initialLikeCount": 27
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 8,
+    "heroImagePath": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["健康生活", "温柔耐心", "喜欢分享"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "厦门", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "营养师", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "福建泉州", "valueIsTranslationKey": false}
+    ],
+    "activities": [],
+    "moments": [
+      {
+        "id": "user-008-moment-001",
+        "contentKey": "第一次尝试全麦贝果，调整水量之后口感终于达到了预期。",
+        "imagePath": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-08-31T10:20:00+08:00",
+        "initialLikeCount": 22
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9,
+    "heroImagePath": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["阳光自律", "公益热心", "节奏稳定"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "南京", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "在读研究生", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "安徽合肥", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-009-a",
+        "ownerId": 9,
+        "titleKey": "玄武湖五公里轻松跑",
+        "coverPath": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "南京·玄武湖",
+        "date": "2026-11-15T07:00:00+08:00",
+        "interestedCount": 17
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-009-moment-001",
+        "contentKey": "完成了本月第一次五公里慢跑，全程控制节奏，状态不错。",
+        "imagePath": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-09-01T07:40:00+08:00",
+        "initialLikeCount": 20
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 10,
+    "heroImagePath": "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://plus.unsplash.com/premium_photo-1675721844807-a3760e14353b?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["审美在线", "好奇探索", "沟通直接"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "青岛", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "产品经理", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "山东烟台", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-010-a",
+        "ownerId": 10,
+        "titleKey": "八大关建筑摄影散步",
+        "coverPath": "https://plus.unsplash.com/premium_photo-1675721844807-a3760e14353b?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "青岛·八大关",
+        "date": "2026-11-21T15:30:00+08:00",
+        "interestedCount": 25
+      },
+      {
+        "id": "profile-activity-010-b",
+        "ownerId": 10,
+        "titleKey": "海边日出手机摄影",
+        "coverPath": "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "青岛·石老人海水浴场",
+        "date": "2026-12-26T06:30:00+08:00",
+        "interestedCount": 10
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-010-moment-001",
+        "contentKey": "傍晚的海边光线很柔和，试着用慢门记录了几张浪花。",
+        "imagePath": "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-09-02T18:50:00+08:00",
+        "initialLikeCount": 35
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 11,
+    "heroImagePath": "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?auto=format&fit=crop&w=1200&h=900&q=82",
+    "galleryPreviewPaths": [
+      "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?auto=format&fit=crop&w=1200&h=900&q=82",
+      "https://images.unsplash.com/photo-1502675135487-e971002a6adb?auto=format&fit=crop&w=1200&h=900&q=82"
+    ],
+    "personalityTags": ["随和友善", "规律运动", "新手友好"],
+    "facts": [
+      {"labelKey": "user_city_label", "value": "深圳", "valueIsTranslationKey": false},
+      {"labelKey": "user_career_label", "value": "软件工程师", "valueIsTranslationKey": false},
+      {"labelKey": "user_hometown_label", "value": "江西南昌", "valueIsTranslationKey": false}
+    ],
+    "activities": [
+      {
+        "id": "profile-activity-011-a",
+        "ownerId": 11,
+        "titleKey": "周六晚休闲羽毛球双打",
+        "coverPath": "https://images.unsplash.com/photo-1502675135487-e971002a6adb?auto=format&fit=crop&w=1200&h=900&q=82",
+        "locationKey": "深圳·南山文体中心",
+        "date": "2026-11-28T19:00:00+08:00",
+        "interestedCount": 13
+      }
+    ],
+    "moments": [
+      {
+        "id": "user-011-moment-001",
+        "contentKey": "下班后打了一小时双打，保持运动的感觉比输赢更重要。",
+        "imagePath": "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?auto=format&fit=crop&w=1200&h=900&q=82",
+        "createdAt": "2026-09-03T21:20:00+08:00",
+        "initialLikeCount": 16
+      }
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9001,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_1.png", "assets/images/video_user/profile_preview_2.png", "assets/images/video_user/profile_preview_3.png"],
+    "personalityTags": ["喜欢摄影", "探索城市", "认真生活"],
+    "facts": [{"labelKey": "user_city_label", "value": "上海", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9001-moment-001", "contentKey": "记录一段轻松的城市周末。", "imagePath": "assets/images/video_user/profile_moment_1.png", "createdAt": "2026-08-11T12:00:00+08:00", "initialLikeCount": 18}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9002,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_2.png", "assets/images/video_user/profile_preview_3.png"],
+    "personalityTags": ["热爱设计", "友善沟通", "周末探店"],
+    "facts": [{"labelKey": "user_city_label", "value": "北京", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9002-moment-001", "contentKey": "分享最近发现的设计细节。", "imagePath": "assets/images/video_user/profile_moment_2.png", "createdAt": "2026-08-12T12:00:00+08:00", "initialLikeCount": 12}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9003,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_3.png", "assets/images/video_user/profile_preview_1.png"],
+    "personalityTags": ["目标清晰", "喜欢旅行", "乐于分享"],
+    "facts": [{"labelKey": "user_city_label", "value": "广州", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9003-moment-001", "contentKey": "把旅行中的小发现整理成了影像。", "imagePath": "assets/images/video_user/profile_moment_1.png", "createdAt": "2026-08-13T12:00:00+08:00", "initialLikeCount": 21}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9004,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_1.png", "assets/images/video_user/profile_preview_3.png"],
+    "personalityTags": ["积极开朗", "热爱运动", "尊重他人"],
+    "facts": [{"labelKey": "user_city_label", "value": "深圳", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9004-moment-001", "contentKey": "运动后的晚风让人很放松。", "imagePath": "assets/images/video_user/profile_moment_2.png", "createdAt": "2026-08-14T12:00:00+08:00", "initialLikeCount": 16}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9005,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_2.png", "assets/images/video_user/profile_preview_1.png"],
+    "personalityTags": ["耐心温和", "喜欢阅读", "生活规律"],
+    "facts": [{"labelKey": "user_city_label", "value": "杭州", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9005-moment-001", "contentKey": "安静读完一本一直想看的书。", "imagePath": "assets/images/video_user/profile_moment_1.png", "createdAt": "2026-08-15T12:00:00+08:00", "initialLikeCount": 14}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9006,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_3.png", "assets/images/video_user/profile_preview_2.png"],
+    "personalityTags": ["细心负责", "健康生活", "真诚友善"],
+    "facts": [{"labelKey": "user_city_label", "value": "成都", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9006-moment-001", "contentKey": "休息日也要记得好好吃饭和散步。", "imagePath": "assets/images/video_user/profile_moment_2.png", "createdAt": "2026-08-16T12:00:00+08:00", "initialLikeCount": 19}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9007,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_1.png", "assets/images/video_user/profile_preview_2.png"],
+    "personalityTags": ["喜欢音乐", "随和开朗", "热爱记录"],
+    "facts": [{"labelKey": "user_city_label", "value": "南京", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9007-moment-001", "contentKey": "今天循环播放了一张喜欢的专辑。", "imagePath": "assets/images/video_user/profile_moment_1.png", "createdAt": "2026-08-17T12:00:00+08:00", "initialLikeCount": 11}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "userId": 9008,
+    "heroImagePath": "assets/images/video_user/profile_hero.png",
+    "galleryPreviewPaths": ["assets/images/video_user/profile_preview_2.png", "assets/images/video_user/profile_preview_3.png"],
+    "personalityTags": ["城市探索", "认真工作", "周末慢行"],
+    "facts": [{"labelKey": "user_city_label", "value": "武汉", "valueIsTranslationKey": false}],
+    "activities": [],
+    "moments": [{"id": "video-user-9008-moment-001", "contentKey": "周末换一条路线认识熟悉的城市。", "imagePath": "assets/images/video_user/profile_moment_2.png", "createdAt": "2026-08-18T12:00:00+08:00", "initialLikeCount": 17}],
+    "source": "demo",
+    "moderationStatus": "approved"
+  }
+]

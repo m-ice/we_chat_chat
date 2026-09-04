@@ -4,6 +4,7 @@ import '../../domain/entities/user.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../domain/repositories/membership_wallet_repository.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../../core/vaules/app_image_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_message_dto.dart';
 import '../providers/asset_json_provider.dart';
@@ -26,12 +27,22 @@ class ChatRepositoryImpl implements ChatRepository {
   final UserRepository _users;
   final MembershipWalletRepository _wallet;
   final SharedPreferences _preferences;
+  Future<void>? _initialization;
 
   @override
-  Future<void> initialize() async {
+  Future<void> initialize() {
+    final pending = _initialization;
+    if (pending != null) return pending;
+    final operation = _initialize();
+    _initialization = operation;
+    return operation.whenComplete(() {
+      if (identical(_initialization, operation)) _initialization = null;
+    });
+  }
+
+  Future<void> _initialize() async {
     await _storage.initialize(_assets);
     if (_preferences.getBool(_giftGrantedKey) ?? false) return;
-    await _wallet.addCoins(100);
     final now = DateTime.now();
     await _storage.append(
       ChatMessageDto(
@@ -42,11 +53,13 @@ class ChatRepositoryImpl implements ChatRepository {
         createdAt: now,
       ),
     );
+    await _wallet.addCoins(100);
     await _preferences.setBool(_giftGrantedKey, true);
   }
 
   @override
   Future<void> appendMessage(ChatMessage message, {User? peer}) async {
+    await initialize();
     if (peer != null) {
       await _storage.savePeerSnapshot(
         id: peer.id,
@@ -80,13 +93,28 @@ class ChatRepositoryImpl implements ChatRepository {
     await initialize();
     final messages = _storage.readMessages();
     final users = {for (final user in await _users.getUsers()) user.id: user};
+    for (final snapshot in _storage.readPeerSnapshots()) {
+      users.putIfAbsent(
+        snapshot.id,
+        () => User(
+          id: snapshot.id,
+          nickname: snapshot.nickname,
+          age: 0,
+          gender: '',
+          hobbies: const [],
+          avatarPath: snapshot.avatarPath,
+          intro: '',
+          isVerified: false,
+        ),
+      );
+    }
     users[assistantId] = const User(
       id: assistantId,
       nickname: '微撩助手',
       age: 0,
       gender: '',
       hobbies: [],
-      avatarPath: 'assets/images/avatar/img_avatar_assistant.png',
+      avatarPath: AppImageString.chatAssistantAvatar,
       intro: '',
       isVerified: false,
     );

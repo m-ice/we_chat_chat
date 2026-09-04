@@ -44,6 +44,8 @@ class UserMoment {
 
 class TeamPost {
   const TeamPost({
+    this.id = '',
+    this.ownerId = 0,
     required this.imagePaths,
     required this.activity,
     required this.location,
@@ -51,6 +53,8 @@ class TeamPost {
     required this.content,
   });
 
+  final String id;
+  final int ownerId;
   final List<String> imagePaths;
   final String activity;
   final String location;

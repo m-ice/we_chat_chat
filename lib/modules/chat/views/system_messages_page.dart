@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../../domain/entities/message_center_item.dart';
 import '../../../domain/entities/user.dart';
@@ -59,7 +60,7 @@ class _SystemMessagesPageState extends State<SystemMessagesPage> {
           SafeArea(
             child: Column(
               children: [
-                const ChatPageBar(title: '系统消息'),
+                ChatPageBar(title: 'message_system_title'.tr),
                 Expanded(
                   child: Obx(() {
                     if (_controller.isLoading.value &&
@@ -109,9 +110,9 @@ class _SystemMessageList extends StatelessWidget {
         children: [
           SizedBox(
             height: MediaQuery.sizeOf(context).height * .55,
-            child: const Center(
+            child: Center(
               child: Text(
-                '暂时没有新消息',
+                'message_feature_empty'.tr,
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
               ),
             ),
@@ -170,8 +171,8 @@ class _SystemMessageList extends StatelessWidget {
   }
 
   String _displayAvatarPath(String source) =>
-      source == 'assets/images/chat_detail/system_assistant.png'
-      ? ChatSystemAssets.systemAvatar
+      source == AppImageString.chatLegacySystemAssistantAvatar
+      ? AppImageString.chatSystemAvatar
       : source;
 }
 
@@ -186,7 +187,7 @@ class _SystemMessagesError extends StatelessWidget {
       child: TextButton.icon(
         onPressed: onRetry,
         icon: const Icon(Icons.refresh_rounded),
-        label: const Text('加载失败，点击重试'),
+        label: Text('common_load_failed_retry'.tr),
       ),
     );
   }

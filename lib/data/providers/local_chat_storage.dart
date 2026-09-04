@@ -21,7 +21,11 @@ class LocalChatStorage {
       return;
     }
     final seed = await assets.readList('assets/mock/chat_messages.json');
-    await _preferences.setString(_messagesKey, jsonEncode(seed));
+    final approved = seed.where(
+      (item) =>
+          item['source'] == 'demo' && item['moderationStatus'] == 'approved',
+    );
+    await _preferences.setString(_messagesKey, jsonEncode(approved.toList()));
     await _preferences.setBool(_initializedKey, true);
   }
 
@@ -53,9 +57,7 @@ class LocalChatStorage {
     required String avatarPath,
   }) async {
     final source = _preferences.getString(_peerSnapshotsKey);
-    final snapshots = source == null
-        ? <String, dynamic>{}
-        : jsonDecode(source) as Map<String, dynamic>;
+    final snapshots = _decodePeerSnapshots(source);
     snapshots['$id'] = {
       'id': id,
       'nickname': nickname,
@@ -68,4 +70,45 @@ class LocalChatStorage {
       throw const DataException('Unable to save chat peer');
     }
   }
+
+  List<LocalChatPeerSnapshot> readPeerSnapshots() {
+    final snapshots = _decodePeerSnapshots(
+      _preferences.getString(_peerSnapshotsKey),
+    );
+    return snapshots.values
+        .whereType<Map>()
+        .map((value) => Map<String, dynamic>.from(value))
+        .map(LocalChatPeerSnapshot.fromJson)
+        .where((value) => value.id != 0 && value.nickname.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  Map<String, dynamic> _decodePeerSnapshots(String? source) {
+    if (source == null || source.isEmpty) return <String, dynamic>{};
+    try {
+      final value = jsonDecode(source);
+      return value is Map<String, dynamic> ? value : <String, dynamic>{};
+    } on Object {
+      return <String, dynamic>{};
+    }
+  }
+}
+
+class LocalChatPeerSnapshot {
+  const LocalChatPeerSnapshot({
+    required this.id,
+    required this.nickname,
+    required this.avatarPath,
+  });
+
+  factory LocalChatPeerSnapshot.fromJson(Map<String, dynamic> json) =>
+      LocalChatPeerSnapshot(
+        id: json['id'] as int? ?? 0,
+        nickname: json['nickname'] as String? ?? '',
+        avatarPath: json['avatarPath'] as String? ?? '',
+      );
+
+  final int id;
+  final String nickname;
+  final String avatarPath;
 }

@@ -1,0 +1,13 @@
+[
+  {
+    "teamOwnerId": 0,
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantAvatarPaths": [
+      "assets/images/team_flow/detail_participant_1.png",
+      "assets/images/team_flow/detail_participant_2.png"
+    ],
+    "source": "demo",
+    "moderationStatus": "approved"
+  }
+]

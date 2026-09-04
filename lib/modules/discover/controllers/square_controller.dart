@@ -1,7 +1,11 @@
+import 'dart:async';
+
+import 'package:draggable_float_widget/draggable_float_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/square_feed.dart';
 import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/square_repository.dart';
@@ -15,11 +19,18 @@ class SquareController extends GetxController {
   final tab = SquareTab.discover.obs;
   final items = <SquareFeedItem>[].obs;
   final likedIds = <String>{}.obs;
+  final floatingActionEvents = StreamController<OperateEvent>.broadcast();
 
   @override
   void onInit() {
     super.onInit();
     reload();
+  }
+
+  @override
+  void onClose() {
+    floatingActionEvents.close();
+    super.onClose();
   }
 
   Future<void> reload() async {
@@ -40,11 +51,18 @@ class SquareController extends GetxController {
     final value = !social.followedIds.contains(item.user.id);
     await social.setFollowed(item.user.id, value);
     await reload();
+    AppToast.show(value ? 'social_followed'.tr : 'social_unfollowed'.tr);
+  }
+
+  Future<void> openUser(SquareFeedItem item) async {
+    await Get.toNamed(Routes.userDetail, arguments: item.user);
   }
 
   Future<void> toggleLike(SquareFeedItem item) async {
-    await repository.setLiked(item.postId, !likedIds.contains(item.postId));
+    final liked = !likedIds.contains(item.postId);
+    await repository.setLiked(item.postId, liked);
     likedIds.assignAll(repository.likedPostIds);
+    AppToast.show(liked ? 'video_liked'.tr : 'video_unliked'.tr);
   }
 
   Future<void> preview(SquareFeedItem item, int index) async {
@@ -101,10 +119,8 @@ class SquareController extends GetxController {
                 Get.back<void>();
                 await social.block(item.user.id);
                 await reload();
-                Get.snackbar(
-                  'common_tip'.tr,
+                AppToast.show(
                   'social_blocked'.trParams({'name': item.user.nickname}),
-                  snackPosition: SnackPosition.BOTTOM,
                 );
               },
             ),
@@ -115,10 +131,8 @@ class SquareController extends GetxController {
                 Get.back<void>();
                 await social.shield(item.user.id);
                 await reload();
-                Get.snackbar(
-                  'common_tip'.tr,
+                AppToast.show(
                   'social_shielded'.trParams({'name': item.user.nickname}),
-                  snackPosition: SnackPosition.BOTTOM,
                 );
               },
             ),

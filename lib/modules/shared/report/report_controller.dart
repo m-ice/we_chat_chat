@@ -29,6 +29,8 @@ class ReportController extends GetxController {
       );
       AppToast.show('report_queued_locally'.tr);
       Get.back<void>();
+    } on Object {
+      AppToast.show('support_save_failed'.tr);
     } finally {
       isSubmitting.value = false;
     }

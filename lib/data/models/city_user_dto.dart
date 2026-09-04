@@ -16,6 +16,8 @@ class CityUserDto {
     required this.isRealPersonVerified,
     required this.videoPath,
     required this.isOnline,
+    this.videoCoverPath = '',
+    this.videoAvatarPath = '',
     this.isSeedData = false,
   });
 
@@ -36,6 +38,8 @@ class CityUserDto {
     isRealPersonVerified: json['isRealPersonVerified'] as bool? ?? false,
     videoPath: json['videoPath'] as String? ?? '',
     isOnline: json['isOnline'] as bool? ?? false,
+    videoCoverPath: json['videoCoverPath'] as String? ?? '',
+    videoAvatarPath: json['videoAvatarPath'] as String? ?? '',
     isSeedData: json['isSeedData'] as bool? ?? false,
   );
 
@@ -53,6 +57,8 @@ class CityUserDto {
   final bool isRealPersonVerified;
   final String videoPath;
   final bool isOnline;
+  final String videoCoverPath;
+  final String videoAvatarPath;
   final bool isSeedData;
 
   CityUser toEntity() => CityUser(
@@ -70,6 +76,8 @@ class CityUserDto {
     isRealPersonVerified: isRealPersonVerified,
     videoPath: videoPath,
     isOnline: isOnline,
+    videoCoverPath: videoCoverPath,
+    videoAvatarPath: videoAvatarPath,
     isSeedData: isSeedData,
   );
 }

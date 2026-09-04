@@ -64,6 +64,7 @@ class ChatThreadController extends GetxController {
   Future<void> send(String raw) async {
     final text = raw.trim();
     if (text.isEmpty || awaitingReply.value || !canSend.value) return;
+    canSend.value = false;
     final message = ChatMessage(
       id: '${peer.id}-${DateTime.now().microsecondsSinceEpoch}',
       peerId: peer.id,
@@ -71,13 +72,17 @@ class ChatThreadController extends GetxController {
       isFromCurrentUser: true,
       createdAt: DateTime.now(),
     );
-    await _chats.appendMessage(message, peer: peer);
-    messages.add(message);
-    await chatController.insertMessage(
-      ChatMessageMapper.toChatCore(message, currentUserId: currentUserId),
-    );
-    canSend.value = false;
-    if (peer.id == -1) await _replyFromAssistant();
+    try {
+      await _chats.appendMessage(message, peer: peer);
+      messages.add(message);
+      await chatController.insertMessage(
+        ChatMessageMapper.toChatCore(message, currentUserId: currentUserId),
+      );
+      if (peer.id == -1) await _replyFromAssistant();
+    } on Object {
+      canSend.value = true;
+      AppToast.show('chat_send_failed'.tr);
+    }
   }
 
   Future<void> _replyFromAssistant() async {
@@ -99,7 +104,7 @@ class ChatThreadController extends GetxController {
       canSend.value = true;
     } on Object {
       canSend.value = true;
-      AppToast.show('消息发送失败，请稍后再试');
+      AppToast.show('chat_send_failed'.tr);
     } finally {
       awaitingReply.value = false;
     }
@@ -107,7 +112,7 @@ class ChatThreadController extends GetxController {
 
   Future<void> startVoiceCall() async {
     if (peer.id == -1) {
-      AppToast.show('微撩助手暂不支持语音通话');
+      AppToast.show('chat_assistant_no_call'.tr);
       return;
     }
     if (messages.isEmpty || messages.last.isFromCurrentUser) {

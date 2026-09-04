@@ -1,16 +1,19 @@
 import 'dart:async';
 
 import 'package:draggable_float_widget/draggable_float_widget.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/widgets/app_dialog.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/city_user.dart';
+import '../../../domain/entities/city_user_mapper.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/repositories/home_city_repository.dart';
 import '../../../domain/repositories/membership_wallet_repository.dart';
 import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/user_repository.dart';
+import '../team_detail/team_detail_controller.dart';
 
 enum HomeFeedTab { nearby }
 
@@ -31,7 +34,6 @@ class HomeController extends GetxController {
   final hasError = false.obs;
 
   late StreamController<OperateEvent> eventStreamController;
-
 
   @override
   void onInit() {
@@ -73,11 +75,7 @@ class HomeController extends GetxController {
       final upcomingActivities = matchingActivities
           .where((user) => !user.teamPost!.isExpired(DateTime.now()))
           .toList();
-      activityUsers.assignAll(
-        upcomingActivities.isNotEmpty
-            ? upcomingActivities
-            : _figmaFeaturedActivities(matchingActivities),
-      );
+      activityUsers.assignAll(upcomingActivities);
       nearbyUsers.assignAll(
         (results[1] as List<CityUser>).where(
           (user) =>
@@ -100,120 +98,59 @@ class HomeController extends GetxController {
     await load();
   }
 
+  Future<User> resolveUser(CityUser cityUser) async {
+    final cached = activityUsers.where((user) => user.id == cityUser.id);
+    if (cached.isNotEmpty) return cached.first;
+    final users = await _users.getUsers();
+    final matches = users.where((user) => user.id == cityUser.id);
+    return matches.isEmpty ? cityUser.toUser() : matches.first;
+  }
+
+  Future<void> openUser(CityUser cityUser) async {
+    final user = await resolveUser(cityUser);
+    await Get.toNamed(Routes.userDetail, arguments: user);
+  }
+
+  Future<HomeFeedTab?> openActivity(User user) async {
+    final post = user.teamPost;
+    if (post == null) return null;
+    return Get.toNamed<HomeFeedTab>(
+      Routes.teamDetail,
+      arguments: TeamDetailArguments(user: user, post: post),
+    );
+  }
+
   Future<void> toggleFollow(int userId) async {
     final next = Set<int>.from(followedIds);
     next.contains(userId) ? next.remove(userId) : next.add(userId);
     followedIds.assignAll(next);
-    await _social.setFollowed(userId, next.contains(userId));
+    final followed = next.contains(userId);
+    await _social.setFollowed(userId, followed);
+    AppToast.show(followed ? 'social_followed'.tr : 'social_unfollowed'.tr);
   }
 
   Future<void> join(User user) async {
+    if (user.teamPost?.isExpired(DateTime.now()) ?? true) {
+      AppToast.show('team_activity_ended'.tr);
+      await load();
+      return;
+    }
     if (!_wallet.isVipActive) {
-      await Get.dialog<void>(
-        AlertDialog(
-          title: Text('vip_privilege'.tr),
-          content: Text('vip_join_required'.tr),
-          actions: [
-            TextButton(onPressed: Get.back, child: Text('common_cancel'.tr)),
-            TextButton(
-              onPressed: () {
-                Get.back<void>();
-                Get.toNamed(Routes.vip);
-              },
-              child: Text('vip_open'.tr),
-            ),
-          ],
-        ),
+      final openVip = await AppDialog.confirm(
+        title: 'vip_privilege'.tr,
+        message: 'vip_join_required'.tr,
+        confirmText: 'vip_open'.tr,
       );
+      if (openVip) await Get.toNamed<void>(Routes.vip);
       return;
     }
     await _social.setPendingJoin(user.id, true);
     refreshSocialState();
-    Get.snackbar(
-      'common_tip'.tr,
-      'team_join_requested'.trParams({'name': user.nickname}),
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppToast.show('team_join_requested'.trParams({'name': user.nickname}));
   }
 
   void refreshSocialState() {
     followedIds.assignAll(_social.followedIds);
     pendingJoinIds.assignAll(_social.pendingJoinIds);
   }
-
-  List<User> _figmaFeaturedActivities(List<User> users) {
-    if (users.isEmpty) return const [];
-    final now = DateTime.now();
-    var activityDate = DateTime(now.year, 12, 12, 12);
-    if (activityDate.isBefore(now)) {
-      activityDate = DateTime(now.year + 1, 12, 12, 12);
-    }
-    final primarySeed = users.first;
-    final foodSeed = users.firstWhere(
-      (user) =>
-          user.id != primarySeed.id && user.teamPost!.activity.contains('吃饭'),
-      orElse: () => users.length > 1 ? users[1] : primarySeed,
-    );
-    final runnerSeed = users.firstWhere(
-      (user) =>
-          user.id != primarySeed.id &&
-          user.id != foodSeed.id &&
-          user.teamPost!.activity.contains('骑行'),
-      orElse: () => users.length > 2 ? users[2] : primarySeed,
-    );
-    final seeds = [primarySeed, foodSeed, runnerSeed];
-    const templates = <_FeaturedActivityTemplate>[
-      _FeaturedActivityTemplate(
-        activity: '羽毛球',
-        title: '羽毛球组局',
-        image: 'assets/images/content/figma_home_card_badminton.png',
-      ),
-      _FeaturedActivityTemplate(
-        activity: '美食',
-        title: '美食探店',
-        image: 'assets/images/content/figma_home_card_food.png',
-      ),
-      _FeaturedActivityTemplate(
-        activity: '夜跑',
-        title: '珠江夜跑',
-        image: 'assets/images/content/figma_home_card_runner.png',
-      ),
-    ];
-    return List.generate(templates.length, (index) {
-      final seed = seeds[index];
-      final template = templates[index];
-      return User(
-        id: seed.id,
-        nickname: seed.nickname,
-        age: seed.age,
-        gender: seed.gender,
-        hobbies: seed.hobbies,
-        avatarPath: seed.avatarPath,
-        intro: seed.intro,
-        isVerified: seed.isVerified,
-        moment: seed.moment,
-        galleryImagePaths: seed.galleryImagePaths,
-        verificationVideoPath: seed.verificationVideoPath,
-        teamPost: TeamPost(
-          imagePaths: [template.image],
-          activity: template.activity,
-          location: '深圳市｜宝安区',
-          date: activityDate,
-          content: '${template.title}\n休闲娱乐，放松一下',
-        ),
-      );
-    });
-  }
-}
-
-class _FeaturedActivityTemplate {
-  const _FeaturedActivityTemplate({
-    required this.activity,
-    required this.title,
-    required this.image,
-  });
-
-  final String activity;
-  final String title;
-  final String image;
 }

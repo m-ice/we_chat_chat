@@ -10,6 +10,7 @@ class UserDto {
     required this.avatarPath,
     required this.intro,
     required this.isVerified,
+    required this.galleryImagePaths,
     this.isSeedData = false,
     this.moment,
     this.teamPost,
@@ -24,11 +25,14 @@ class UserDto {
     avatarPath: json['avatarPath'] as String? ?? '',
     intro: json['intro'] as String? ?? '',
     isVerified: json['isVerified'] as bool? ?? false,
+    galleryImagePaths: List<String>.from(
+      json['galleryImagePaths'] as List? ?? const [],
+    ),
     isSeedData: json['isSeedData'] as bool? ?? false,
-    moment: json['moment'] is Map<String, dynamic>
+    moment: _isApprovedContent(json['moment'])
         ? MomentDto.fromJson(json['moment'] as Map<String, dynamic>)
         : null,
-    teamPost: json['teamPost'] is Map<String, dynamic>
+    teamPost: _isApprovedContent(json['teamPost'])
         ? TeamPostDto.fromJson(json['teamPost'] as Map<String, dynamic>)
         : null,
   );
@@ -41,6 +45,7 @@ class UserDto {
   final String avatarPath;
   final String intro;
   final bool isVerified;
+  final List<String> galleryImagePaths;
   final bool isSeedData;
   final MomentDto? moment;
   final TeamPostDto? teamPost;
@@ -54,11 +59,15 @@ class UserDto {
     avatarPath: avatarPath,
     intro: intro,
     isVerified: isVerified,
+    galleryImagePaths: List.unmodifiable(galleryImagePaths),
     isSeedData: isSeedData,
     moment: moment?.toEntity(),
     teamPost: teamPost?.toEntity(),
   );
 }
+
+bool _isApprovedContent(Object? value) =>
+    value is Map<String, dynamic> && value['moderationStatus'] == 'approved';
 
 class MomentDto {
   const MomentDto({
@@ -86,6 +95,8 @@ class MomentDto {
 
 class TeamPostDto {
   const TeamPostDto({
+    required this.id,
+    required this.ownerId,
     required this.imagePaths,
     required this.activity,
     required this.location,
@@ -94,6 +105,8 @@ class TeamPostDto {
   });
 
   factory TeamPostDto.fromJson(Map<String, dynamic> json) => TeamPostDto(
+    id: json['id'] as String? ?? '',
+    ownerId: json['ownerId'] as int? ?? 0,
     imagePaths: List<String>.from(json['imagePaths'] as List? ?? const []),
     activity: json['activity'] as String? ?? '',
     location: json['location'] as String? ?? '',
@@ -101,6 +114,8 @@ class TeamPostDto {
     content: json['content'] as String? ?? '',
   );
 
+  final String id;
+  final int ownerId;
   final List<String> imagePaths;
   final String activity;
   final String location;
@@ -108,6 +123,8 @@ class TeamPostDto {
   final String content;
 
   TeamPost toEntity() => TeamPost(
+    id: id,
+    ownerId: ownerId,
     imagePaths: List.unmodifiable(imagePaths),
     activity: activity,
     location: location,
