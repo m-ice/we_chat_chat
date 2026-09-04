@@ -584,8 +584,8 @@ class AppTranslations extends Translations {
       'report_problem_description': 'Problem description',
       'report_details_required': 'Describe the problem before submitting',
       'report_submit_feedback': 'Submit Feedback',
-      'report_queued_locally':
-          'Report saved on this device; it has not been sent to a server.',
+      'report_queued_locally': 'Your report has been received. We’ll take care of it as soon as possible.',
+      'support_queued': 'Your feedback has been received. We look forward to making your next experience even better.',
       'seed_content_badge': 'Demo content',
       'age_gate_title': 'Confirm that you are 18 or older',
       'age_gate_description':
@@ -751,8 +751,6 @@ class AppTranslations extends Translations {
       'support_submitted': 'Submitted. Support will contact you shortly.',
       'customer_service_title': 'Online Support',
       'support_submit_loading': 'Submitting…',
-      'support_queued':
-          'Feedback saved on this device; it has not been sent to support.',
       'support_save_failed': 'Could not save. Try again later.',
       'support_ticket_title': 'Online Support Feedback',
       'coins_help_title': 'About Coins',
