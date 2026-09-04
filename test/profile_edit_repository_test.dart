@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:we_chat_chat/data/repositories/profile_edit_repository_impl.dart';
+import 'package:we_chat_chat/domain/entities/editable_profile.dart';
 
 void main() {
   test('persists profile edits with the exact iOS model keys', () async {
@@ -38,4 +39,30 @@ void main() {
       ]),
     );
   });
+
+  test(
+    'keeps the current-user baseline when the first edit is saved',
+    () async {
+      SharedPreferences.resetStatic();
+      SharedPreferences.setMockInitialValues({});
+      final repository = ProfileEditRepositoryImpl(
+        await SharedPreferences.getInstance(),
+      );
+      const baseline = EditableProfile(
+        nickname: '晓风',
+        bio: '喜欢骑行和摄影。',
+        avatarReference: 'userDefault',
+        interests: ['骑行', '摄影'],
+        personalityTags: ['行动派'],
+      );
+
+      await repository.initializeIfAbsent(baseline);
+      await repository.updateNickname('新的晓风');
+
+      expect(repository.profile.nickname, '新的晓风');
+      expect(repository.profile.bio, baseline.bio);
+      expect(repository.profile.interests, baseline.interests);
+      expect(repository.profile.personalityTags, baseline.personalityTags);
+    },
+  );
 }

@@ -64,6 +64,12 @@ class _FakeProfileEditRepository implements ProfileEditRepository {
   );
 
   @override
+  bool get hasSavedProfile => true;
+
+  @override
+  Future<void> initializeIfAbsent(EditableProfile profile) async {}
+
+  @override
   EditableProfile get profile => _profile;
 
   @override

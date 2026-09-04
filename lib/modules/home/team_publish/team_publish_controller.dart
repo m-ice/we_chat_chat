@@ -6,14 +6,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/widgets/app_legal_agreement_confirmation.dart';
 import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../domain/repositories/membership_wallet_repository.dart';
+import '../../../domain/policies/feature_access_gate.dart';
 import '../../../domain/repositories/team_publish_repository.dart';
-import 'team_flow_assets.dart';
 
 class TeamPublishController extends GetxController {
-  TeamPublishController(this._repository, this._wallet, this._preferences);
+  TeamPublishController(this._repository, this._access, this._preferences);
 
   static const activityGroups = <String, List<String>>{
     '娱乐': ['K歌', '电影', '读书', '摄影', '约咖啡', '绘画'],
@@ -22,16 +22,10 @@ class TeamPublishController extends GetxController {
   };
   static List<String> get activities =>
       activityGroups.values.expand((items) => items).toList(growable: false);
-  // Figma default-state references only; selected user files remain the sole
-  // imagePaths submitted to the repository.
-  static const designPreviewImagePaths = <String>[
-    TeamFlowAssets.publishSampleBadminton,
-    TeamFlowAssets.publishSampleCourt,
-  ];
   static const verificationKey = 'mt_real_person_verify_record';
 
   final TeamPublishRepository _repository;
-  final MembershipWalletRepository _wallet;
+  final FeatureAccessGate _access;
   final SharedPreferences _preferences;
   final title = TextEditingController();
   final location = TextEditingController();
@@ -83,12 +77,9 @@ class TeamPublishController extends GetxController {
   void removeImage(int index) => imagePaths.removeAt(index);
 
   Future<void> submit(BuildContext context) async {
+    FocusScope.of(context).unfocus();
     if (!agreed.value) {
-      final accepted = await AppDialog.confirm(
-        title: 'common_tip'.tr,
-        message: 'legal_agreement_required'.tr,
-        confirmText: 'common_done'.tr,
-      );
+      final accepted = await AppLegalAgreementConfirmation.show();
       if (!accepted) return;
       agreed.value = true;
     }
@@ -96,15 +87,7 @@ class TeamPublishController extends GetxController {
       AppToast.show('team_activity_required'.tr);
       return;
     }
-    if (!_wallet.isVipActive) {
-      final openVip = await AppDialog.confirm(
-        title: 'vip_privilege'.tr,
-        message: 'vip_publish_required'.tr,
-        confirmText: 'vip_open'.tr,
-      );
-      if (openVip) await Get.toNamed<void>(Routes.vip);
-      return;
-    }
+    if (!await _access.request(FeatureAccess.activityPublish)) return;
     if (!isVerified) {
       final proceed = await AppDialog.confirm(
         title: 'common_tip'.tr,

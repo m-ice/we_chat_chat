@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/conversation.dart';
 import '../../domain/entities/user.dart';
@@ -27,7 +29,11 @@ class ChatRepositoryImpl implements ChatRepository {
   final UserRepository _users;
   final MembershipWalletRepository _wallet;
   final SharedPreferences _preferences;
+  final _conversationUpdates = StreamController<void>.broadcast();
   Future<void>? _initialization;
+
+  @override
+  Stream<void> get conversationUpdates => _conversationUpdates.stream;
 
   @override
   Future<void> initialize() {
@@ -68,6 +74,7 @@ class ChatRepositoryImpl implements ChatRepository {
       );
     }
     await _storage.append(ChatMessageDto.fromEntity(message));
+    _conversationUpdates.add(null);
   }
 
   @override

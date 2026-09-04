@@ -1,12 +1,65 @@
 [
   {
-    "teamOwnerId": 0,
+    "activityId": "activity-001",
     "participantTotal": 4,
     "participantCount": 3,
-    "participantAvatarPaths": [
-      "assets/images/team_flow/detail_participant_1.png",
-      "assets/images/team_flow/detail_participant_2.png"
-    ],
+    "participantUserIds": [1, 3, 4],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "activityId": "activity-003",
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantUserIds": [3, 1, 4],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "activityId": "activity-004",
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantUserIds": [4, 1, 3],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "activityId": "activity-006",
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantUserIds": [6, 2, 5],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "activityId": "activity-007",
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantUserIds": [7, 1, 5],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "activityId": "activity-009",
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantUserIds": [9, 2, 4],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "activityId": "activity-010",
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantUserIds": [10, 3, 6],
+    "source": "demo",
+    "moderationStatus": "approved"
+  },
+  {
+    "activityId": "activity-011",
+    "participantTotal": 4,
+    "participantCount": 3,
+    "participantUserIds": [11, 1, 7],
     "source": "demo",
     "moderationStatus": "approved"
   }

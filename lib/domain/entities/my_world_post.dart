@@ -8,6 +8,7 @@ class MyWorldPost {
     required this.topics,
     required this.createdAt,
     required this.reviewStatus,
+    this.reviewAvailableAt,
     this.isLiked = false,
     this.likeCount = 0,
     this.comments = const [],
@@ -18,6 +19,10 @@ class MyWorldPost {
   final List<String> topics;
   final DateTime createdAt;
   final MyWorldReviewStatus reviewStatus;
+
+  /// Kept private to the client. It defines when fake moderation can promote
+  /// a pending post without revealing a review countdown in the UI.
+  final DateTime? reviewAvailableAt;
   final bool isLiked;
   final int likeCount;
   final List<MyWorldComment> comments;
@@ -25,6 +30,8 @@ class MyWorldPost {
   int get commentCount => comments.length;
 
   MyWorldPost copyWith({
+    MyWorldReviewStatus? reviewStatus,
+    DateTime? reviewAvailableAt,
     bool? isLiked,
     int? likeCount,
     List<MyWorldComment>? comments,
@@ -34,7 +41,8 @@ class MyWorldPost {
     imageRelativePaths: imageRelativePaths,
     topics: topics,
     createdAt: createdAt,
-    reviewStatus: reviewStatus,
+    reviewStatus: reviewStatus ?? this.reviewStatus,
+    reviewAvailableAt: reviewAvailableAt ?? this.reviewAvailableAt,
     isLiked: isLiked ?? this.isLiked,
     likeCount: likeCount ?? this.likeCount,
     comments: comments ?? this.comments,

@@ -33,6 +33,8 @@ dependencies:
 
   get: ^4.7.3
   shared_preferences: ^2.5.5
+  device_info_plus: ^12.4.0
+  package_info_plus: ^9.0.1
   flutter_chat_core: ^2.9.0
   flutter_chat_ui: ^2.11.1
   # 3.2.3 moves to StoreKit 2 and requires a newer Xcode SDK than this project.

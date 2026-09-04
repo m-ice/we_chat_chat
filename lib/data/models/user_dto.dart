@@ -11,6 +11,7 @@ class UserDto {
     required this.intro,
     required this.isVerified,
     required this.galleryImagePaths,
+    required this.personalityTags,
     this.isSeedData = false,
     this.moment,
     this.teamPost,
@@ -27,6 +28,9 @@ class UserDto {
     isVerified: json['isVerified'] as bool? ?? false,
     galleryImagePaths: List<String>.from(
       json['galleryImagePaths'] as List? ?? const [],
+    ),
+    personalityTags: List<String>.from(
+      json['personalityTags'] as List? ?? const [],
     ),
     isSeedData: json['isSeedData'] as bool? ?? false,
     moment: _isApprovedContent(json['moment'])
@@ -46,6 +50,7 @@ class UserDto {
   final String intro;
   final bool isVerified;
   final List<String> galleryImagePaths;
+  final List<String> personalityTags;
   final bool isSeedData;
   final MomentDto? moment;
   final TeamPostDto? teamPost;
@@ -60,6 +65,7 @@ class UserDto {
     intro: intro,
     isVerified: isVerified,
     galleryImagePaths: List.unmodifiable(galleryImagePaths),
+    personalityTags: List.unmodifiable(personalityTags),
     isSeedData: isSeedData,
     moment: moment?.toEntity(),
     teamPost: teamPost?.toEntity(),

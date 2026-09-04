@@ -87,9 +87,6 @@ class _ActivityFilterPageState extends State<ActivityFilterPage> {
                   itemCount: controller.results.length,
                   itemBuilder: (context, index) => ActivityCard(
                     user: controller.results[index],
-                    isPendingJoin: controller.pendingJoinIds.contains(
-                      controller.results[index].id,
-                    ),
                     onJoin: () => controller.join(controller.results[index]),
                   ),
                 );

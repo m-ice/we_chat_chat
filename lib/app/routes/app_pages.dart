@@ -20,6 +20,7 @@ import '../../modules/chat/views/chat_page.dart';
 import '../../modules/chat/views/message_feature_pages.dart';
 import '../../modules/chat/views/system_messages_page.dart';
 import '../../domain/repositories/membership_wallet_repository.dart';
+import '../../domain/policies/feature_access_gate.dart';
 import '../../modules/profile/controllers/vip_controller.dart';
 import '../../modules/profile/controllers/wallet_controller.dart';
 import '../../modules/profile/views/coins_page.dart';
@@ -35,6 +36,7 @@ import '../../modules/chat/controllers/voice_call_controller.dart';
 import '../../modules/chat/views/voice_call_page.dart';
 import '../../modules/home/team_detail/team_detail_controller.dart';
 import '../../modules/home/team_detail/team_detail_page.dart';
+import '../../modules/home/team_detail/team_members_page.dart';
 import '../../modules/home/team_detail/guide_article_page.dart';
 import '../../domain/entities/guide_article.dart';
 import '../../domain/repositories/team_publish_repository.dart';
@@ -47,6 +49,10 @@ import '../../modules/shared/legal/legal_web_page.dart';
 import '../../domain/repositories/profile_edit_repository.dart';
 import '../../modules/profile/controllers/edit_profile_controller.dart';
 import '../../modules/profile/views/edit_profile_page.dart';
+import '../../modules/profile/controllers/blacklist_controller.dart';
+import '../../modules/profile/views/about_us_page.dart';
+import '../../modules/profile/views/blacklist_page.dart';
+import '../../modules/profile/views/settings_page.dart';
 import '../../modules/profile/views/profile_tags_page.dart';
 import '../../modules/profile/views/profile_text_edit_page.dart';
 import '../../modules/profile/views/customer_service_page.dart';
@@ -62,7 +68,6 @@ import '../../modules/profile/views/my_world_publish_page.dart';
 import '../../domain/entities/square_feed.dart';
 import '../../modules/discover/controllers/topic_detail_controller.dart';
 import '../../modules/discover/views/topic_detail_page.dart';
-import '../../domain/entities/city_user.dart';
 import '../../modules/discover/controllers/video_feed_controller.dart';
 import '../../modules/discover/views/center_search_page.dart';
 import '../../modules/discover/views/video_feed_page.dart';
@@ -85,7 +90,10 @@ abstract final class AppPages {
   static BindingsBuilder get _profileEditBinding => BindingsBuilder(() {
     if (!Get.isRegistered<EditProfileController>()) {
       Get.lazyPut(
-        () => EditProfileController(Get.find<ProfileEditRepository>()),
+        () => EditProfileController(
+          Get.find<ProfileEditRepository>(),
+          Get.find<UserRepository>(),
+        ),
       );
     }
   });
@@ -114,6 +122,7 @@ abstract final class AppPages {
             peer,
             Get.find<ChatRepository>(),
             Get.find<AiRepository>(),
+            Get.find<SocialStateRepository>(),
           ),
         );
       }),
@@ -182,7 +191,8 @@ abstract final class AppPages {
             Get.find<UserRepository>(),
             Get.find<HomeCityRepository>(),
             Get.find<SocialStateRepository>(),
-            Get.find<MembershipWalletRepository>(),
+            Get.find<FeatureAccessGate>(),
+            Get.find<TeamDetailRepository>(),
           ),
         ),
       ),
@@ -215,14 +225,26 @@ abstract final class AppPages {
       name: Routes.userDetail,
       page: UserDetailPage.new,
       binding: BindingsBuilder(() {
-        final user = Get.arguments;
-        if (user is! User) throw ArgumentError('User detail requires a User');
+        final arguments = Get.arguments;
+        final User user;
+        if (arguments is Map &&
+            arguments['userId'] is int &&
+            arguments['user'] is User) {
+          user = arguments['user'] as User;
+          if (user.id != arguments['userId']) {
+            throw ArgumentError('User detail userId does not match User');
+          }
+        } else if (arguments is User) {
+          user = arguments;
+        } else {
+          throw ArgumentError('User detail requires a userId and User');
+        }
         Get.lazyPut(
           () => UserDetailController(
             user,
             Get.find<SocialStateRepository>(),
             Get.find<ChatRepository>(),
-            Get.find<MembershipWalletRepository>(),
+            Get.find<FeatureAccessGate>(),
             Get.find<UserRepository>(),
             Get.find<UserDetailRepository>(),
           ),
@@ -233,9 +255,24 @@ abstract final class AppPages {
       name: Routes.report,
       page: ReportPage.new,
       binding: BindingsBuilder(() {
-        final user = Get.arguments;
-        if (user is! User) throw ArgumentError('Report requires a User');
-        Get.lazyPut(() => ReportController(user, Get.find<ReportRepository>()));
+        final arguments = Get.arguments;
+        final ReportArguments report;
+        if (arguments is ReportArguments) {
+          report = arguments;
+        } else if (arguments is User) {
+          report = ReportArguments(target: arguments);
+        } else {
+          throw ArgumentError('Report requires a user target');
+        }
+        Get.lazyPut(
+          () => ReportController(
+            report.target,
+            Get.find<ReportRepository>(),
+            users: Get.find<UserRepository>(),
+            targetActivityId: report.targetActivityId,
+            targetDynamicId: report.targetDynamicId,
+          ),
+        );
       }),
     ),
     GetPage(
@@ -258,8 +295,7 @@ abstract final class AppPages {
         final user = Get.arguments;
         if (user is! User) throw ArgumentError('Voice call requires a User');
         Get.lazyPut(
-          () =>
-              VoiceCallController(user, Get.find<MembershipWalletRepository>()),
+          () => VoiceCallController(user, Get.find<UserRepository>()),
         );
       }),
     ),
@@ -284,11 +320,22 @@ abstract final class AppPages {
             user,
             post,
             Get.find<SocialStateRepository>(),
-            Get.find<MembershipWalletRepository>(),
+            Get.find<FeatureAccessGate>(),
             Get.find<TeamDetailRepository>(),
+            Get.find<UserRepository>(),
           ),
         );
       }),
+    ),
+    GetPage(
+      name: Routes.teamMembers,
+      page: () {
+        final arguments = Get.arguments;
+        if (arguments is! TeamMembersArguments) {
+          throw ArgumentError('Team members require activity member arguments');
+        }
+        return TeamMembersPage(arguments: arguments);
+      },
     ),
     GetPage(
       name: Routes.guideArticle,
@@ -307,7 +354,7 @@ abstract final class AppPages {
         () => Get.lazyPut(
           () => TeamPublishController(
             Get.find<TeamPublishRepository>(),
-            Get.find<MembershipWalletRepository>(),
+            Get.find<FeatureAccessGate>(),
             Get.find<SharedPreferences>(),
           ),
         ),
@@ -338,7 +385,24 @@ abstract final class AppPages {
       page: EditProfilePage.new,
       binding: BindingsBuilder(
         () => Get.lazyPut(
-          () => EditProfileController(Get.find<ProfileEditRepository>()),
+          () => EditProfileController(
+            Get.find<ProfileEditRepository>(),
+            Get.find<UserRepository>(),
+          ),
+        ),
+      ),
+    ),
+    GetPage(name: Routes.aboutUs, page: AboutUsPage.new),
+    GetPage(name: Routes.settings, page: SettingsPage.new),
+    GetPage(
+      name: Routes.blacklist,
+      page: BlacklistPage.new,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => BlacklistController(
+            Get.find<UserRepository>(),
+            Get.find<SocialStateRepository>(),
+          ),
         ),
       ),
     ),
@@ -371,7 +435,12 @@ abstract final class AppPages {
       name: Routes.album,
       page: AlbumPage.new,
       binding: BindingsBuilder(
-        () => Get.lazyPut(() => AlbumController(Get.find<AlbumRepository>())),
+        () => Get.lazyPut(
+          () => AlbumController(
+            Get.find<AlbumRepository>(),
+            Get.find<UserRepository>(),
+          ),
+        ),
       ),
     ),
     GetPage(
@@ -414,7 +483,8 @@ abstract final class AppPages {
             topic,
             Get.find<UserRepository>(),
             Get.find<SocialStateRepository>(),
-            Get.find<MembershipWalletRepository>(),
+            Get.find<FeatureAccessGate>(),
+            Get.find<TeamDetailRepository>(),
           ),
         );
       }),
@@ -424,7 +494,10 @@ abstract final class AppPages {
       page: CenterSearchPage.new,
       binding: BindingsBuilder(
         () => Get.lazyPut(
-          () => CenterSearchController(Get.find<VideoFeedController>()),
+          () => CenterSearchController(
+            Get.find<VideoFeedController>(),
+            Get.find<SocialStateRepository>(),
+          ),
         ),
       ),
     ),
@@ -432,12 +505,12 @@ abstract final class AppPages {
       name: Routes.videoFeed,
       page: () {
         final arguments = Get.arguments;
-        if (arguments is! Map) {
-          throw ArgumentError('Video feed requires arguments');
+        if (arguments is! VideoFeedArguments) {
+          throw ArgumentError('Video feed requires VideoFeedArguments');
         }
         return StandaloneVideoFeedPage(
-          users: List<CityUser>.from(arguments['users'] as List),
-          startIndex: arguments['index'] as int,
+          users: arguments.users,
+          startIndex: arguments.startIndex,
         );
       },
     ),

@@ -62,13 +62,14 @@ class VideoFeedPage extends GetView<VideoFeedController> {
                           mainAxisExtent: 238,
                         ),
                     itemCount: controller.users.length,
-                    itemBuilder: (_, index) => _PartnerTile(
-                      key: ValueKey('partner-tile-$index'),
-                      user: controller.users[index],
-                      coverPath: _partnerCover(index),
-                      onOpen: () =>
-                          controller.openUser(controller.users[index]),
-                    ),
+                    itemBuilder: (_, index) {
+                      final user = controller.users[index];
+                      return _PartnerTile(
+                        key: ValueKey('partner-tile-$index'),
+                        user: user,
+                        onOpen: () => controller.openUser(user),
+                      );
+                    },
                   ),
                 );
               }),
@@ -175,15 +176,9 @@ class _PartnerTabButton extends StatelessWidget {
 }
 
 class _PartnerTile extends StatelessWidget {
-  const _PartnerTile({
-    super.key,
-    required this.user,
-    required this.coverPath,
-    required this.onOpen,
-  });
+  const _PartnerTile({super.key, required this.user, required this.onOpen});
 
   final CityUser user;
-  final String coverPath;
   final VoidCallback onOpen;
 
   @override
@@ -196,7 +191,7 @@ class _PartnerTile extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          AppImage(coverPath, fit: BoxFit.cover),
+          AppImage(user.avatarPath, fit: BoxFit.cover),
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -314,8 +309,6 @@ class _PartnerTile extends StatelessWidget {
     ),
   );
 }
-
-String _partnerCover(int index) => AppImageString.discoverPartnerCover(index);
 
 /// Immersive video content embedded below the Square page's shared tab strip.
 class SquareVideoPane extends GetView<VideoFeedController> {

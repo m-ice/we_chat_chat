@@ -29,12 +29,16 @@ class ReportRepositoryImpl implements ReportRepository {
   @override
   Future<ReportRecord> submit({
     required int targetUserId,
+    String? targetActivityId,
+    String? targetDynamicId,
     required String reason,
     required String details,
   }) async {
     final record = ReportRecord(
       id: 'report_${DateTime.now().microsecondsSinceEpoch}',
       targetUserId: targetUserId,
+      targetActivityId: targetActivityId,
+      targetDynamicId: targetDynamicId,
       reason: reason.trim(),
       details: details.trim(),
       createdAt: DateTime.now(),
@@ -52,6 +56,10 @@ class ReportRepositoryImpl implements ReportRepository {
   Map<String, Object> _toJson(ReportRecord record) => {
     'id': record.id,
     'targetUserId': record.targetUserId,
+    if (record.targetActivityId case final activityId?)
+      'targetActivityId': activityId,
+    if (record.targetDynamicId case final dynamicId?)
+      'targetDynamicId': dynamicId,
     'reason': record.reason,
     'details': record.details,
     'createdAt': record.createdAt.toIso8601String(),
@@ -61,6 +69,8 @@ class ReportRepositoryImpl implements ReportRepository {
   ReportRecord _fromJson(Map<String, dynamic> json) => ReportRecord(
     id: json['id'] as String,
     targetUserId: json['targetUserId'] as int,
+    targetActivityId: json['targetActivityId'] as String?,
+    targetDynamicId: json['targetDynamicId'] as String?,
     reason: json['reason'] as String,
     details: json['details'] as String,
     createdAt: DateTime.parse(json['createdAt'] as String),

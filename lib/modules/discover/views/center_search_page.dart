@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/routes/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
@@ -151,10 +150,7 @@ class CenterSearchPage extends GetView<CenterSearchController> {
                           fontSize: 12,
                         ),
                       ),
-                      onTap: () => Get.toNamed(
-                        Routes.videoFeed,
-                        arguments: {'users': results, 'index': index},
-                      ),
+                      onTap: () => controller.openSearchResult(user),
                     ),
                   );
                 },

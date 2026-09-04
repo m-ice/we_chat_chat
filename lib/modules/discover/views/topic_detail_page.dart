@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_refresh_view.dart';
+import '../../home/team_detail/team_detail_controller.dart';
 import '../../home/views/home_page.dart';
 import '../controllers/topic_detail_controller.dart';
 
@@ -32,11 +33,14 @@ class TopicDetailPage extends GetView<TopicDetailController> {
             final user = controller.users[index];
             return ActivityCard(
               user: user,
-              isPendingJoin: controller.social.pendingJoinIds.contains(user.id),
               onJoin: () => controller.join(user),
               onOpen: () async {
-                await controller.openActivity(user);
-                controller.refreshState();
+                final result = await controller.openActivity(user);
+                if (result == TeamDetailResult.activityShielded) {
+                  await controller.reload();
+                } else {
+                  controller.refreshState();
+                }
               },
             );
           },

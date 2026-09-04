@@ -10,22 +10,14 @@ class FigmaBackButton extends StatelessWidget {
   const FigmaBackButton({super.key, this.iconColor});
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: '返回',
-    child: InkResponse(
-      onTap: Get.back,
-      radius: 24.r,
-      child: SizedBox(
-        width: 48.w,
-        height: 48.w,
-        child: Center(
-          child: AppImage(
-            AppImageString.chatBack,
-            height: 24.w,
-            color: iconColor,
-          ),
-        ),
+  Widget build(BuildContext context) => IconButton(
+    onPressed: Get.back,
+    tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+    icon: Center(
+      child: AppImage(
+        AppImageString.chatBack,
+        width: 10.w,
+        color: iconColor,
       ),
     ),
   );

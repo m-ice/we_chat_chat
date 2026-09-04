@@ -3,14 +3,12 @@ import 'package:get/get.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/repositories/membership_wallet_repository.dart';
 import '../../../domain/repositories/user_repository.dart';
-import '../../../domain/repositories/profile_edit_repository.dart';
 
 class ProfileController extends GetxController {
-  ProfileController(this._users, this._wallet, this._profileEdit);
+  ProfileController(this._users, this._wallet);
 
   final UserRepository _users;
   final MembershipWalletRepository _wallet;
-  final ProfileEditRepository _profileEdit;
   final nickname = ''.obs;
   final avatarFilePath = RxnString();
   final currentUser = Rxn<User>();
@@ -24,9 +22,10 @@ class ProfileController extends GetxController {
   }
 
   Future<void> load() async {
-    currentUser.value = await _users.getCurrentUser();
-    nickname.value = _profileEdit.profile.nickname;
-    avatarFilePath.value = await _profileEdit.resolveAvatarPath();
+    final user = await _users.getCurrentUser();
+    currentUser.value = user;
+    nickname.value = user.nickname;
+    avatarFilePath.value = user.avatarPath;
     refreshWallet();
   }
 

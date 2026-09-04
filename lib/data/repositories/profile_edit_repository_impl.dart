@@ -14,6 +14,9 @@ class ProfileEditRepositoryImpl implements ProfileEditRepository {
   final SharedPreferences _preferences;
 
   @override
+  bool get hasSavedProfile => _preferences.containsKey(storageKey);
+
+  @override
   EditableProfile get profile {
     final raw = _preferences.getString(storageKey);
     if (raw == null) return _defaults;
@@ -39,6 +42,12 @@ class ProfileEditRepositoryImpl implements ProfileEditRepository {
     interests: [],
     personalityTags: [],
   );
+
+  @override
+  Future<void> initializeIfAbsent(EditableProfile profile) async {
+    if (hasSavedProfile) return;
+    await _save(profile);
+  }
 
   @override
   Future<String?> resolveAvatarPath() async {

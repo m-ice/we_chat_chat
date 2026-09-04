@@ -9,10 +9,11 @@ import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/chat_repository.dart';
 import '../../../domain/repositories/message_center_repository.dart';
 import '../../../domain/repositories/video_engagement_repository.dart';
+import '../../../domain/repositories/team_detail_repository.dart';
 import '../../chat/controllers/conversation_controller.dart';
 import '../../../domain/repositories/membership_wallet_repository.dart';
+import '../../../domain/policies/feature_access_gate.dart';
 import '../../profile/controllers/profile_controller.dart';
-import '../../../domain/repositories/profile_edit_repository.dart';
 import '../../../domain/repositories/square_repository.dart';
 import '../../discover/controllers/square_controller.dart';
 import '../../discover/controllers/video_feed_controller.dart';
@@ -25,6 +26,7 @@ class MainBinding extends Bindings {
       () => SquareController(
         Get.find<SquareRepository>(),
         Get.find<SocialStateRepository>(),
+        Get.find<UserRepository>(),
       ),
     );
     Get.lazyPut(
@@ -46,7 +48,6 @@ class MainBinding extends Bindings {
       () => ProfileController(
         Get.find<UserRepository>(),
         Get.find<MembershipWalletRepository>(),
-        Get.find<ProfileEditRepository>(),
       ),
     );
     Get.lazyPut(
@@ -54,7 +55,8 @@ class MainBinding extends Bindings {
         Get.find<UserRepository>(),
         Get.find<HomeCityRepository>(),
         Get.find<SocialStateRepository>(),
-        Get.find<MembershipWalletRepository>(),
+        Get.find<FeatureAccessGate>(),
+        Get.find<TeamDetailRepository>(),
       ),
     );
   }

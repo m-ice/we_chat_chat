@@ -72,4 +72,24 @@ void main() {
     expect(post.commentCount, 1);
     expect(post.comments.single.content, '下次一起。');
   });
+
+  test('promotes a pending post after its persisted review time', () async {
+    SharedPreferences.resetStatic();
+    SharedPreferences.setMockInitialValues({});
+    final repository = MyWorldRepositoryImpl(
+      await SharedPreferences.getInstance(),
+      reviewDelay: () => Duration.zero,
+    );
+
+    await repository.publish(
+      content: '晚风很温柔。',
+      imageSourcePaths: const [],
+      topics: const ['日常'],
+    );
+    expect(repository.posts.single.reviewStatus, MyWorldReviewStatus.pending);
+
+    await repository.refreshReviewStatuses();
+
+    expect(repository.posts.single.reviewStatus, MyWorldReviewStatus.approved);
+  });
 }

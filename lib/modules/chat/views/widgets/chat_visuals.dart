@@ -41,14 +41,20 @@ class ChatHeaderBackdrop extends StatelessWidget {
 }
 
 class ChatAvatar extends StatelessWidget {
-  const ChatAvatar({super.key, required this.assetPath, required this.size});
+  const ChatAvatar({
+    super.key,
+    required this.assetPath,
+    required this.size,
+    this.onTap,
+  });
 
   final String assetPath;
   final double size;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ClipOval(
+    final avatar = ClipOval(
       child: AppImage(
         assetPath,
         width: size,
@@ -63,6 +69,16 @@ class ChatAvatar extends StatelessWidget {
         ),
       ),
     );
+    if (onTap == null) return avatar;
+    return Semantics(
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(onTap: onTap, child: avatar),
+      ),
+    );
   }
 }
 
@@ -74,75 +90,120 @@ class ChatPageBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      key: const ValueKey('chat-page-bar'),
-      height: 48,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            left: 4,
-            top: 0,
-            width: 48,
-            height: 48,
-            child: Semantics(
-              button: true,
-              label: MaterialLocalizations.of(context).backButtonTooltip,
-              child: InkResponse(
-                key: const ValueKey('chat-back-button'),
-                onTap: Navigator.of(context).maybePop,
-                radius: 24,
-                child: const Center(
-                  child: AppImage(
-                    ChatSystemAssets.back,
-                    width: 10,
-                    height: 18,
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-            ),
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      centerTitle: true,
+      automaticallyImplyLeading: false,
+      leading: IconButton(
+        key: const ValueKey('chat-back-button'),
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        onPressed: Navigator.of(context).maybePop,
+        icon: const Center(
+          child: AppImage(
+            ChatSystemAssets.back,
+            width: 10,
+            height: 18,
+            fit: BoxFit.fill,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 104),
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          if (onMore != null)
-            Positioned(
-              right: 40,
-              top: 0,
-              width: 48,
-              height: 48,
-              child: Semantics(
-                button: true,
-                label: 'common_more'.tr,
-                child: InkResponse(
-                  key: const ValueKey('chat-more-button'),
-                  onTap: onMore,
-                  radius: 24,
-                  child: const Center(
-                    child: AppImage(
-                      ChatSystemAssets.more,
-                      width: 18,
-                      height: 4,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
+      title: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      actions: [
+        if (onMore != null)
+          IconButton(
+            key: const ValueKey('chat-more-button'),
+            tooltip: 'common_more'.tr,
+            onPressed: onMore,
+            icon: const Center(
+              child: AppImage(
+                ChatSystemAssets.more,
+                width: 18,
+                // height: 4,
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
+      ],
     );
+    // return SizedBox(
+    //   key: const ValueKey('chat-page-bar'),
+    //   height: 48,
+    //   child: Stack(
+    //     alignment: Alignment.center,
+    //     children: [
+    //       Positioned(
+    //         left: 4,
+    //         top: 0,
+    //         width: 48,
+    //         height: 48,
+    //         child: Semantics(
+    //           button: true,
+    //           label: MaterialLocalizations.of(context).backButtonTooltip,
+    //           child: InkResponse(
+    //             key: const ValueKey('chat-back-button'),
+    //             onTap: Navigator.of(context).maybePop,
+    //             radius: 24,
+    //             child: const Center(
+    //               child: AppImage(
+    //                 ChatSystemAssets.back,
+    //                 width: 10,
+    //                 height: 18,
+    //                 fit: BoxFit.fill,
+    //               ),
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //       Padding(
+    //         padding: const EdgeInsets.symmetric(horizontal: 104),
+    //         child: Text(
+    //           title,
+    //           maxLines: 1,
+    //           overflow: TextOverflow.ellipsis,
+    //           style: const TextStyle(
+    //             color: AppColors.textPrimary,
+    //             fontSize: 16,
+    //             fontWeight: FontWeight.w500,
+    //           ),
+    //         ),
+    //       ),
+    //       if (onMore != null)
+    //         Positioned(
+    //           right: 40,
+    //           top: 0,
+    //           width: 48,
+    //           height: 48,
+    //           child: Semantics(
+    //             button: true,
+    //             label: 'common_more'.tr,
+    //             child: InkResponse(
+    //               key: const ValueKey('chat-more-button'),
+    //               onTap: onMore,
+    //               radius: 24,
+    //               child: const Center(
+    //                 child: AppImage(
+    //                   ChatSystemAssets.more,
+    //                   width: 18,
+    //                   height: 4,
+    //                   fit: BoxFit.fill,
+    //                 ),
+    //               ),
+    //             ),
+    //           ),
+    //         ),
+    //     ],
+    //   ),
+    // );
   }
 }
 

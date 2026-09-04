@@ -17,7 +17,9 @@ class MyWorldPublishPage extends GetView<MyWorldPublishController> {
       Obx(
         () => ProfileAppBarAction(
           label: 'common_publish'.tr,
-          onPressed: controller.publishing.value ? null : controller.publish,
+          onPressed: controller.publishing.value ? null : (){
+            controller.publish(context);
+          },
         ),
       ),
     ],
@@ -94,27 +96,6 @@ class _ImageStrip extends StatelessWidget {
       builder: (context, constraints) {
         final size = (constraints.maxWidth - gap * 2) / 3;
         final visiblePaths = paths.take(3).toList(growable: false);
-        // These reference photos are picker placeholders only. They are never
-        // included in a post unless the user selects local photos.
-        if (visiblePaths.isEmpty) {
-          return Row(
-            children: [
-              _PreviewImage(
-                path: TeamFlowAssets.publishSampleBadminton,
-                size: size,
-                onTap: onPick,
-              ),
-              const SizedBox(width: gap),
-              _PreviewImage(
-                path: TeamFlowAssets.publishSampleCourt,
-                size: size,
-                onTap: onPick,
-              ),
-              const SizedBox(width: gap),
-              _PickImage(size: size, onTap: onPick),
-            ],
-          );
-        }
         return Wrap(
           spacing: gap,
           runSpacing: gap,
@@ -131,28 +112,6 @@ class _ImageStrip extends StatelessWidget {
       },
     );
   }
-}
-
-class _PreviewImage extends StatelessWidget {
-  const _PreviewImage({
-    required this.path,
-    required this.size,
-    required this.onTap,
-  });
-
-  final String path;
-  final double size;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    borderRadius: BorderRadius.circular(15),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: AppImage(path, width: size, height: 118, fit: BoxFit.cover),
-    ),
-  );
 }
 
 class _SelectedImage extends StatelessWidget {

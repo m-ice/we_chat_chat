@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/widgets/app_legal_agreement_confirmation.dart';
 import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_text_input_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -14,18 +16,23 @@ class MyWorldController extends GetxController {
   static const topics = ['旅行', '风景', '美食', '音乐', '运动', '日常', '休闲'];
   final MyWorldRepository repository;
   final posts = <MyWorldPost>[].obs;
+  Timer? _reviewTimer;
 
   @override
   void onInit() {
     super.onInit();
     reload();
+    _reviewTimer = Timer.periodic(const Duration(minutes: 1), (_) => reload());
   }
 
-  void reload() => posts.assignAll(repository.posts);
+  Future<void> reload() async {
+    await repository.refreshReviewStatuses();
+    posts.assignAll(repository.posts);
+  }
 
   Future<void> openPublish() async {
     await Get.toNamed(Routes.myWorldPublish);
-    reload();
+    await reload();
   }
 
   Future<void> preview(MyWorldPost post, int index) async {
@@ -72,6 +79,12 @@ class MyWorldController extends GetxController {
     reload();
     AppToast.show('world_comment_saved'.tr);
   }
+
+  @override
+  void onClose() {
+    _reviewTimer?.cancel();
+    super.onClose();
+  }
 }
 
 class MyWorldPublishController extends GetxController {
@@ -99,18 +112,15 @@ class MyWorldPublishController extends GetxController {
     selectedTopics.assignAll(next);
   }
 
-  Future<void> publish() async {
+  Future<void> publish(BuildContext context) async {
+    FocusScope.of(context).unfocus();
     if (publishing.value) return;
     if (content.text.trim().isEmpty) {
       AppToast.show('world_content_required'.tr);
       return;
     }
     if (!agreed.value) {
-      final accepted = await AppDialog.confirm(
-        title: 'common_tip'.tr,
-        message: 'legal_agreement_required'.tr,
-        confirmText: 'common_done'.tr,
-      );
+      final accepted = await AppLegalAgreementConfirmation.show();
       if (!accepted) return;
       agreed.value = true;
     }

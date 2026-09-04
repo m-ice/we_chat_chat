@@ -174,9 +174,7 @@ class _SquareFeed extends GetView<SquareController> {
                         controller.tab.value == SquareTab.following
                             ? 'square_following_empty'.tr
                             : 'square_empty'.tr,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                        ),
+                        style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
                   ),
@@ -186,10 +184,8 @@ class _SquareFeed extends GetView<SquareController> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 76),
                 itemCount: controller.items.length,
-                itemBuilder: (_, index) => _SquarePost(
-                  item: controller.items[index],
-                  index: index,
-                ),
+                itemBuilder: (_, index) =>
+                    _SquarePost(item: controller.items[index], index: index),
               ),
       ),
     ),
@@ -251,10 +247,7 @@ class _SquarePost extends GetView<SquareController> {
                   child: SizedBox.square(
                     dimension: 40,
                     child: ClipOval(
-                      child: AppImage(
-                        figmaVisual?.avatarPath ?? item.user.avatarPath,
-                        fit: BoxFit.cover,
-                      ),
+                      child: AppImage(item.user.avatarPath, fit: BoxFit.cover),
                     ),
                   ),
                 ),
@@ -418,16 +411,22 @@ class _PostActionRow extends GetView<SquareController> {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      _FigmaAction(
-        assetPath: AppImageString.discoverMore,
-        rotateQuarterTurns: 1,
-        onTap: () => controller.more(item),
+      Obx(
+        () => controller.isCurrentUser(item.user.id)
+            ? const SizedBox.shrink()
+            : _FigmaAction(
+                assetPath: AppImageString.discoverMore,
+                rotateQuarterTurns: 1,
+                onTap: () => controller.more(item),
+              ),
       ),
       const Spacer(),
       Obx(() {
         final liked = controller.likedIds.contains(item.postId);
         return _FigmaAction(
-          assetPath: liked?AppImageString.discoverLiked:AppImageString.discoverLike,
+          assetPath: liked
+              ? AppImageString.discoverLiked
+              : AppImageString.discoverLike,
           label: 'video_like'.tr,
           color: liked ? const Color(0xFFFF3D91) : null,
           onTap: () => controller.toggleLike(item),
@@ -494,9 +493,8 @@ class _FigmaAction extends StatelessWidget {
 }
 
 class _FeedVisual {
-  const _FeedVisual({required this.avatarPath, required this.imagePaths});
+  const _FeedVisual({required this.imagePaths});
 
-  final String avatarPath;
   final List<String> imagePaths;
 }
 
@@ -504,19 +502,14 @@ _FeedVisual _visualFor(int index) =>
     _figmaVisuals[index % _figmaVisuals.length];
 
 const _figmaVisuals = [
+  _FeedVisual(imagePaths: [AppImageString.discoverSquarePost0101]),
   _FeedVisual(
-    avatarPath: AppImageString.discoverSquareAvatar1,
-    imagePaths: [AppImageString.discoverSquarePost0101],
-  ),
-  _FeedVisual(
-    avatarPath: AppImageString.discoverSquareAvatar2,
     imagePaths: [
       AppImageString.discoverSquarePost0201,
       AppImageString.discoverSquarePost0202,
     ],
   ),
   _FeedVisual(
-    avatarPath: AppImageString.discoverSquareAvatar3,
     imagePaths: [
       AppImageString.discoverSquarePost0202,
       AppImageString.discoverSquarePost0301,
@@ -524,7 +517,6 @@ const _figmaVisuals = [
     ],
   ),
   _FeedVisual(
-    avatarPath: AppImageString.discoverSquareAvatar4,
     imagePaths: [
       AppImageString.discoverSquarePost0401,
       AppImageString.discoverSquarePost0402,
@@ -533,7 +525,6 @@ const _figmaVisuals = [
     ],
   ),
   _FeedVisual(
-    avatarPath: AppImageString.discoverSquareAvatar5,
     imagePaths: [
       AppImageString.discoverSquarePost0501,
       AppImageString.discoverSquarePost0502,
@@ -543,7 +534,6 @@ const _figmaVisuals = [
     ],
   ),
   _FeedVisual(
-    avatarPath: AppImageString.discoverSquareAvatar6,
     imagePaths: [
       AppImageString.discoverSquarePost0601,
       AppImageString.discoverSquarePost0501,

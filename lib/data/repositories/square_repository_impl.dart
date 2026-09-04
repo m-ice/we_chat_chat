@@ -1,7 +1,5 @@
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:we_chat_chat/domain/entities/my_world_post.dart';
-
 import '../../domain/entities/square_feed.dart';
 import '../../domain/repositories/my_world_repository.dart';
 import '../../domain/repositories/social_state_repository.dart';
@@ -33,36 +31,22 @@ class SquareRepositoryImpl implements SquareRepository {
 
   Future<List<SquareFeedItem>> _all() async {
     final users = await _users.getUsers();
+    final current = await _users.getCurrentUser();
+    await _world.refreshReviewStatuses();
     final items = <SquareFeedItem>[
       for (final user in users)
-        if (user.moment case final moment?)
-          if (moment.content.trim().isNotEmpty)
-            SquareFeedItem(
-              postId: 'moment_${user.id}',
-              user: user,
-              content: moment.content,
-              imagePaths: moment.imagePaths,
-              time: _format(moment.createdAt),
-              usesSandboxImages: false,
-            ),
+        if (user.id != current.id)
+          if (user.moment case final moment?)
+            if (moment.content.trim().isNotEmpty)
+              SquareFeedItem(
+                postId: 'moment_${user.id}',
+                user: user,
+                content: moment.content,
+                imagePaths: moment.imagePaths,
+                time: _format(moment.createdAt),
+                usesSandboxImages: false,
+              ),
     ];
-    final current = await _users.getCurrentUser();
-    for (final post in _world.posts) {
-      if (post.content.trim().isEmpty ||
-          post.reviewStatus != MyWorldReviewStatus.approved) {
-        continue;
-      }
-      items.add(
-        SquareFeedItem(
-          postId: post.id,
-          user: current,
-          content: post.content,
-          imagePaths: post.imageRelativePaths,
-          time: _format(post.createdAt),
-          usesSandboxImages: true,
-        ),
-      );
-    }
     items.sort((a, b) => b.time.compareTo(a.time));
     return items;
   }
@@ -83,9 +67,13 @@ class SquareRepositoryImpl implements SquareRepository {
   @override
   Future<List<TopicItem>> topics() async {
     final map = <String, TopicItem>{};
+    final current = await _users.getCurrentUser();
+    final shieldedActivities = _social.shieldedActivityIds;
     for (final user in await _users.getUsers()) {
       final post = user.teamPost;
       if (post == null ||
+          user.id == current.id ||
+          shieldedActivities.contains(post.id) ||
           post.isExpired(DateTime.now()) ||
           map.containsKey(post.activity)) {
         continue;

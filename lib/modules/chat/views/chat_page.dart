@@ -50,7 +50,16 @@ class ChatPage extends GetView<ChatThreadController> {
             children: [
               Row(
                 children: [
-                  ChatAvatar(assetPath: controller.peer.avatarPath, size: 48),
+                  ChatAvatar(
+                    assetPath: controller.peer.avatarPath,
+                    size: 48,
+                    onTap: controller.canOpenPeerProfile
+                        ? () async {
+                            Get.back<void>();
+                            await controller.openPeerProfile();
+                          }
+                        : null,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -79,7 +88,7 @@ class ChatPage extends GetView<ChatThreadController> {
                   ),
                 ],
               ),
-              if (controller.peer.id != -1) ...[
+              if (controller.peer.id != -1 && !controller.isSelfPeer) ...[
                 const SizedBox(height: 12),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -104,6 +113,8 @@ class ChatPage extends GetView<ChatThreadController> {
         ),
       ),
       isScrollControlled: true,
+      barrierColor: Colors.transparent,
+      backgroundColor: Colors.black,
     );
   }
 }
@@ -197,7 +208,7 @@ class _MessageList extends StatelessWidget {
                     ? controller.currentUser.value?.avatarPath ??
                           ChatSystemAssets.currentUserAvatar
                     : controller.peer.avatarPath;
-                final avatar = ChatAvatar(assetPath: avatarPath, size: 40);
+                final canOpenPeerProfile = controller.canOpenPeerProfile;
                 return chat_ui.ChatMessage(
                   message: message,
                   index: index,
@@ -208,12 +219,28 @@ class _MessageList extends StatelessWidget {
                       ? null
                       : Padding(
                           padding: const EdgeInsets.only(right: 12),
-                          child: avatar,
+                          child: ChatAvatar(
+                            key: ValueKey('chat-peer-avatar-${message.id}'),
+                            assetPath: avatarPath,
+                            size: 40,
+                            onTap: canOpenPeerProfile
+                                ? controller.openPeerProfile
+                                : null,
+                          ),
                         ),
                   trailingWidget: isSentByMe
                       ? Padding(
                           padding: const EdgeInsets.only(left: 12),
-                          child: avatar,
+                          child: ChatAvatar(
+                            key: ValueKey(
+                              'chat-current-user-avatar-${message.id}',
+                            ),
+                            assetPath: avatarPath,
+                            size: 40,
+                            onTap: controller.currentUser.value == null
+                                ? null
+                                : controller.openCurrentUserProfile,
+                          ),
                         )
                       : null,
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -236,6 +263,9 @@ class _MessageList extends StatelessWidget {
                   ? SliverToBoxAdapter(
                       child: _TypingBubble(
                         avatarPath: controller.peer.avatarPath,
+                        onAvatarTap: controller.canOpenPeerProfile
+                            ? controller.openPeerProfile
+                            : null,
                       ),
                     )
                   : null,
@@ -249,9 +279,10 @@ class _MessageList extends StatelessWidget {
 }
 
 class _TypingBubble extends StatelessWidget {
-  const _TypingBubble({required this.avatarPath});
+  const _TypingBubble({required this.avatarPath, this.onAvatarTap});
 
   final String avatarPath;
+  final VoidCallback? onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +291,7 @@ class _TypingBubble extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _BubbleAvatar(assetPath: avatarPath),
+          _BubbleAvatar(assetPath: avatarPath, onTap: onAvatarTap),
           const SizedBox(width: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
@@ -280,25 +311,14 @@ class _TypingBubble extends StatelessWidget {
 }
 
 class _BubbleAvatar extends StatelessWidget {
-  const _BubbleAvatar({required this.assetPath});
+  const _BubbleAvatar({required this.assetPath, this.onTap});
 
   final String? assetPath;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    if (assetPath != null && assetPath!.isNotEmpty) {
-      return ChatAvatar(assetPath: assetPath!, size: 40);
-    }
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFE7A1),
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(Icons.person, color: AppColors.iconTint, size: 22),
-    );
-  }
+  Widget build(BuildContext context) =>
+      ChatAvatar(assetPath: assetPath ?? '', size: 40, onTap: onTap);
 }
 
 class _MessageComposer extends StatefulWidget {

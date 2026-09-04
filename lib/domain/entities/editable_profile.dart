@@ -1,3 +1,5 @@
+import 'user.dart';
+
 class EditableProfile {
   const EditableProfile({
     required this.nickname,
@@ -12,6 +14,17 @@ class EditableProfile {
   final String avatarReference;
   final List<String> interests;
   final List<String> personalityTags;
+
+  factory EditableProfile.fromUser(
+    User user, {
+    required String avatarReference,
+  }) => EditableProfile(
+    nickname: user.nickname,
+    bio: user.intro,
+    avatarReference: avatarReference,
+    interests: user.hobbies,
+    personalityTags: const [],
+  );
 
   EditableProfile copyWith({
     String? nickname,

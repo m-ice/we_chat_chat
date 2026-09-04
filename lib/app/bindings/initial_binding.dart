@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/providers/asset_json_provider.dart';
+import '../../data/providers/device_identity_provider.dart';
 import '../../data/providers/local_chat_storage.dart';
 import '../../data/providers/mock_ai_provider.dart';
 import '../../data/providers/store_purchase_service.dart';
@@ -11,6 +12,7 @@ import '../../data/repositories/mock_ai_repository.dart';
 import '../../data/repositories/membership_wallet_repository_impl.dart';
 import '../../data/repositories/social_state_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
+import '../../data/repositories/local_user_identity_repository.dart';
 import '../../data/repositories/user_detail_repository_impl.dart';
 import '../../data/repositories/team_publish_repository_impl.dart';
 import '../../data/repositories/team_detail_repository_impl.dart';
@@ -26,8 +28,10 @@ import '../../domain/repositories/ai_repository.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../domain/repositories/home_city_repository.dart';
 import '../../domain/repositories/membership_wallet_repository.dart';
+import '../../domain/policies/feature_access_gate.dart';
 import '../../domain/repositories/social_state_repository.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../../domain/repositories/user_identity_repository.dart';
 import '../../domain/repositories/user_detail_repository.dart';
 import '../../domain/repositories/team_publish_repository.dart';
 import '../../domain/repositories/team_detail_repository.dart';
@@ -49,6 +53,17 @@ class InitialBinding extends Bindings {
   void dependencies() {
     Get.put(_preferences, permanent: true);
     Get.lazyPut<AssetJsonProvider>(AssetJsonProvider.new, fenix: true);
+    Get.put<DeviceIdentityProvider>(
+      LocalDeviceIdentityProvider(_preferences),
+      permanent: true,
+    );
+    Get.put<UserIdentityRepository>(
+      LocalUserIdentityRepository(
+        _preferences,
+        Get.find<DeviceIdentityProvider>(),
+      ),
+      permanent: true,
+    );
     Get.put(LocalChatStorage(_preferences), permanent: true);
     Get.put<ProfileEditRepository>(
       ProfileEditRepositoryImpl(_preferences),
@@ -58,11 +73,14 @@ class InitialBinding extends Bindings {
       () => UserRepositoryImpl(
         Get.find<AssetJsonProvider>(),
         Get.find<ProfileEditRepository>(),
+        Get.find<UserIdentityRepository>(),
+        Get.find<AlbumRepository>(),
       ),
       fenix: true,
     );
     Get.lazyPut<UserDetailRepository>(
-      () => UserDetailRepositoryImpl(Get.find<AssetJsonProvider>(),_preferences),
+      () =>
+          UserDetailRepositoryImpl(Get.find<AssetJsonProvider>(), _preferences),
       fenix: true,
     );
     Get.lazyPut<HomeCityRepository>(
@@ -77,6 +95,7 @@ class InitialBinding extends Bindings {
       MembershipWalletRepositoryImpl(_preferences),
       permanent: true,
     );
+    Get.put<FeatureAccessGate>(const FreeFeatureAccessGate(), permanent: true);
     Get.lazyPut(
       () => StorePurchaseService(
         Get.find<MembershipWalletRepository>(),
@@ -101,8 +120,11 @@ class InitialBinding extends Bindings {
       permanent: true,
     );
     Get.lazyPut<TeamDetailRepository>(
-      () =>
-          TeamDetailRepositoryImpl(Get.find<AssetJsonProvider>(), _preferences),
+      () => TeamDetailRepositoryImpl(
+        Get.find<AssetJsonProvider>(),
+        _preferences,
+        Get.find<UserRepository>(),
+      ),
       fenix: true,
     );
     Get.put<AlbumRepository>(

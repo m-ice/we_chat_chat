@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:we_chat_chat/app/routes/routes.dart';
 import 'package:we_chat_chat/domain/entities/ai_response.dart';
 import 'package:we_chat_chat/domain/entities/chat_message.dart';
 import 'package:we_chat_chat/domain/entities/city_user.dart';
@@ -10,6 +11,7 @@ import 'package:we_chat_chat/domain/entities/user.dart';
 import 'package:we_chat_chat/domain/repositories/ai_repository.dart';
 import 'package:we_chat_chat/domain/repositories/chat_repository.dart';
 import 'package:we_chat_chat/domain/repositories/message_center_repository.dart';
+import 'package:we_chat_chat/domain/repositories/social_state_repository.dart';
 import 'package:we_chat_chat/domain/repositories/user_repository.dart';
 import 'package:we_chat_chat/modules/chat/controllers/chat_thread_controller.dart';
 import 'package:we_chat_chat/modules/chat/views/chat_page.dart';
@@ -46,7 +48,14 @@ void main() {
     );
     final repository = _ChatRepository();
     Get.put<UserRepository>(_UserRepository(currentUser));
-    Get.put(ChatThreadController(peer, repository, _AiRepository()));
+    Get.put(
+      ChatThreadController(
+        peer,
+        repository,
+        _AiRepository(),
+        _EmptySocialStateRepository(),
+      ),
+    );
 
     await tester.pumpWidget(buildTestApp(const ChatPage()));
     await tester.pumpAndSettle();
@@ -90,8 +99,122 @@ void main() {
     );
     expect(
       tester.getTopLeft(find.byKey(const ValueKey('system-notice-welcome'))).dy,
-      closeTo(107, .1),
+      closeTo(115, .1),
     );
+  });
+
+  testWidgets('tapping a chat peer avatar opens that peer profile', (
+    tester,
+  ) async {
+    const peer = User(
+      id: 7,
+      nickname: '零度晚风',
+      age: 25,
+      gender: '女',
+      hobbies: [],
+      avatarPath: 'assets/images/chat_system/chat_peer_avatar.png',
+      intro: '',
+      isVerified: false,
+    );
+    const currentUser = User(
+      id: 1,
+      nickname: '我',
+      age: 25,
+      gender: '女',
+      hobbies: [],
+      avatarPath: 'assets/images/chat_system/chat_current_avatar.png',
+      intro: '',
+      isVerified: false,
+    );
+    Get.put<UserRepository>(_UserRepository(currentUser));
+    Get.put(
+      ChatThreadController(
+        peer,
+        _ChatRepository(),
+        _AiRepository(),
+        _EmptySocialStateRepository(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        getPages: [
+          GetPage(
+            name: Routes.userDetail,
+            page: () {
+              final arguments = Get.arguments as Map<Object?, Object?>;
+              final user = arguments['user'] as User;
+              return Text('profile-${user.id}');
+            },
+          ),
+        ],
+        home: const ChatPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('chat-peer-avatar-2')));
+    await tester.pumpAndSettle();
+
+    expect(Get.currentRoute, Routes.userDetail);
+    expect(find.text('profile-7'), findsOneWidget);
+  });
+
+  testWidgets('tapping the current-user chat avatar opens that profile', (
+    tester,
+  ) async {
+    const peer = User(
+      id: 7,
+      nickname: '零度晚风',
+      age: 25,
+      gender: '女',
+      hobbies: [],
+      avatarPath: 'assets/images/chat_system/chat_peer_avatar.png',
+      intro: '',
+      isVerified: false,
+    );
+    const currentUser = User(
+      id: 1,
+      nickname: '我',
+      age: 25,
+      gender: '女',
+      hobbies: [],
+      avatarPath: 'assets/images/chat_system/chat_current_avatar.png',
+      intro: '',
+      isVerified: false,
+    );
+    Get.put<UserRepository>(_UserRepository(currentUser));
+    Get.put(
+      ChatThreadController(
+        peer,
+        _ChatRepository(),
+        _AiRepository(),
+        _EmptySocialStateRepository(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        getPages: [
+          GetPage(
+            name: Routes.userDetail,
+            page: () {
+              final arguments = Get.arguments as Map<Object?, Object?>;
+              final user = arguments['user'] as User;
+              return Text('profile-${user.id}');
+            },
+          ),
+        ],
+        home: const ChatPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('chat-current-user-avatar-3')));
+    await tester.pumpAndSettle();
+
+    expect(Get.currentRoute, Routes.userDetail);
+    expect(find.text('profile-1'), findsOneWidget);
   });
 }
 
@@ -132,6 +255,9 @@ class _ChatRepository implements ChatRepository {
   ];
 
   @override
+  Stream<void> get conversationUpdates => Stream<void>.empty();
+
+  @override
   Future<void> appendMessage(ChatMessage message, {User? peer}) async {
     messages.add(message);
   }
@@ -154,6 +280,50 @@ class _AiRepository implements AiRepository {
   @override
   Future<AiResponse> generate(List<ChatMessage> history) async =>
       const AiResponse('晚上好');
+}
+
+class _EmptySocialStateRepository implements SocialStateRepository {
+  @override
+  Set<int> get blockedIds => const {};
+
+  @override
+  Stream<void> get changes => Stream<void>.empty();
+
+  @override
+  Set<int> get followedIds => const {};
+
+  @override
+  Set<int> get invitedIds => const {};
+
+  @override
+  Set<int> get pendingJoinIds => const {};
+
+  @override
+  Set<int> get shieldedIds => const {};
+
+  @override
+  Set<String> get shieldedActivityIds => const {};
+
+  @override
+  Future<void> block(int userId) async {}
+
+  @override
+  Future<void> setFollowed(int userId, bool value) async {}
+
+  @override
+  Future<void> setInvited(int userId, bool value) async {}
+
+  @override
+  Future<void> setPendingJoin(int userId, bool value) async {}
+
+  @override
+  Future<void> shield(int userId) async {}
+
+  @override
+  Future<void> shieldActivity(String activityId) async {}
+
+  @override
+  Future<void> unblock(int userId) async {}
 }
 
 class _UserRepository implements UserRepository {

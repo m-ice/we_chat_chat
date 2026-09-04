@@ -17,7 +17,7 @@
     "isVideoVerified": false,
     "isRealPersonVerified": false,
     "videoPath": "",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -61,7 +61,7 @@
     "isVideoVerified": false,
     "isRealPersonVerified": false,
     "videoPath": "",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -105,7 +105,7 @@
     "isVideoVerified": false,
     "isRealPersonVerified": false,
     "videoPath": "",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -149,7 +149,7 @@
     "isVideoVerified": false,
     "isRealPersonVerified": false,
     "videoPath": "",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -193,7 +193,7 @@
     "isVideoVerified": false,
     "isRealPersonVerified": false,
     "videoPath": "",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -237,7 +237,7 @@
     "isVideoVerified": false,
     "isRealPersonVerified": false,
     "videoPath": "",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"

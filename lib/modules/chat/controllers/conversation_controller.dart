@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
@@ -20,6 +22,8 @@ class ConversationController extends GetxController {
   final hasError = false.obs;
   final isLoading = true.obs;
   final quickUnreadCounts = <MessageCenterSection, int>{}.obs;
+  StreamSubscription<void>? _chatUpdatesSubscription;
+  StreamSubscription<void>? _socialChangesSubscription;
 
   User? get assistant {
     for (final conversation in conversations) {
@@ -33,7 +37,16 @@ class ConversationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _chatUpdatesSubscription = _chats.conversationUpdates.listen((_) => load());
+    _socialChangesSubscription = _social.changes.listen((_) => load());
     load();
+  }
+
+  @override
+  void onClose() {
+    _chatUpdatesSubscription?.cancel();
+    _socialChangesSubscription?.cancel();
+    super.onClose();
   }
 
   Future<void> load() async {
@@ -75,12 +88,23 @@ class ConversationController extends GetxController {
       !_social.shieldedIds.contains(userId);
 
   Future<void> openChat(User peer) async {
+    if (await _isCurrentUser(peer)) return;
     await Get.toNamed(Routes.chat, arguments: peer);
     await load();
   }
 
   Future<void> startVoiceCall(User peer) async {
+    if (await _isCurrentUser(peer)) return;
     await Get.toNamed(Routes.voiceCall, arguments: peer);
+  }
+
+  Future<bool> _isCurrentUser(User peer) async {
+    try {
+      return (await Get.find<UserRepository>().getCurrentUser()).id == peer.id;
+    } on Object {
+      // Chat and calls stay unavailable until the local identity is known.
+      return true;
+    }
   }
 
   Future<void> openFeature(String route) async {

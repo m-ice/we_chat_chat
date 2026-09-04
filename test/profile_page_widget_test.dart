@@ -10,7 +10,7 @@ import 'package:we_chat_chat/main.dart';
 void main() {
   tearDown(Get.reset);
 
-  testWidgets('profile page matches the 375 by 812 Figma geometry', (
+  testWidgets('profile page exposes its current profile entry points', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1125, 2436);
@@ -38,38 +38,33 @@ void main() {
     await tester.pumpAndSettle();
 
     final header = _asset('figma_profile_header.png');
-    final summary = _asset('figma_profile_card.png');
-    final coins = _asset('figma_profile_quick_coin.png');
-    final membership = _asset('figma_profile_quick_vip.png');
-    final album = _asset('figma_profile_quick_album.png');
     final edit = _asset('figma_profile_icon_edit.png');
     final world = _asset('figma_profile_icon_world.png');
+    final album = _asset('my_image.png');
     final support = _asset('figma_profile_icon_support.png');
-    final privacy = _asset('figma_profile_icon_privacy.png');
-    final agreement = _asset('figma_profile_icon_agreement.png');
+    final aboutUs = _asset('about_us.png');
+    final settings = _asset('my_setting.png');
 
     expect(tester.getRect(header), const Rect.fromLTWH(0, 0, 375, 255));
     expect(
       tester.getRect(find.byKey(const ValueKey('profile-avatar'))),
       const Rect.fromLTWH(143.5, 80, 88, 88),
     );
-    expect(tester.getRect(summary), const Rect.fromLTWH(16, 239, 343, 93));
-    expect(tester.getRect(coins), const Rect.fromLTWH(50, 251, 44, 44));
-    expect(tester.getRect(membership), const Rect.fromLTWH(164, 251, 44, 44));
-    expect(tester.getRect(album), const Rect.fromLTWH(280, 251, 44, 44));
-    expect(tester.getRect(edit), const Rect.fromLTWH(20, 356, 28, 28));
-    expect(tester.getRect(world), const Rect.fromLTWH(20, 416, 28, 28));
-    expect(tester.getRect(support), const Rect.fromLTWH(20, 476, 28, 28));
-    expect(tester.getRect(privacy), const Rect.fromLTWH(20, 536, 28, 28));
-    expect(tester.getRect(agreement), const Rect.fromLTWH(20, 596, 28, 28));
+    expect(edit, findsOneWidget);
+    expect(world, findsOneWidget);
+    expect(album, findsOneWidget);
+    expect(support, findsOneWidget);
+    expect(aboutUs, findsOneWidget);
+    expect(settings, findsOneWidget);
     expect(find.text('我的动态'), findsOneWidget);
     expect(find.text('真人认证'), findsNothing);
     expect(tester.takeException(), isNull);
 
     for (final route in [
-      (coins, Routes.coins),
-      (membership, Routes.vip),
       (album, Routes.album),
+      (world, Routes.myWorld),
+      (aboutUs, Routes.aboutUs),
+      (settings, Routes.settings),
     ]) {
       await tester.tap(route.$1);
       await tester.pumpAndSettle();

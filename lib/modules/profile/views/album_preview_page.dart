@@ -10,6 +10,7 @@ import '../../../core/widgets/app_toast.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../domain/entities/album_item.dart';
 import '../../../domain/repositories/album_repository.dart';
+import '../../../domain/repositories/user_repository.dart';
 
 class AlbumPreviewPage extends StatefulWidget {
   const AlbumPreviewPage({super.key, required this.item});
@@ -58,7 +59,15 @@ class _AlbumPreviewPageState extends State<AlbumPreviewPage> {
       isDangerous: true,
     );
     if (yes) {
-      await repository.remove({widget.item.id}, widget.item.kind);
+      if (widget.item.kind == AlbumMediaKind.photo) {
+        final user = await Get.find<UserRepository>().getCurrentUser();
+        await repository.removeProfilePhotos(
+          userId: user.id,
+          ids: {widget.item.id},
+        );
+      } else {
+        await repository.remove({widget.item.id}, widget.item.kind);
+      }
       AppToast.show('common_deleted'.tr);
       Get.back();
     }

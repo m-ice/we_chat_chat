@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:we_chat_chat/core/widgets/figma_back_button.dart';
 
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_text_input_dialog.dart';
@@ -63,6 +64,9 @@ class TeamPublishPage extends GetView<TeamPublishController> {
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: FigmaBackButton(),
+        centerTitle: true,
         title: Text('team_create'.tr),
         toolbarHeight: 48,
         backgroundColor: Colors.transparent,
@@ -70,84 +74,90 @@ class TeamPublishPage extends GetView<TeamPublishController> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
-      body: Stack(
-        children: [
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 255,
-            child: AppImage(
-              TeamFlowAssets.publishHeaderDecor,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 255,
+              child: AppImage(
+                TeamFlowAssets.publishHeaderDecor,
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
             ),
-          ),
-          ListView(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              MediaQuery.paddingOf(context).top + 60,
-              16,
-              24,
-            ),
-            children: [
-              _MainContentCard(controller: controller),
-              const SizedBox(height: 8),
-              SizedBox(
-                key: const ValueKey('team-publish-detail-card'),
-                height: 170,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _publishBorder),
-                  ),
-                  child: Column(
-                    children: [
-                      Obx(
-                        () => _FormRow(
-                          icon: TeamFlowAssets.activityIcon,
-                          label: 'team_choose_activity'.tr,
-                          value: controller.activity.value ?? 'team_choose'.tr,
-                          onTap: () => _chooseActivity(context),
+            ListView(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                MediaQuery.paddingOf(context).top + 60,
+                16,
+                24,
+              ),
+              children: [
+                _MainContentCard(controller: controller),
+                const SizedBox(height: 8),
+                SizedBox(
+                  key: const ValueKey('team-publish-detail-card'),
+                  height: 170,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: _publishBorder),
+                    ),
+                    child: Column(
+                      children: [
+                        Obx(
+                              () => _FormRow(
+                            icon: TeamFlowAssets.activityIcon,
+                            label: 'team_choose_activity'.tr,
+                            value: controller.activity.value ?? 'team_choose'.tr,
+                            onTap: () => _chooseActivity(context),
+                          ),
                         ),
-                      ),
-                      const _InsetDivider(),
-                      Obx(
-                        () => _FormRow(
-                          icon: TeamFlowAssets.timeIcon,
-                          label: 'team_activity_time'.tr,
-                          value: controller.dateText,
-                          onTap: () => _chooseDateTime(context),
+                        const _InsetDivider(),
+                        Obx(
+                              () => _FormRow(
+                            icon: TeamFlowAssets.timeIcon,
+                            label: 'team_activity_time'.tr,
+                            value: controller.dateText,
+                            onTap: () => _chooseDateTime(context),
+                          ),
                         ),
-                      ),
-                      const _InsetDivider(),
-                      _FormRow(
-                        icon: TeamFlowAssets.locationIcon,
-                        label: 'team_activity_address'.tr,
-                        valueListenable: controller.location,
-                        emptyValue: 'team_location_hint'.tr,
-                        onTap: () => _editText(
-                          title: 'team_location'.tr,
-                          hint: 'team_location_hint'.tr,
-                          target: controller.location,
+                        const _InsetDivider(),
+                        _FormRow(
+                          icon: TeamFlowAssets.locationIcon,
+                          label: 'team_activity_address'.tr,
+                          valueListenable: controller.location,
+                          emptyValue: 'team_location_hint'.tr,
+                          onTap: () => _editText(
+                            title: 'team_location'.tr,
+                            hint: 'team_location_hint'.tr,
+                            target: controller.location,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           child: Obx(
-            () => SizedBox(
+                () => SizedBox(
               height: 52,
               child: FilledButton(
                 key: const ValueKey('team-publish-submit'),
@@ -162,19 +172,19 @@ class TeamPublishPage extends GetView<TeamPublishController> {
                 ),
                 child: controller.submitting.value
                     ? const SizedBox.square(
-                        dimension: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.black,
-                        ),
-                      )
+                  dimension: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.black,
+                  ),
+                )
                     : Text(
-                        'common_publish'.tr,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  'common_publish'.tr,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ),
@@ -274,20 +284,10 @@ class _PublishImageStrip extends StatelessWidget {
         return Row(
           children: List.generate(3, (index) {
             final isImage = index < imagePaths.length;
-            final isAdd = index == 2 && imagePaths.length < 3;
-            final showsPreview =
-                !isImage &&
-                !isAdd &&
-                index < TeamPublishController.designPreviewImagePaths.length;
             final child = isImage
                 ? _SelectedImage(
                     path: imagePaths[index],
                     onRemove: () => onRemove(index),
-                  )
-                : showsPreview
-                ? _SampleImage(
-                    path: TeamPublishController.designPreviewImagePaths[index],
-                    onTap: onPick,
                   )
                 : _AddImage(onTap: onPick);
             return Padding(
@@ -329,31 +329,6 @@ class _SelectedImage extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _SampleImage extends StatelessWidget {
-  const _SampleImage({required this.path, required this.onTap});
-
-  final String path;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFFF4F4F4),
-      borderRadius: BorderRadius.circular(14),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: AppImage(
-          path,
-          width: double.infinity,
-          height: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      ),
     );
   }
 }

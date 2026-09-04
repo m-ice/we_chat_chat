@@ -5,13 +5,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
-import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/chat_message.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/entities/user_detail_seed_profile.dart';
 import '../../../domain/repositories/chat_repository.dart';
-import '../../../domain/repositories/membership_wallet_repository.dart';
+import '../../../domain/policies/feature_access_gate.dart';
 import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/user_repository.dart';
 import '../../../domain/repositories/user_detail_repository.dart';
@@ -19,24 +18,29 @@ import '../../home/team_detail/team_detail_controller.dart';
 
 class UserDetailController extends GetxController {
   UserDetailController(
-    this.user,
+    User user,
     this._social,
     this._chats,
-    this._wallet,
+    this._access,
     this._users,
     this._details,
-  );
+  ) : profileUser = user.obs;
 
-  final User user;
+  /// The route can carry an outdated presentation snapshot. This observable is
+  /// refreshed from [UserRepository] before rendering the profile.
+  final Rx<User> profileUser;
+  User get user => profileUser.value;
   final SocialStateRepository _social;
   final ChatRepository _chats;
-  final MembershipWalletRepository _wallet;
+  final FeatureAccessGate _access;
   final UserRepository _users;
   final UserDetailRepository _details;
   final invited = false.obs;
+  final isCurrentUser = false.obs;
   final seedProfile = Rxn<UserDetailSeedProfile>();
   final floatingActionEvents = StreamController<OperateEvent>.broadcast();
   final _momentRevision = 0.obs;
+  final _activityRevision = 0.obs;
 
   final imageCarouselIndex = 0.obs;
   final imageCarouselC = PageController();
@@ -47,27 +51,21 @@ class UserDetailController extends GetxController {
     if (imageCarouselC.hasClients) imageCarouselC.jumpToPage(index);
   }
 
-  List<String> get generatedPersonalityTags =>
-      seedProfile.value?.personalityTags ?? const [];
+  List<String> get generatedPersonalityTags => isCurrentUser.value
+      ? user.personalityTags
+      : seedProfile.value?.personalityTags ?? const [];
 
-  String get heroImagePath {
-    final seedPath = seedProfile.value?.heroImagePath ?? '';
-    if (user.isSeedData && seedPath.isNotEmpty) return seedPath;
-    return user.galleryImagePaths.firstOrNull ?? user.avatarPath;
-  }
+  String get heroImagePath => user.avatarPath;
 
-  List<String> get galleryPreviewPaths {
-    final seedPaths = seedProfile.value?.galleryPreviewPaths ?? const [];
-    if (user.isSeedData && seedPaths.isNotEmpty) return seedPaths;
-    return user.galleryImagePaths.isEmpty
-        ? [user.avatarPath]
-        : user.galleryImagePaths;
-  }
+  List<String> get galleryPreviewPaths => user.galleryImagePaths
+      .where((path) => path.isNotEmpty && path != user.avatarPath)
+      .toSet()
+      .toList(growable: false);
 
   List<UserDetailFact> get facts {
     final profile = seedProfile.value;
     return [
-      UserDetailFact('user_id_label'.tr, '${user.id + 1237500}'),
+      UserDetailFact('user_id_label'.tr, user.displayId),
       ...?profile?.facts.map(
         (item) => UserDetailFact(
           item.labelKey.tr,
@@ -78,6 +76,7 @@ class UserDetailController extends GetxController {
   }
 
   List<UserDetailActivityData> get activities {
+    _activityRevision.value;
     final seededActivities = seedProfile.value?.activities ?? const [];
     if (user.isSeedData && seededActivities.isNotEmpty) {
       return seededActivities
@@ -104,11 +103,15 @@ class UserDetailController extends GetxController {
               interestedCount: activity.interestedCount,
             );
           })
+          .where(
+            (activity) =>
+                !_social.shieldedActivityIds.contains(activity.post.id),
+          )
           .toList(growable: false);
     }
 
     final team = user.teamPost;
-    if (team != null) {
+    if (team != null && !_social.shieldedActivityIds.contains(team.id)) {
       return [
         UserDetailActivityData(
           post: team,
@@ -181,10 +184,11 @@ class UserDetailController extends GetxController {
   Future<void> reloadProfile() => _loadProfile();
 
   Future<void> openActivity(UserDetailActivityData activity) async {
-    await Get.toNamed(
+    final result = await Get.toNamed(
       Routes.teamDetail,
       arguments: TeamDetailArguments(user: user, post: activity.post),
     );
+    if (result == TeamDetailResult.activityShielded) _activityRevision.value++;
   }
 
   @override
@@ -195,6 +199,14 @@ class UserDetailController extends GetxController {
   }
 
   Future<void> _loadProfile() async {
+    try {
+      final users = await _users.getUsers();
+      final matches = users.where((candidate) => candidate.id == user.id);
+      if (matches.isNotEmpty) profileUser.value = matches.first;
+      isCurrentUser.value = (await _users.getCurrentUser()).id == user.id;
+    } on Object {
+      isCurrentUser.value = true;
+    }
     if (!user.isSeedData) {
       seedProfile.value = null;
       return;
@@ -207,18 +219,17 @@ class UserDetailController extends GetxController {
   }
 
   Future<void> startChat() async {
+    if (await _isCurrentUser()) return;
     if (!await _chats.canSendMessage(user.id)) {
       AppToast.show('chat_wait_for_reply'.tr);
       return;
     }
-    if (!await _wallet.spendCoins(MembershipWalletRepository.chatCost)) {
-      await _showInsufficientCoins(MembershipWalletRepository.chatCost);
-      return;
-    }
+    if (!await _access.request(FeatureAccess.directMessage)) return;
     await Get.toNamed(Routes.chat, arguments: user);
   }
 
   Future<void> invite() async {
+    if (await _isCurrentUser()) return;
     if (invited.value) {
       AppToast.show('user_invited'.tr);
       return;
@@ -244,42 +255,37 @@ class UserDetailController extends GetxController {
   }
 
   Future<void> startCall() async {
+    if (await _isCurrentUser()) return;
     final messages = await _chats.getMessages(user.id);
     if (messages.isEmpty || messages.last.isFromCurrentUser) {
       AppToast.show('call_wait_for_reply'.tr);
       return;
     }
-    if (_wallet.coinBalance < MembershipWalletRepository.callCostPerMinute) {
-      await _showInsufficientCoins(
-        MembershipWalletRepository.callCostPerMinute,
-      );
-      return;
-    }
+    if (!await _access.request(FeatureAccess.voiceCall)) return;
     await Get.toNamed(Routes.voiceCall, arguments: user);
   }
 
   Future<void> block() async {
+    if (await _isCurrentUser()) return;
     await _social.block(user.id);
     Get.until((route) => route.isFirst);
     AppToast.show('social_blocked'.trParams({'name': user.nickname}));
   }
 
   Future<void> shield() async {
+    if (await _isCurrentUser()) return;
     await _social.shield(user.id);
     Get.until((route) => route.isFirst);
     AppToast.show('social_shielded'.trParams({'name': user.nickname}));
   }
 
-  Future<void> _showInsufficientCoins(int required) async {
-    final recharge = await AppDialog.confirm(
-      title: 'coins_insufficient'.tr,
-      message: 'coins_required'.trParams({
-        'required': '$required',
-        'balance': '${_wallet.coinBalance}',
-      }),
-      confirmText: 'coins_recharge_action'.tr,
-    );
-    if (recharge) await Get.toNamed<void>(Routes.coins);
+  Future<bool> _isCurrentUser() async {
+    try {
+      return (await _users.getCurrentUser()).id == user.id;
+    } on Object {
+      // Do not permit account-affecting actions until identity is available.
+      return true;
+    }
   }
 
   @override

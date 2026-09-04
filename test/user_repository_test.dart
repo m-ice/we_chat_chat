@@ -4,7 +4,11 @@ import 'package:we_chat_chat/core/vaules/app_image_string.dart';
 import 'package:we_chat_chat/data/providers/asset_json_provider.dart';
 import 'package:we_chat_chat/data/repositories/profile_edit_repository_impl.dart';
 import 'package:we_chat_chat/data/repositories/user_repository_impl.dart';
+import 'package:we_chat_chat/domain/entities/album_item.dart';
 import 'package:we_chat_chat/domain/entities/city_user_mapper.dart';
+import 'package:we_chat_chat/domain/entities/editable_profile.dart';
+import 'package:we_chat_chat/domain/entities/user.dart';
+import 'package:we_chat_chat/domain/repositories/album_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -48,7 +52,10 @@ void main() {
     expect(verifiedUsers.every((user) => user.isSeedData), isTrue);
     expect(cityUsers.every((user) => !user.isRealPersonVerified), isTrue);
     expect(verifiedUsers.every((user) => !user.isRealPersonVerified), isTrue);
-    expect(verifiedUsers.every((user) => !user.isOnline), isTrue);
+    expect(verifiedUsers.any((user) => user.isOnline), isTrue);
+    expect(verifiedUsers.any((user) => !user.isOnline), isTrue);
+    expect(cityUsers.any((user) => user.isOnline), isTrue);
+    expect(cityUsers.any((user) => !user.isOnline), isTrue);
     expect(
       verifiedUsers.every(
         (user) =>
@@ -84,6 +91,21 @@ void main() {
         expect(await rootBundle.load(path), isNotNull, reason: path);
       }
     }
+  });
+
+  test('uses the same public id format on every profile surface', () {
+    const user = User(
+      id: 2,
+      nickname: '沐野',
+      age: 24,
+      gender: '女',
+      hobbies: [],
+      avatarPath: '',
+      intro: '',
+      isVerified: false,
+    );
+
+    expect(user.displayId, '1237502');
   });
 
   test(
@@ -174,4 +196,97 @@ void main() {
     expect(otherAfter.nickname, otherBefore.nickname);
     expect(otherAfter.intro, otherBefore.intro);
   });
+
+  test(
+    'exposes the edited profile and local album from the canonical current user',
+    () async {
+      SharedPreferences.resetStatic();
+      SharedPreferences.setMockInitialValues({});
+      final profile = ProfileEditRepositoryImpl(
+        await SharedPreferences.getInstance(),
+      );
+      final repository = UserRepositoryImpl(
+        AssetJsonProvider(),
+        profile,
+        null,
+        const _AlbumWithPhoto('/documents/album/photos/uploaded.jpg'),
+      );
+      final source = await repository.getCurrentUser();
+      await profile.initializeIfAbsent(
+        EditableProfile.fromUser(source, avatarReference: 'userDefault'),
+      );
+      await profile.updateNickname('星光旅人');
+      await profile.updateBio('把今天收进相册里。');
+      await profile.updateInterests(['摄影', '徒步']);
+      await profile.updatePersonalityTags(['城市漫游', '行动派']);
+
+      final current = await repository.getCurrentUser();
+      final currentCityUser = (await repository.getCityUsers()).singleWhere(
+        (user) => user.id == current.id,
+      );
+
+      expect(current.nickname, '星光旅人');
+      expect(current.intro, '把今天收进相册里。');
+      expect(current.hobbies, ['摄影', '徒步']);
+      expect(current.personalityTags, ['城市漫游', '行动派']);
+      expect(
+        current.galleryImagePaths.first,
+        '/documents/album/photos/uploaded.jpg',
+      );
+      expect(
+        current.galleryImagePaths,
+        contains('/documents/album/photos/uploaded.jpg'),
+      );
+      expect(
+        currentCityUser.galleryImagePaths,
+        contains('/documents/album/photos/uploaded.jpg'),
+      );
+    },
+  );
+}
+
+class _AlbumWithPhoto implements AlbumRepository {
+  const _AlbumWithPhoto(this.photoPath);
+
+  final String photoPath;
+
+  @override
+  List<AlbumItem> get photos => [
+    AlbumItem(
+      id: 'uploaded-photo',
+      relativePath: 'album/photos/uploaded.jpg',
+      kind: AlbumMediaKind.photo,
+      createdAt: DateTime(2026),
+    ),
+  ];
+
+  @override
+  List<AlbumItem> get videos => const [];
+
+  @override
+  bool get hasProfilePhotoOverrides => true;
+
+  @override
+  Future<List<AlbumItem>> profilePhotos({
+    required int userId,
+    required List<String> seedPhotoPaths,
+    required String avatarPath,
+  }) async => photos;
+
+  @override
+  Future<String> fullPath(AlbumItem item) async => photoPath;
+
+  @override
+  Future<int> importFiles(List<String> sourcePaths, AlbumMediaKind kind) =>
+      throw UnsupportedError('Not used by this test');
+
+  @override
+  Future<void> remove(Set<String> ids, AlbumMediaKind kind) =>
+      throw UnsupportedError('Not used by this test');
+
+  @override
+  Future<void> removeProfilePhotos({
+    required int userId,
+    required Set<String> ids,
+  }) => throw UnsupportedError('Not used by this test');
 }

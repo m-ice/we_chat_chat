@@ -11,12 +11,11 @@ import '../../../domain/entities/city_user.dart';
 import '../../../domain/entities/user.dart';
 import '../../main/controllers/main_controller.dart';
 import '../controllers/home_controller.dart';
+import '../team_detail/team_detail_controller.dart';
 
 const _figmaYellow = Color(0xFFFFCE45);
 const _figmaText = Color(0xFF333333);
 const _figmaSecondary = Color(0xFF999999);
-const _figmaAvatars = AppImageString.homeRecommendationAvatars;
-
 String _copy(String zh, String en) =>
     Get.locale?.languageCode == 'zh' ? zh : en;
 
@@ -63,14 +62,16 @@ class HomePage extends GetView<HomeController> {
                         final user = controller.activityUsers[index];
                         return ActivityCard(
                           user: user,
-                          isPendingJoin: controller.pendingJoinIds.contains(
-                            user.id,
-                          ),
+                          participantAvatarPaths:
+                              controller.activityParticipantAvatarPaths[user
+                                  .teamPost!
+                                  .id] ??
+                              const [],
                           onJoin: () => controller.join(user),
                           onOpen: () async {
                             final result = await controller.openActivity(user);
                             if (result == HomeFeedTab.nearby) _openPartnerTab();
-                            controller.refreshSocialState();
+                            await controller.load();
                           },
                         );
                       },
@@ -79,7 +80,7 @@ class HomePage extends GetView<HomeController> {
                   child: _CreateActivityButton(
                     onPressed: () async {
                       await Get.toNamed(Routes.teamPublish);
-                      controller.refreshSocialState();
+                      await controller.load();
                     },
                   ),
                 ),
@@ -98,14 +99,7 @@ class _NearbyHero extends StatelessWidget {
   final List<CityUser> users;
   final ValueChanged<CityUser> onUserTap;
 
-  void _openRecommendation(int index) {
-    if (users.isEmpty) {
-      _openPartnerTab();
-      return;
-    }
-    final user = users[index % users.length];
-    onUserTap(user);
-  }
+  void _openRecommendation(CityUser user) => onUserTap(user);
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +147,10 @@ class _NearbyHero extends StatelessWidget {
             right: 12.w,
             top: 59.h,
             bottom: 65.h,
-            child: _RecommendationPanel(onAvatarPressed: _openRecommendation),
+            child: _RecommendationPanel(
+              users: users,
+              onAvatarPressed: _openRecommendation,
+            ),
           ),
           Positioned(
             bottom: 0,
@@ -168,12 +165,17 @@ class _NearbyHero extends StatelessWidget {
 }
 
 class _RecommendationPanel extends StatelessWidget {
-  const _RecommendationPanel({required this.onAvatarPressed});
+  const _RecommendationPanel({
+    required this.users,
+    required this.onAvatarPressed,
+  });
 
-  final ValueChanged<int> onAvatarPressed;
+  final List<CityUser> users;
+  final ValueChanged<CityUser> onAvatarPressed;
 
   @override
   Widget build(BuildContext context) {
+    final visibleUsers = users.take(5).toList(growable: false);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -216,14 +218,15 @@ class _RecommendationPanel extends StatelessWidget {
           width: 302,
           height: 57,
           child: Row(
-            children: List.generate(_figmaAvatars.length, (index) {
+            children: List.generate(visibleUsers.length, (index) {
+              final user = visibleUsers[index];
               return Padding(
                 padding: EdgeInsets.only(
-                  right: index == _figmaAvatars.length - 1 ? 0 : 4,
+                  right: index == visibleUsers.length - 1 ? 0 : 4,
                 ),
                 child: GestureDetector(
-                  key: ValueKey('home-recommendation-$index'),
-                  onTap: () => onAvatarPressed(index),
+                  key: ValueKey('home-recommendation-${user.id}'),
+                  onTap: () => onAvatarPressed(user),
                   child: Container(
                     width: 57,
                     height: 57,
@@ -234,7 +237,7 @@ class _RecommendationPanel extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
                       child: AppImage(
-                        _figmaAvatars[index],
+                        user.avatarPath,
                         width: 57,
                         height: 57,
                         fit: BoxFit.cover,
@@ -492,13 +495,13 @@ class ActivityCard extends StatelessWidget {
   const ActivityCard({
     super.key,
     required this.user,
-    required this.isPendingJoin,
+    this.participantAvatarPaths = const [],
     this.onOpen,
     this.onJoin,
   });
 
   final User user;
-  final bool isPendingJoin;
+  final List<String> participantAvatarPaths;
   final VoidCallback? onOpen;
   final VoidCallback? onJoin;
 
@@ -514,12 +517,15 @@ class ActivityCard extends StatelessWidget {
       child: Semantics(
         button: true,
         label: _eventTitle(post),
-        value: isPendingJoin ? 'home_pending_join'.tr : null,
         onLongPress: onJoin,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap:
-              onOpen ?? () => Get.toNamed(Routes.teamDetail, arguments: user),
+              onOpen ??
+              () => Get.toNamed(
+                Routes.teamDetail,
+                arguments: TeamDetailArguments(user: user, post: post),
+              ),
           onLongPress: onJoin,
           child: Container(
             key: const ValueKey('home-activity-card'),
@@ -598,10 +604,10 @@ class ActivityCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Positioned(
+                Positioned(
                   left: 12,
                   top: 104,
-                  child: _ParticipantStrip(),
+                  child: _ParticipantStrip(avatarPaths: participantAvatarPaths),
                 ),
                 Positioned(
                   right: 12,
@@ -683,16 +689,23 @@ class _MetaRow extends StatelessWidget {
 }
 
 class _ParticipantStrip extends StatelessWidget {
-  const _ParticipantStrip();
+  const _ParticipantStrip({required this.avatarPaths});
+
+  final List<String> avatarPaths;
 
   @override
   Widget build(BuildContext context) {
+    final visibleAvatarPaths = avatarPaths
+        .where((path) => path.isNotEmpty)
+        .toSet()
+        .take(2)
+        .toList(growable: false);
     return SizedBox(
       width: 90,
       height: 22,
       child: Stack(
         children: [
-          for (var index = 0; index < 2; index++)
+          for (var index = 0; index < visibleAvatarPaths.length; index++)
             Positioned(
               left: index * 16,
               child: Container(
@@ -704,7 +717,7 @@ class _ParticipantStrip extends StatelessWidget {
                 ),
                 child: ClipOval(
                   child: AppImage(
-                    _figmaAvatars[index],
+                    visibleAvatarPaths[index],
                     width: 22,
                     height: 22,
                     fit: BoxFit.cover,

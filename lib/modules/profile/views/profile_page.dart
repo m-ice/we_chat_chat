@@ -41,23 +41,23 @@ class ProfilePage extends GetView<ProfileController> {
                 _ProfileHeader(
                   avatar: avatar,
                   nickname: controller.nickname.value,
-                  userId: user?.id,
+                  displayId: user?.displayId,
                 ),
-                _SummaryPanel(
-                  coinsLabel: _isChinese ? '撩币' : 'profile_coins'.tr,
-                  membershipLabel: 'profile_vip'.tr,
-                  albumLabel: 'profile_album'.tr,
-                  onCoinsTap: () async {
-                    await Get.toNamed(Routes.coins);
-                    controller.refreshWallet();
-                  },
-                  onMembershipTap: () async {
-                    await Get.toNamed(Routes.vip);
-                    controller.refreshWallet();
-                  },
-                  onAlbumTap: () => Get.toNamed(Routes.album),
-                ),
-                const SizedBox(height: 8),
+                // _SummaryPanel(
+                //   coinsLabel: _isChinese ? '撩币' : 'profile_coins'.tr,
+                //   membershipLabel: 'profile_vip'.tr,
+                //   albumLabel: 'profile_album'.tr,
+                //   onCoinsTap: () async {
+                //     await Get.toNamed(Routes.coins);
+                //     controller.refreshWallet();
+                //   },
+                //   onMembershipTap: () async {
+                //     await Get.toNamed(Routes.vip);
+                //     controller.refreshWallet();
+                //   },
+                //   onAlbumTap: () => Get.toNamed(Routes.album),
+                // ),
+                // const SizedBox(height: 8),
                 _MenuRow(
                   icon: AppImageString.profileFigmaEdit,
                   label: 'profile_edit'.tr,
@@ -66,37 +66,59 @@ class ProfilePage extends GetView<ProfileController> {
                     await controller.load();
                   },
                 ),
+                // _MenuRow(
+                //   icon: AppImageString.liveVerification,
+                //   label: _isChinese ? '真人认证' : 'live_verification'.tr,
+                //   onTap: () => Get.toNamed(Routes.myWorld),
+                // ),
                 _MenuRow(
                   icon: AppImageString.profileFigmaWorld,
                   label: _isChinese ? '我的动态' : 'profile_world'.tr,
                   onTap: () => Get.toNamed(Routes.myWorld),
+                ),
+
+                _MenuRow(
+                  icon: AppImageString.myImage,
+                  label: _isChinese ? '我的相册' : 'profile_album'.tr,
+                  onTap: () => Get.toNamed(Routes.album),
                 ),
                 _MenuRow(
                   icon: AppImageString.profileFigmaSupport,
                   label: 'profile_customer_service'.tr,
                   onTap: () => Get.toNamed(Routes.customerService),
                 ),
+
                 _MenuRow(
-                  icon: AppImageString.profileFigmaPrivacy,
-                  label: 'legal_privacy'.tr,
-                  onTap: () => Get.toNamed(
-                    Routes.legal,
-                    arguments: {
-                      'title': 'legal_privacy'.tr,
-                      'assetPath': 'assets/legal/privacy_policy.html',
-                    },
-                  ),
+                  icon: AppImageString.aboutUs,
+                  label: 'profile_about_us'.tr,
+                  onTap: () => Get.toNamed(Routes.aboutUs),
                 ),
+                // _MenuRow(
+                //   icon: AppImageString.profileFigmaPrivacy,
+                //   label: 'legal_privacy'.tr,
+                //   onTap: () => Get.toNamed(
+                //     Routes.legal,
+                //     arguments: {
+                //       'title': 'legal_privacy'.tr,
+                //       'assetPath': 'assets/legal/privacy_policy.html',
+                //     },
+                //   ),
+                // ),
+                // _MenuRow(
+                //   icon: AppImageString.profileFigmaAgreement,
+                //   label: 'legal_user_agreement'.tr,
+                //   onTap: () => Get.toNamed(
+                //     Routes.legal,
+                //     arguments: {
+                //       'title': 'legal_user_agreement'.tr,
+                //       'assetPath': 'assets/legal/user_agreement.html',
+                //     },
+                //   ),
+                // ),
                 _MenuRow(
-                  icon: AppImageString.profileFigmaAgreement,
-                  label: 'legal_user_agreement'.tr,
-                  onTap: () => Get.toNamed(
-                    Routes.legal,
-                    arguments: {
-                      'title': 'legal_user_agreement'.tr,
-                      'assetPath': 'assets/legal/user_agreement.html',
-                    },
-                  ),
+                  icon: AppImageString.mySetting,
+                  label: 'profile_settings'.tr,
+                  onTap: () => Get.toNamed(Routes.settings),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -130,12 +152,12 @@ class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({
     required this.avatar,
     required this.nickname,
-    required this.userId,
+    required this.displayId,
   });
 
   final String avatar;
   final String nickname;
-  final int? userId;
+  final String? displayId;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -171,7 +193,7 @@ class _ProfileHeader extends StatelessWidget {
           ),
         ),
         Text(
-          'ID: ${userId ?? '--'}',
+          'ID: ${displayId ?? '--'}',
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: AppColors.textSecondary,
@@ -290,12 +312,14 @@ class _SummaryAction extends StatelessWidget {
 
 class _MenuRow extends StatelessWidget {
   const _MenuRow({
-    required this.icon,
+    this.icon,
+    this.materialIcon,
     required this.label,
     required this.onTap,
-  });
+  }) : assert(icon != null || materialIcon != null);
 
-  final String icon;
+  final String? icon;
+  final IconData? materialIcon;
   final String label;
   final VoidCallback onTap;
 
@@ -308,7 +332,10 @@ class _MenuRow extends StatelessWidget {
         padding: const EdgeInsets.only(left: 20, right: 15),
         child: Row(
           children: [
-            AppImage(icon, width: 28, height: 28),
+            if (materialIcon case final iconData?)
+              Icon(iconData, size: 28, color: AppColors.textPrimary)
+            else
+              AppImage(icon!, width: 28, height: 28),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

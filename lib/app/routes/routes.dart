@@ -14,12 +14,16 @@ abstract final class Routes {
   static const imagePreview = '/image-preview';
   static const voiceCall = '/voice-call';
   static const teamDetail = '/team-detail';
+  static const teamMembers = '/team-detail/members';
   static const guideArticle = '/guide-article';
   static const teamPublish = '/team-publish';
   static const teamActivityPicker = '/team-publish/activity';
   static const teamPublishReview = '/team-publish/review';
   static const legal = '/legal';
   static const profileEdit = '/profile/edit';
+  static const aboutUs = '/profile/about-us';
+  static const settings = '/profile/settings';
+  static const blacklist = '/profile/settings/blacklist';
   static const profileInterests = '/profile/edit/interests';
   static const profilePersonality = '/profile/edit/personality';
   static const profileNickname = '/profile/edit/nickname';

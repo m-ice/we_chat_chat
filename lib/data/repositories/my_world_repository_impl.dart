@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,9 +9,14 @@ import '../../domain/entities/my_world_post.dart';
 import '../../domain/repositories/my_world_repository.dart';
 
 class MyWorldRepositoryImpl implements MyWorldRepository {
-  MyWorldRepositoryImpl(this._preferences);
+  MyWorldRepositoryImpl(this._preferences, {Duration Function()? reviewDelay})
+    : _reviewDelay = reviewDelay ?? _randomReviewDelay;
   static const storageKey = 'mt_my_world_posts';
   final SharedPreferences _preferences;
+  final Duration Function() _reviewDelay;
+
+  static Duration _randomReviewDelay() =>
+      Duration(minutes: 15 + Random.secure().nextInt(16));
 
   @override
   List<MyWorldPost> get posts {
@@ -36,6 +42,7 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
           reviewStatus: json['mtReviewStatus'] == 'mtApproved'
               ? MyWorldReviewStatus.approved
               : MyWorldReviewStatus.pending,
+          reviewAvailableAt: _readReviewAvailableAt(json),
           isLiked: json['mtIsLiked'] as bool? ?? false,
           likeCount: json['mtLikeCount'] as int? ?? 0,
           comments: (json['mtComments'] as List? ?? const [])
@@ -57,6 +64,40 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
     } on Object {
       return const [];
     }
+  }
+
+  DateTime? _readReviewAvailableAt(Map<String, dynamic> json) {
+    final value = json['mtReviewAvailableAt'] as num?;
+    if (value != null) {
+      return DateTime.fromMillisecondsSinceEpoch((value * 1000).round());
+    }
+    if (json['mtReviewStatus'] == 'mtApproved') return null;
+    final created = json['mtCreatedAt'] as num?;
+    return created == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(
+            (created * 1000).round(),
+          ).add(const Duration(minutes: 15));
+  }
+
+  @override
+  Future<void> refreshReviewStatuses() async {
+    final now = DateTime.now();
+    final current = posts.toList();
+    var changed = false;
+    for (var index = 0; index < current.length; index++) {
+      final post = current[index];
+      if (post.reviewStatus != MyWorldReviewStatus.pending ||
+          post.reviewAvailableAt == null ||
+          now.isBefore(post.reviewAvailableAt!)) {
+        continue;
+      }
+      current[index] = post.copyWith(
+        reviewStatus: MyWorldReviewStatus.approved,
+      );
+      changed = true;
+    }
+    if (changed) await _persist(current);
   }
 
   @override
@@ -83,6 +124,7 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
         }
       }
     }
+    final createdAt = DateTime.now();
     final current = posts.toList()
       ..insert(
         0,
@@ -91,8 +133,9 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
           content: text,
           imageRelativePaths: paths,
           topics: topics,
-          createdAt: DateTime.now(),
+          createdAt: createdAt,
           reviewStatus: MyWorldReviewStatus.pending,
+          reviewAvailableAt: createdAt.add(_reviewDelay()),
         ),
       );
     return _persist(current);
@@ -169,6 +212,8 @@ class MyWorldRepositoryImpl implements MyWorldRepository {
                   post.reviewStatus == MyWorldReviewStatus.approved
                   ? 'mtApproved'
                   : 'mtPending',
+              if (post.reviewAvailableAt case final reviewAt?)
+                'mtReviewAvailableAt': reviewAt.millisecondsSinceEpoch / 1000,
               'mtIsLiked': post.isLiked,
               'mtLikeCount': post.likeCount,
               'mtComments': post.comments

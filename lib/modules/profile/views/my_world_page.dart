@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
-import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/my_world_post.dart';
 import '../controllers/my_world_controller.dart';
 import '../controllers/profile_controller.dart';
@@ -99,7 +98,6 @@ class _PostCard extends GetView<MyWorldController> {
           image: images.firstOrNull,
           time: _dateLabel(post.createdAt),
           onImageTap: images.isEmpty ? null : () => controller.preview(post, 0),
-          onAction: () => AppToast.show('world_own_greet'.tr),
           onLike: () => controller.toggleLike(post),
           onComment: () => controller.comment(post),
           liked: post.isLiked,
@@ -176,7 +174,6 @@ class _PostShell extends StatelessWidget {
     required this.meta,
     required this.content,
     required this.time,
-    required this.onAction,
     required this.onLike,
     required this.onComment,
     required this.liked,
@@ -191,7 +188,6 @@ class _PostShell extends StatelessWidget {
   final String content;
   final String? image;
   final String time;
-  final VoidCallback onAction;
   final VoidCallback onLike;
   final VoidCallback onComment;
   final bool liked;
@@ -240,23 +236,6 @@ class _PostShell extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            FilledButton(
-              onPressed: onAction,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCE45),
-                foregroundColor: Colors.black,
-                minimumSize: const Size(0, 30),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: const StadiumBorder(),
-                textStyle: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              child: Text('world_greet'.tr),
             ),
           ],
         ),

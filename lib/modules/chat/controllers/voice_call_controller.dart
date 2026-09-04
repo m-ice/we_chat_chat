@@ -5,14 +5,13 @@ import 'package:get/get.dart';
 
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/user.dart';
-import '../../../domain/repositories/membership_wallet_repository.dart';
+import '../../../domain/repositories/user_repository.dart';
 
 class VoiceCallController extends GetxController {
-  // The wallet parameter keeps the existing route factory source-compatible.
-  // Demo calling must not charge before a real RTC connection is available.
-  VoiceCallController(this.peer, MembershipWalletRepository _);
+  VoiceCallController(this.peer, this._users);
 
   final User peer;
+  final UserRepository _users;
   final elapsedSeconds = 0.obs;
   final AudioPlayer _player = AudioPlayer();
   Timer? _timer;
@@ -30,6 +29,10 @@ class VoiceCallController extends GetxController {
   }
 
   Future<void> _start() async {
+    if (await _isCurrentUser()) {
+      Get.back<void>();
+      return;
+    }
     AppToast.show('call_demo_no_charge'.tr);
     try {
       await _player.setReleaseMode(ReleaseMode.loop);
@@ -41,6 +44,15 @@ class VoiceCallController extends GetxController {
       elapsedSeconds.value++;
       if (elapsedSeconds.value >= 30) end(showToast: true);
     });
+  }
+
+  Future<bool> _isCurrentUser() async {
+    try {
+      return (await _users.getCurrentUser()).id == peer.id;
+    } on Object {
+      // A call is not started when the local identity cannot be verified.
+      return true;
+    }
   }
 
   void end({bool showToast = false}) {

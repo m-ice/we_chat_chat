@@ -5,6 +5,8 @@ abstract interface class ReportRepository {
 
   Future<ReportRecord> submit({
     required int targetUserId,
+    String? targetActivityId,
+    String? targetDynamicId,
     required String reason,
     required String details,
   });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:we_chat_chat/core/widgets/figma_back_button.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -21,25 +22,49 @@ class LegalWebPage extends StatefulWidget {
 class _LegalWebPageState extends State<LegalWebPage> {
   late final WebViewController _controller;
   var _loading = true;
+  var _hasLoadError = false;
 
   @override
   void initState() {
     super.initState();
     _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setJavaScriptMode(JavaScriptMode.disabled)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (_) =>
               mounted ? setState(() => _loading = false) : null,
-          onWebResourceError: (_) =>
-              mounted ? setState(() => _loading = false) : null,
+          onWebResourceError: (_) {
+            if (mounted) {
+              setState(() {
+                _loading = false;
+                _hasLoadError = true;
+              });
+            }
+          },
         ),
       );
+    _loadDocument();
+  }
+
+  Future<void> _loadDocument() async {
     final asset = widget.assetPath;
-    if (asset == null) {
-      _controller.loadRequest(Uri.parse(widget.url!));
-    } else {
-      _controller.loadFlutterAsset(asset);
+    try {
+      if (asset != null && asset.trim().isNotEmpty) {
+        await _controller.loadFlutterAsset(asset);
+        return;
+      }
+      final uri = Uri.tryParse(widget.url ?? '');
+      if (uri == null || !uri.hasScheme || !uri.isScheme('https')) {
+        throw ArgumentError.value(widget.url, 'url', 'Expected an HTTPS URL');
+      }
+      await _controller.loadRequest(uri);
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _hasLoadError = true;
+        });
+      }
     }
   }
 
@@ -53,7 +78,18 @@ class _LegalWebPageState extends State<LegalWebPage> {
     ),
     body: Stack(
       children: [
-        WebViewWidget(controller: _controller),
+        if (_hasLoadError)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'legal_document_unavailable'.tr,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          )
+        else
+          WebViewWidget(controller: _controller),
         if (_loading) const LinearProgressIndicator(),
       ],
     ),

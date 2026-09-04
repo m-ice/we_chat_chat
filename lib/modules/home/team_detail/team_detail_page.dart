@@ -90,7 +90,7 @@ class TeamDetailPage extends GetView<TeamDetailController> {
               actions: [
                 _RoundTopButton(
                   assetPath: TeamFlowAssets.detailMoreIcon,
-                  onTap: controller.openOrganizer,
+                  onTap: controller.openActions,
                 ),
               ],
             ),
@@ -225,7 +225,10 @@ class TeamDetailPage extends GetView<TeamDetailController> {
                             .map(
                               (comment) => _CommentRow(
                                 comment: comment,
-                                onGreeting: controller.openChat,
+                                showGreeting: controller
+                                    .canChatWithCommentAuthor(comment),
+                                onGreeting: () =>
+                                    controller.openCommentAuthorChat(comment),
                               ),
                             )
                             .toList(growable: false),
@@ -344,8 +347,8 @@ class _ParticipantBar extends StatelessWidget {
     return Obx(
       () => Semantics(
         button: true,
-        label: controller.pending.value
-            ? 'team_join_pending_semantics'.tr
+        label: controller.isCurrentUserParticipant.value
+            ? 'team_members_tap_semantics'.tr
             : 'team_join_tap_semantics'.tr,
         child: Material(
           color: const Color(0xFFF2F2F2),
@@ -383,7 +386,6 @@ class _ParticipantBar extends StatelessWidget {
                             child: AppImage(
                               TeamFlowAssets.detailParticipantAdd,
                               width: 22,
-                              height: 22,
                             ),
                           ),
                         ],
@@ -556,9 +558,14 @@ class _BannerAvatar extends StatelessWidget {
 }
 
 class _CommentRow extends StatelessWidget {
-  const _CommentRow({required this.comment, required this.onGreeting});
+  const _CommentRow({
+    required this.comment,
+    required this.showGreeting,
+    required this.onGreeting,
+  });
 
   final TeamDetailComment comment;
+  final bool showGreeting;
   final VoidCallback onGreeting;
 
   @override
@@ -568,9 +575,11 @@ class _CommentRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ClipOval(
+          ClipOval(
             child: AppImage(
-              TeamFlowAssets.detailCommentAvatar,
+              comment.avatarPath.isEmpty
+                  ? TeamFlowAssets.detailCommentAvatar
+                  : comment.avatarPath,
               width: 24,
               height: 24,
               fit: BoxFit.cover,
@@ -600,25 +609,27 @@ class _CommentRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: onGreeting,
-            child: Container(
-              width: 54.w,
-              height: 27.h,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(26.r),
-                border: Border.all(color: Color(0xFFFFCE45), width: 1.w),
-              ),
-              child: Text(
-                'team_greet'.tr,
-                style: TextStyle(fontSize: 11.sp, color: Color(0xFFFFCE45)),
+          if (showGreeting) ...[
+            const SizedBox(width: 8),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: onGreeting,
+              child: Container(
+                width: 54.w,
+                height: 27.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(26.r),
+                  border: Border.all(color: Color(0xFFFFCE45), width: 1.w),
+                ),
+                child: Text(
+                  'team_greet'.tr,
+                  style: TextStyle(fontSize: 11.sp, color: Color(0xFFFFCE45)),
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

@@ -41,6 +41,7 @@ class AppImageString {
   static const homePublish = 'assets/images/content/figma_home_publish.png';
   static const homeClock = 'assets/images/content/figma_home_clock.png';
   static const homeMap = 'assets/images/content/figma_home_map.png';
+  static const liveVerification = 'assets/images/content/live_verification.png';
 
   static const profileFigmaHeader =
       'assets/images/content/figma_profile_header.png';
@@ -132,6 +133,10 @@ class AppImageString {
 
   static const profileEditSearch = 'assets/icons/profile_edit/search.svg';
   static const profileEditAlbumAdd = 'assets/icons/profile_edit/album_add.svg';
+  static const myImage = 'assets/icons/profile/my_image.png';
+  static const mySetting = 'assets/icons/profile/my_setting.png';
+  static const aboutUs = 'assets/icons/profile/about_us.png';
+  static const aboutUsAppIcon = 'assets/images/content/about_app_icon.png';
 
   static const profileHeaderBackground =
       'assets/images/profile_detail/header_bg.svg';
@@ -148,6 +153,8 @@ class AppImageString {
       'assets/images/profile_detail/album_photo_2.png';
   static const profileChevronRight =
       'assets/icons/profile_detail/chevron_right.svg';
+  static const profileChevronLeft =
+      'assets/icons/profile_detail/chevron_left.svg';
   static const profileRechargeHelp =
       'assets/icons/profile_detail/recharge_help.svg';
   static const profileWorldMore = 'assets/icons/profile_detail/world_more.svg';

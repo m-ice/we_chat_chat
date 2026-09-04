@@ -26,6 +26,7 @@ abstract final class AppDialog {
       builder: (_) => _AppConfirmDialog(
         title: title,
         message: message,
+        messageWidget: null,
         cancelText: '',
         confirmText: buttonText ?? 'common_got_it'.tr,
         isDangerous: false,
@@ -40,10 +41,12 @@ abstract final class AppDialog {
   static Future<bool> confirm({
     required String title,
     String? message,
+    Widget? messageWidget,
     String? cancelText,
     String? confirmText,
     bool isDangerous = false,
   }) async {
+    assert(message == null || messageWidget == null);
     final tag = 'app-confirm-${_sequence++}';
     final result = await SmartDialog.show<bool>(
       tag: tag,
@@ -54,6 +57,7 @@ abstract final class AppDialog {
       builder: (_) => _AppConfirmDialog(
         title: title,
         message: message,
+        messageWidget: messageWidget,
         cancelText: cancelText ?? 'common_cancel'.tr,
         confirmText: confirmText ?? 'common_confirm'.tr,
         isDangerous: isDangerous,
@@ -78,6 +82,7 @@ class _AppConfirmDialog extends StatelessWidget {
   const _AppConfirmDialog({
     required this.title,
     required this.message,
+    required this.messageWidget,
     required this.cancelText,
     required this.confirmText,
     required this.isDangerous,
@@ -88,6 +93,7 @@ class _AppConfirmDialog extends StatelessWidget {
 
   final String title;
   final String? message;
+  final Widget? messageWidget;
   final String cancelText;
   final String confirmText;
   final bool isDangerous;
@@ -155,7 +161,10 @@ class _AppConfirmDialog extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (trimmedMessage?.isNotEmpty == true) ...[
+                if (messageWidget != null) ...[
+                  const SizedBox(height: 14),
+                  messageWidget!,
+                ] else if (trimmedMessage?.isNotEmpty == true) ...[
                   const SizedBox(height: 14),
                   Text(
                     trimmedMessage!,

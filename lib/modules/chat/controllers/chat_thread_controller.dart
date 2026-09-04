@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_chat_core/flutter_chat_core.dart' as chat_core;
 import 'package:get/get.dart';
 
@@ -8,15 +10,17 @@ import '../../../domain/entities/chat_message.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/repositories/ai_repository.dart';
 import '../../../domain/repositories/chat_repository.dart';
+import '../../../domain/repositories/social_state_repository.dart';
 import '../../../domain/repositories/user_repository.dart';
 
 class ChatThreadController extends GetxController {
-  ChatThreadController(this.peer, this._chats, this._ai);
+  ChatThreadController(this.peer, this._chats, this._ai, this._social);
 
   static const currentUserId = 'current-user';
   final User peer;
   final ChatRepository _chats;
   final AiRepository _ai;
+  final SocialStateRepository _social;
   final messages = <ChatMessage>[].obs;
   final awaitingReply = false.obs;
   final canSend = true.obs;
@@ -24,11 +28,13 @@ class ChatThreadController extends GetxController {
   final hasError = false.obs;
   final currentUser = Rxn<User>();
   late chat_core.InMemoryChatController chatController;
+  StreamSubscription<void>? _socialChangesSubscription;
 
   @override
   void onInit() {
     super.onInit();
     chatController = chat_core.InMemoryChatController();
+    _socialChangesSubscription = _social.changes.listen((_) => load());
     load();
   }
 
@@ -40,6 +46,11 @@ class ChatThreadController extends GetxController {
         currentUser.value = await Get.find<UserRepository>().getCurrentUser();
       } on Object {
         currentUser.value = null;
+      }
+      if (isBlocked) {
+        messages.clear();
+        canSend.value = false;
+        return;
       }
       messages.assignAll(await _chats.getMessages(peer.id));
       await chatController.setMessages(
@@ -62,6 +73,8 @@ class ChatThreadController extends GetxController {
   }
 
   Future<void> send(String raw) async {
+    if (isBlocked) return;
+    if (await _isSelfPeer()) return;
     final text = raw.trim();
     if (text.isEmpty || awaitingReply.value || !canSend.value) return;
     canSend.value = false;
@@ -111,6 +124,8 @@ class ChatThreadController extends GetxController {
   }
 
   Future<void> startVoiceCall() async {
+    if (isBlocked) return;
+    if (await _isSelfPeer()) return;
     if (peer.id == -1) {
       AppToast.show('chat_assistant_no_call'.tr);
       return;
@@ -120,6 +135,42 @@ class ChatThreadController extends GetxController {
       return;
     }
     await Get.toNamed(Routes.voiceCall, arguments: peer);
+  }
+
+  Future<void> openPeerProfile() async {
+    if (!canOpenPeerProfile || await _isSelfPeer()) return;
+    await _openUserProfile(peer);
+  }
+
+  Future<void> openCurrentUserProfile() async {
+    final user = currentUser.value;
+    if (user == null) return;
+    await _openUserProfile(user);
+  }
+
+  bool get isSelfPeer => currentUser.value?.id == peer.id;
+  bool get canOpenPeerProfile => peer.id != -1 && !isSelfPeer;
+  bool get isBlocked => _social.blockedIds.contains(peer.id);
+
+  Future<bool> _isSelfPeer() async {
+    final knownCurrentUser = currentUser.value;
+    if (knownCurrentUser != null) return knownCurrentUser.id == peer.id;
+    try {
+      final loadedCurrentUser = await Get.find<UserRepository>()
+          .getCurrentUser();
+      currentUser.value = loadedCurrentUser;
+      return loadedCurrentUser.id == peer.id;
+    } on Object {
+      // Sending or starting a call requires a verified local identity.
+      return true;
+    }
+  }
+
+  Future<void> _openUserProfile(User user) async {
+    await Get.toNamed<void>(
+      Routes.userDetail,
+      arguments: <String, Object>{'userId': user.id, 'user': user},
+    );
   }
 
   Future<chat_core.User?> resolveUser(String id) async {
@@ -133,6 +184,7 @@ class ChatThreadController extends GetxController {
 
   @override
   void onClose() {
+    _socialChangesSubscription?.cancel();
     chatController.dispose();
     super.onClose();
   }

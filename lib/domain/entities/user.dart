@@ -11,6 +11,7 @@ class User {
     this.moment,
     this.teamPost,
     this.galleryImagePaths = const [],
+    this.personalityTags = const [],
     this.verificationVideoPath = '',
     this.isSeedData = false,
   });
@@ -26,8 +27,15 @@ class User {
   final UserMoment? moment;
   final TeamPost? teamPost;
   final List<String> galleryImagePaths;
+  final List<String> personalityTags;
   final String verificationVideoPath;
   final bool isSeedData;
+
+  /// Internal ids identify records locally. The app presents a stable public
+  /// id instead, so every profile surface uses the same value.
+  String get displayId => '${id + _publicIdOffset}';
+
+  static const _publicIdOffset = 1237500;
 }
 
 class UserMoment {

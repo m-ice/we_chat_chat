@@ -4,6 +4,8 @@ class ReportRecord {
   const ReportRecord({
     required this.id,
     required this.targetUserId,
+    this.targetActivityId,
+    this.targetDynamicId,
     required this.reason,
     required this.details,
     required this.createdAt,
@@ -12,6 +14,8 @@ class ReportRecord {
 
   final String id;
   final int targetUserId;
+  final String? targetActivityId;
+  final String? targetDynamicId;
   final String reason;
   final String details;
   final DateTime createdAt;

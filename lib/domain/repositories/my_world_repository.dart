@@ -2,6 +2,7 @@ import '../entities/my_world_post.dart';
 
 abstract interface class MyWorldRepository {
   List<MyWorldPost> get posts;
+  Future<void> refreshReviewStatuses();
   Future<bool> publish({
     required String content,
     required List<String> imageSourcePaths,

@@ -19,11 +19,24 @@ void main() {
     await repository.setInvited(13, true);
     await repository.block(15);
     await repository.shield(17);
+    await repository.shieldActivity('activity-017');
 
     expect(repository.followedIds, {7, 9});
     expect(repository.pendingJoinIds, {11});
     expect(repository.invitedIds, {13});
     expect(repository.blockedIds, {15});
     expect(repository.shieldedIds, {17});
+    expect(repository.shieldedActivityIds, {'activity-017'});
+
+    final restored = SocialStateRepositoryImpl(
+      await SharedPreferences.getInstance(),
+    );
+    expect(restored.blockedIds, {15});
+
+    await repository.unblock(15);
+    final unblocked = SocialStateRepositoryImpl(
+      await SharedPreferences.getInstance(),
+    );
+    expect(unblocked.blockedIds, isEmpty);
   });
 }

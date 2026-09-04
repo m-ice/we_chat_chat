@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/routes.dart';
+import '../../../core/config/legal_document_urls.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
@@ -163,7 +164,7 @@ class _AgeGate extends StatelessWidget {
                       Routes.legal,
                       arguments: {
                         'title': 'legal_user_agreement'.tr,
-                        'assetPath': 'assets/legal/user_agreement.html',
+                        'url': LegalDocumentUrls.userAgreement,
                       },
                     ),
                     child: Text('legal_user_agreement'.tr),
@@ -173,7 +174,7 @@ class _AgeGate extends StatelessWidget {
                       Routes.legal,
                       arguments: {
                         'title': 'legal_privacy'.tr,
-                        'assetPath': 'assets/legal/privacy_policy.html',
+                        'url': LegalDocumentUrls.privacyPolicy,
                       },
                     ),
                     child: Text('legal_privacy'.tr),

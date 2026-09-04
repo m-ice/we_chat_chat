@@ -5,7 +5,10 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
+import 'package:we_chat_chat/app/routes/routes.dart';
+import 'package:we_chat_chat/core/config/legal_document_urls.dart';
 import 'package:we_chat_chat/core/widgets/app_dialog.dart';
+import 'package:we_chat_chat/core/widgets/app_legal_agreement_confirmation.dart';
 import 'package:we_chat_chat/core/widgets/app_text_input_dialog.dart';
 import 'package:we_chat_chat/l10n/app_translations.dart';
 
@@ -117,6 +120,55 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('app-confirm-dialog')), findsNothing);
   });
+
+  testWidgets(
+    'publish consent exposes both legal documents before confirming',
+    (tester) async {
+      String? openedUrl;
+      await tester.pumpWidget(
+        GetMaterialApp(
+          translations: AppTranslations(),
+          locale: const Locale('en', 'US'),
+          fallbackLocale: AppTranslations.fallbackLocale,
+          builder: FlutterSmartDialog.init(),
+          getPages: [
+            GetPage(
+              name: Routes.legal,
+              page: () {
+                openedUrl = (Get.arguments as Map)['url'] as String?;
+                return const Scaffold(body: Text('Legal document'));
+              },
+            ),
+          ],
+          home: Scaffold(
+            body: FilledButton(
+              onPressed: () => unawaited(AppLegalAgreementConfirmation.show()),
+              child: const Text('Open consent'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open consent'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('legal-confirm-user-agreement')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('legal-confirm-privacy-policy')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('legal-confirm-user-agreement')),
+      );
+      await tester.pumpAndSettle();
+      expect(Get.currentRoute, Routes.legal);
+      expect(openedUrl, LegalDocumentUrls.userAgreement);
+      expect(find.text('Legal document'), findsOneWidget);
+    },
+  );
 
   testWidgets('text input dialog returns input and ignores mask taps', (
     tester,

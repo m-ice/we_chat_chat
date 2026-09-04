@@ -4,10 +4,12 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../domain/entities/editable_profile.dart';
 import '../../../domain/repositories/profile_edit_repository.dart';
+import '../../../domain/repositories/user_repository.dart';
 
 class EditProfileController extends GetxController {
-  EditProfileController(this._repository);
+  EditProfileController(this._repository, [this._users]);
 
   static const interests = [
     '羽毛球',
@@ -41,6 +43,7 @@ class EditProfileController extends GetxController {
   ];
 
   final ProfileEditRepository _repository;
+  final UserRepository? _users;
   late final profile = _repository.profile.obs;
   final avatarFilePath = RxnString();
 
@@ -51,8 +54,19 @@ class EditProfileController extends GetxController {
   }
 
   Future<void> refreshProfile() async {
+    final users = _users;
+    final user = users == null ? null : await users.getCurrentUser();
+    if (user != null && !_repository.hasSavedProfile) {
+      await _repository.initializeIfAbsent(
+        EditableProfile.fromUser(
+          user,
+          avatarReference: _repository.profile.avatarReference,
+        ),
+      );
+    }
     profile.value = _repository.profile;
-    avatarFilePath.value = await _repository.resolveAvatarPath();
+    final localAvatar = await _repository.resolveAvatarPath();
+    avatarFilePath.value = localAvatar ?? user?.avatarPath;
   }
 
   Future<void> pickAvatar() async {

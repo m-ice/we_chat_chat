@@ -14,6 +14,8 @@ void main() {
 
     final submitted = await repository.submit(
       targetUserId: 42,
+      targetActivityId: 'activity-42',
+      targetDynamicId: 'dynamic-42',
       reason: '其他',
       details: '持续发送不适当内容',
     );
@@ -21,7 +23,13 @@ void main() {
     expect(submitted.status, ReportDeliveryStatus.queued);
     expect(repository.queuedReports, hasLength(1));
     expect(repository.queuedReports.single.targetUserId, 42);
+    expect(repository.queuedReports.single.targetActivityId, 'activity-42');
+    expect(repository.queuedReports.single.targetDynamicId, 'dynamic-42');
     expect(repository.queuedReports.single.details, '持续发送不适当内容');
+
+    final restored = ReportRepositoryImpl(preferences);
+    expect(restored.queuedReports, hasLength(1));
+    expect(restored.queuedReports.single.id, submitted.id);
   });
 
   test('support submission is retained in the delivery queue', () async {

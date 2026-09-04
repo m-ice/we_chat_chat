@@ -128,6 +128,9 @@ void main() {
 
 class _EmptyChatRepository implements ChatRepository {
   @override
+  Stream<void> get conversationUpdates => Stream<void>.empty();
+
+  @override
   Future<void> appendMessage(ChatMessage message, {User? peer}) async {}
 
   @override
@@ -148,6 +151,9 @@ class _EmptySocialStateRepository implements SocialStateRepository {
   Set<int> get blockedIds => const {};
 
   @override
+  Stream<void> get changes => Stream<void>.empty();
+
+  @override
   Set<int> get followedIds => const {};
 
   @override
@@ -158,6 +164,9 @@ class _EmptySocialStateRepository implements SocialStateRepository {
 
   @override
   Set<int> get shieldedIds => const {};
+
+  @override
+  Set<String> get shieldedActivityIds => const {};
 
   @override
   Future<void> block(int userId) async {}
@@ -173,4 +182,10 @@ class _EmptySocialStateRepository implements SocialStateRepository {
 
   @override
   Future<void> shield(int userId) async {}
+
+  @override
+  Future<void> shieldActivity(String activityId) async {}
+
+  @override
+  Future<void> unblock(int userId) async {}
 }

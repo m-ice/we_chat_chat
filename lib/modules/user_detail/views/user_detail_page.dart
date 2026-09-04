@@ -8,6 +8,7 @@ import '../../../core/vaules/app_image_string.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/app_refresh_view.dart';
 import '../../shared/actions/user_actions_sheet.dart';
+import '../../shared/report/report_controller.dart';
 import '../controllers/user_detail_controller.dart';
 
 class UserDetailPage extends GetView<UserDetailController> {
@@ -15,6 +16,7 @@ class UserDetailPage extends GetView<UserDetailController> {
 
   @override
   Widget build(BuildContext context) => Obx(() {
+    controller.profileUser.value;
     controller.seedProfile.value;
     return Scaffold(
       backgroundColor: Colors.white,
@@ -23,7 +25,10 @@ class UserDetailPage extends GetView<UserDetailController> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            _ProfileHero(controller: controller, onMore: _showMore),
+            _ProfileHero(
+              controller: controller,
+              onMore: controller.isCurrentUser.value ? null : _showMore,
+            ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
@@ -66,26 +71,31 @@ class UserDetailPage extends GetView<UserDetailController> {
                         const SizedBox(height: 12),
                       ],
                     ],
-                    const _SectionDivider(),
-                    _SectionTitle(title: 'user_posts'.tr),
-                    const SizedBox(height: 12),
-                    if (controller.moments.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 28),
-                        child: Center(
-                          child: Text(
-                            'user_no_posts'.tr,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                    if (!controller.isCurrentUser.value) ...[
+                      const _SectionDivider(),
+                      _SectionTitle(title: 'user_posts'.tr),
+                      const SizedBox(height: 12),
+                      if (controller.moments.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 28),
+                          child: Center(
+                            child: Text(
+                              'user_no_posts'.tr,
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                    else
-                      for (final item in controller.moments) ...[
-                        _MomentCard(item: item, onMore: _showMore),
-                        const SizedBox(height: 18),
-                      ],
+                        )
+                      else
+                        for (final item in controller.moments) ...[
+                          _MomentCard(
+                            item: item,
+                            onMore: () => _showMomentMore(item),
+                          ),
+                          const SizedBox(height: 18),
+                        ],
+                    ],
                   ],
                 ),
               ),
@@ -117,19 +127,32 @@ class UserDetailPage extends GetView<UserDetailController> {
       onReport: () => Get.toNamed(Routes.report, arguments: controller.user),
     );
   }
+
+  void _showMomentMore(UserDetailMomentData moment) {
+    showUserActionsSheet(
+      onBlock: controller.block,
+      onReport: () => Get.toNamed(
+        Routes.report,
+        arguments: ReportArguments(
+          target: controller.user,
+          targetDynamicId: moment.id,
+        ),
+      ),
+    );
+  }
 }
 
 class _ProfileHero extends StatelessWidget {
   const _ProfileHero({required this.controller, required this.onMore});
 
   final UserDetailController controller;
-  final VoidCallback onMore;
+  final VoidCallback? onMore;
 
   @override
   Widget build(BuildContext context) {
     final images = [
       controller.heroImagePath,
-      ...controller.galleryPreviewPaths,
+      ...controller.galleryPreviewPaths.take(3),
     ];
 
     return SliverAppBar(
@@ -145,11 +168,12 @@ class _ProfileHero extends StatelessWidget {
         onTap: Get.back,
       ),
       actions: [
-        _HeroActionButton(
-          tooltip: 'common_more'.tr,
-          assetPath: AppImageString.videoUserProfileMore,
-          onTap: onMore,
-        ),
+        if (onMore != null)
+          _HeroActionButton(
+            tooltip: 'common_more'.tr,
+            assetPath: AppImageString.videoUserProfileMore,
+            onTap: onMore!,
+          ),
       ],
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground],
@@ -389,7 +413,7 @@ class _ProfileSummary extends StatelessWidget {
                         ),
                       ),
                     Text(
-                      'ID: ${user.id + 1237500}',
+                      'ID: ${user.displayId}',
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,
@@ -419,11 +443,12 @@ class _ProfileSummary extends StatelessWidget {
               ],
             ),
             SizedBox(width: 10.w),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: controller.startChat,
-              child: _ChatPill(label: 'user_chat'.tr),
-            ),
+            if (!controller.isCurrentUser.value)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: controller.startChat,
+                child: _ChatPill(label: 'user_chat'.tr),
+              ),
           ],
         ),
 

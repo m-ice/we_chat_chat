@@ -9,6 +9,10 @@ import 'package:we_chat_chat/data/repositories/home_city_repository_impl.dart';
 import 'package:we_chat_chat/data/repositories/social_state_repository_impl.dart';
 import 'package:we_chat_chat/core/widgets/app_image.dart';
 import 'package:we_chat_chat/main.dart';
+import 'package:we_chat_chat/modules/home/controllers/home_controller.dart';
+import 'package:we_chat_chat/modules/home/team_detail/team_detail_controller.dart';
+import 'package:we_chat_chat/modules/home/team_detail/team_detail_page.dart';
+import 'package:we_chat_chat/modules/user_detail/controllers/user_detail_controller.dart';
 
 void main() {
   setUp(() async => Get.reset());
@@ -90,12 +94,32 @@ void main() {
     );
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.byKey(const ValueKey('home-recommendation-0')));
+    final homeController = Get.find<HomeController>();
+    final nearbyUser = homeController.nearbyUsers.first;
+    final recommendation = find.byKey(
+      ValueKey('home-recommendation-${nearbyUser.id}'),
+    );
+    final recommendationImage = tester.widget<AppImage>(
+      find.descendant(of: recommendation, matching: find.byType(AppImage)),
+    );
+    expect(recommendationImage.source, nearbyUser.avatarPath);
+    await tester.tap(recommendation);
     await tester.pumpAndSettle();
+    expect(Get.find<UserDetailController>().user.id, nearbyUser.id);
+    expect(
+      Get.find<UserDetailController>().heroImagePath,
+      nearbyUser.avatarPath,
+    );
     expect(find.text('交谈'), findsOneWidget);
     Get.back<void>();
     await tester.pumpAndSettle();
     expect(find.text('有颜有趣的人·尽在附近搭子'), findsOneWidget);
+
+    final selectedActivityId = homeController.activityUsers.first.teamPost!.id;
+    await tester.tap(find.byKey(const ValueKey('home-activity-card')).first);
+    await tester.pumpAndSettle();
+    expect(find.byType(TeamDetailPage), findsOneWidget);
+    expect(Get.find<TeamDetailController>().post.id, selectedActivityId);
     expect(tester.takeException(), isNull);
   });
 
@@ -201,6 +225,7 @@ void main() {
     await social.setPendingJoin(7, true);
     await social.block(9);
     await social.shield(10);
+    await social.shieldActivity('activity-010');
 
     final restored = SocialStateRepositoryImpl(
       await SharedPreferences.getInstance(),
@@ -209,5 +234,6 @@ void main() {
     expect(restored.pendingJoinIds, contains(7));
     expect(restored.blockedIds, contains(9));
     expect(restored.shieldedIds, contains(10));
+    expect(restored.shieldedActivityIds, contains('activity-010'));
   });
 }

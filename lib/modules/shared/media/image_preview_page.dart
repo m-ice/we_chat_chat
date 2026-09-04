@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:we_chat_chat/core/widgets/app_image.dart';
@@ -84,6 +83,7 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
                 child: SizedBox(
                   height: kToolbarHeight,
                   child: Stack(
+                    alignment: Alignment.centerLeft,
                     children: [
                       if (widget.images.length > 1)
                         Center(
@@ -113,16 +113,13 @@ class _ImagePreviewPageState extends State<ImagePreviewPage> {
                           ),
                         ),
 
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          tooltip: MaterialLocalizations.of(
-                            context,
-                          ).backButtonTooltip,
-                          icon: const FigmaBackButton(iconColor: Colors.white),
-                          onPressed: Get.back,
+                      Positioned(
+                        left: 0,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: FigmaBackButton(iconColor: Colors.white),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),

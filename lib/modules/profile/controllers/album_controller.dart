@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -5,10 +7,12 @@ import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../domain/entities/album_item.dart';
 import '../../../domain/repositories/album_repository.dart';
+import '../../../domain/repositories/user_repository.dart';
 
 class AlbumController extends GetxController {
-  AlbumController(this.repository);
+  AlbumController(this.repository, this._users);
   final AlbumRepository repository;
+  final UserRepository _users;
   final kind = AlbumMediaKind.photo.obs;
   final items = <AlbumItem>[].obs;
   final editing = false.obs;
@@ -20,18 +24,25 @@ class AlbumController extends GetxController {
     reload();
   }
 
-  void reload() {
-    items.assignAll(
-      kind.value == AlbumMediaKind.photo
-          ? repository.photos
-          : repository.videos,
-    );
+  Future<void> reload() async {
+    if (kind.value == AlbumMediaKind.photo) {
+      final user = await _users.getCurrentUser();
+      items.assignAll(
+        await repository.profilePhotos(
+          userId: user.id,
+          seedPhotoPaths: user.galleryImagePaths,
+          avatarPath: user.avatarPath,
+        ),
+      );
+    } else {
+      items.assignAll(repository.videos);
+    }
     selectedIds.clear();
   }
 
   void selectKind(AlbumMediaKind value) {
     kind.value = value;
-    reload();
+    unawaited(reload());
   }
 
   void toggleEditing() {
@@ -64,7 +75,7 @@ class AlbumController extends GetxController {
       kind.value,
     );
     if (count > 0) {
-      reload();
+      await reload();
       AppToast.show('album_upload_success'.tr);
     }
   }
@@ -80,8 +91,16 @@ class AlbumController extends GetxController {
       isDangerous: true,
     );
     if (!yes) return;
-    await repository.remove(Set.of(selectedIds), kind.value);
-    reload();
+    if (kind.value == AlbumMediaKind.photo) {
+      final user = await _users.getCurrentUser();
+      await repository.removeProfilePhotos(
+        userId: user.id,
+        ids: Set.of(selectedIds),
+      );
+    } else {
+      await repository.remove(Set.of(selectedIds), kind.value);
+    }
+    await reload();
     editing.value = false;
     AppToast.show('common_deleted'.tr);
   }

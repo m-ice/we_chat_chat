@@ -11,6 +11,7 @@ typedef UserAction = FutureOr<void> Function();
 Future<void> showUserActionsSheet({
   required UserAction onBlock,
   required UserAction onReport,
+  String? primaryLabel,
 }) {
   Future<void> run(UserAction action) async {
     Get.back<void>();
@@ -28,7 +29,7 @@ Future<void> showUserActionsSheet({
           mainAxisSize: MainAxisSize.min,
           children: [
             _ActionRow(
-              label: 'common_block'.tr,
+              label: primaryLabel ?? 'common_block'.tr,
               onTap: () => run(onBlock),
               backgroundAsset: AppImageString.videoUserMoreSheet,
             ),

@@ -20,7 +20,7 @@
     "videoPath": "assets/videos/verified/user_01.mp4",
     "videoCoverPath": "assets/images/video_user/video_cover.png",
     "videoAvatarPath": "assets/images/video_user/video_avatar.png",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -72,7 +72,7 @@
     "videoPath": "assets/videos/verified/user_03.mp4",
     "videoCoverPath": "assets/images/video_user/video_cover.png",
     "videoAvatarPath": "assets/images/video_user/video_avatar.png",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -124,7 +124,7 @@
     "videoPath": "assets/videos/verified/user_05.mp4",
     "videoCoverPath": "assets/images/video_user/video_cover.png",
     "videoAvatarPath": "assets/images/video_user/video_avatar.png",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"
@@ -176,7 +176,7 @@
     "videoPath": "assets/videos/verified/user_07.mp4",
     "videoCoverPath": "assets/images/video_user/video_cover.png",
     "videoAvatarPath": "assets/images/video_user/video_avatar.png",
-    "isOnline": false,
+    "isOnline": true,
     "isSeedData": true,
     "source": "demo",
     "moderationStatus": "approved"

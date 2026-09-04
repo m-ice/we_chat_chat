@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,6 +16,21 @@ import '../../shared/actions/user_actions_sheet.dart';
 
 enum PartnerTab { recommended, nearby, newcomers }
 
+/// Typed navigation input for a standalone, vertically paged video feed.
+///
+/// Search owns the choice of the selected user; the feed only receives users
+/// which have a playable video and the selected user's position in that list.
+class VideoFeedArguments {
+  VideoFeedArguments({required List<CityUser> users, required this.startIndex})
+    : assert(users.isNotEmpty),
+      assert(startIndex >= 0 && startIndex < users.length),
+      assert(users.every(VideoFeedController.hasVideo)),
+      users = List.unmodifiable(users);
+
+  final List<CityUser> users;
+  final int startIndex;
+}
+
 class VideoFeedController extends GetxController {
   VideoFeedController(this._users, this._cities, this.social, this._engagement);
   final UserRepository _users;
@@ -28,6 +45,8 @@ class VideoFeedController extends GetxController {
   final favoriteIds = <int>{}.obs;
   List<CityUser> _cityUsers = const [];
   List<CityUser> _newcomerUsers = const [];
+  StreamSubscription<void>? _socialChangesSubscription;
+  int _reloadRevision = 0;
 
   List<CityUser> get searchableUsers {
     final unique = <int, CityUser>{};
@@ -37,35 +56,51 @@ class VideoFeedController extends GetxController {
     return unique.values.toList(growable: false);
   }
 
+  static bool hasVideo(CityUser user) => user.videoPath.trim().isNotEmpty;
+
   String coverPathFor(CityUser user) =>
       user.videoCoverPath.isNotEmpty ? user.videoCoverPath : user.avatarPath;
 
-  String avatarPathFor(CityUser user) =>
-      user.videoAvatarPath.isNotEmpty ? user.videoAvatarPath : user.avatarPath;
+  String avatarPathFor(CityUser user) => user.avatarPath;
 
   @override
   void onInit() {
     super.onInit();
     likedIds.assignAll(_engagement.likedUserIds);
     favoriteIds.assignAll(_engagement.favoriteUserIds);
+    _socialChangesSubscription = social.changes.listen((_) {
+      unawaited(reload());
+    });
     reload();
   }
 
+  @override
+  void onClose() {
+    _socialChangesSubscription?.cancel();
+    super.onClose();
+  }
+
   Future<void> reload() async {
+    final revision = ++_reloadRevision;
     final excluded = {...social.blockedIds, ...social.shieldedIds};
     final result = await Future.wait([
       _users.getCityUsers(),
       _users.getVerifiedUsers(),
+      _users.getCurrentUser(),
     ]);
-    _cityUsers = result[0]
-        .where((user) => !excluded.contains(user.id))
+    if (revision != _reloadRevision) return;
+    final currentUserId = (result[2] as User).id;
+    _cityUsers = (result[0] as List<CityUser>)
+        .where(
+          (user) => !excluded.contains(user.id) && user.id != currentUserId,
+        )
         .toList(growable: false);
-    _newcomerUsers = result[1]
-        .where((user) => !excluded.contains(user.id))
+    _newcomerUsers = (result[1] as List<CityUser>)
+        .where(
+          (user) => !excluded.contains(user.id) && user.id != currentUserId,
+        )
         .toList(growable: false);
-    videoUsers.assignAll(
-      _newcomerUsers.where((user) => user.videoPath.isNotEmpty),
-    );
+    videoUsers.assignAll(_newcomerUsers.where(hasVideo));
     _applyPartnerFilter();
     if (currentIndex.value >= videoUsers.length) currentIndex.value = 0;
   }
@@ -103,7 +138,33 @@ class VideoFeedController extends GetxController {
 
   Future<void> openUser(CityUser cityUser) async {
     final user = await resolveUser(cityUser);
-    await Get.toNamed(Routes.userDetail, arguments: user);
+    await Get.toNamed(
+      Routes.userDetail,
+      arguments: <String, Object>{'userId': user.id, 'user': user},
+    );
+  }
+
+  Future<void> openSearchResult(CityUser selectedUser) async {
+    final arguments = videoFeedArgumentsFor(selectedUser);
+    if (arguments == null) {
+      await openUser(selectedUser);
+      return;
+    }
+
+    await Get.toNamed(Routes.videoFeed, arguments: arguments);
+  }
+
+  VideoFeedArguments? videoFeedArgumentsFor(CityUser selectedUser) {
+    if (!hasVideo(selectedUser)) return null;
+
+    final playableUsers = searchableUsers
+        .where(hasVideo)
+        .toList(growable: false);
+    final startIndex = playableUsers.indexWhere(
+      (user) => user.id == selectedUser.id,
+    );
+    if (startIndex < 0) return null;
+    return VideoFeedArguments(users: playableUsers, startIndex: startIndex);
   }
 
   Future<void> toggleLike(int id) async {
@@ -126,6 +187,7 @@ class VideoFeedController extends GetxController {
 
   Future<void> more(CityUser cityUser) async {
     final user = await resolveUser(cityUser);
+    if (await _isCurrentUser(user.id)) return;
     await showUserActionsSheet(
       onBlock: () async {
         await social.block(user.id);
@@ -136,14 +198,39 @@ class VideoFeedController extends GetxController {
     );
   }
 
+  Future<bool> _isCurrentUser(int userId) async {
+    try {
+      return (await _users.getCurrentUser()).id == userId;
+    } on Object {
+      // Without a confirmed identity, destructive social actions stay closed.
+      return true;
+    }
+  }
+
   void _message(String value) => AppToast.show(value);
 }
 
 class CenterSearchController extends GetxController {
-  CenterSearchController(this._feed);
+  CenterSearchController(this._feed, this._social);
   final VideoFeedController _feed;
+  final SocialStateRepository _social;
   final query = TextEditingController();
   final results = <CityUser>[].obs;
+  StreamSubscription<void>? _socialChangesSubscription;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _socialChangesSubscription = _social.changes.listen((_) {
+      unawaited(_refreshAfterSocialChange());
+    });
+  }
+
+  Future<void> _refreshAfterSocialChange() async {
+    await _feed.reload();
+    if (query.text.trim().isNotEmpty) search(query.text);
+  }
+
   void search(String value) {
     final keyword = value.trim();
     if (keyword.isEmpty) {
@@ -164,8 +251,11 @@ class CenterSearchController extends GetxController {
     );
   }
 
+  Future<void> openSearchResult(CityUser user) => _feed.openSearchResult(user);
+
   @override
   void onClose() {
+    _socialChangesSubscription?.cancel();
     query.dispose();
     super.onClose();
   }

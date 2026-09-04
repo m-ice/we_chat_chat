@@ -10,6 +10,7 @@ import '../../domain/repositories/album_repository.dart';
 class AlbumRepositoryImpl implements AlbumRepository {
   AlbumRepositoryImpl(this._preferences);
   static const storageKey = 'mt_album_store_model';
+  static const _hiddenSeedPhotoIdsKey = 'mt_album_hidden_seed_photo_ids';
   final SharedPreferences _preferences;
 
   Map<String, dynamic> get _store {
@@ -42,6 +43,43 @@ class AlbumRepositoryImpl implements AlbumRepository {
   List<AlbumItem> get photos => _items('mtPhotos');
   @override
   List<AlbumItem> get videos => _items('mtVideos');
+
+  @override
+  bool get hasProfilePhotoOverrides =>
+      photos.isNotEmpty || _hiddenSeedPhotoIds.isNotEmpty;
+
+  @override
+  Future<List<AlbumItem>> profilePhotos({
+    required int userId,
+    required List<String> seedPhotoPaths,
+    required String avatarPath,
+  }) async {
+    final hiddenIds = _hiddenSeedPhotoIds;
+    final localPhotos = photos;
+    final localPaths = (await Future.wait(localPhotos.map(fullPath))).toSet();
+    final seeded = <AlbumItem>[];
+    final seenPaths = <String>{};
+    for (final path in seedPhotoPaths) {
+      if (path.isEmpty ||
+          path == avatarPath ||
+          localPaths.contains(path) ||
+          !seenPaths.add(path)) {
+        continue;
+      }
+      final id = _seedPhotoId(userId, path);
+      if (hiddenIds.contains(id)) continue;
+      seeded.add(
+        AlbumItem(
+          id: id,
+          relativePath: '',
+          sourcePath: path,
+          kind: AlbumMediaKind.photo,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
+    }
+    return List.unmodifiable([...localPhotos, ...seeded]);
+  }
 
   @override
   Future<int> importFiles(List<String> sourcePaths, AlbumMediaKind kind) async {
@@ -99,6 +137,30 @@ class AlbumRepositoryImpl implements AlbumRepository {
   }
 
   @override
+  Future<void> removeProfilePhotos({
+    required int userId,
+    required Set<String> ids,
+  }) async {
+    if (ids.isEmpty) return;
+    final localIds = photos.map((item) => item.id).toSet().intersection(ids);
+    if (localIds.isNotEmpty) {
+      await remove(localIds, AlbumMediaKind.photo);
+    }
+    final hiddenIds = ids.where((id) => id.startsWith('seed:$userId:')).toSet();
+    if (hiddenIds.isEmpty) return;
+    await _preferences.setStringList(
+      _hiddenSeedPhotoIdsKey,
+      {..._hiddenSeedPhotoIds, ...hiddenIds}.toList()..sort(),
+    );
+  }
+
+  @override
   Future<String> fullPath(AlbumItem item) async =>
+      item.sourcePath ??
       '${(await getApplicationDocumentsDirectory()).path}/${item.relativePath}';
+
+  Set<String> get _hiddenSeedPhotoIds =>
+      (_preferences.getStringList(_hiddenSeedPhotoIdsKey) ?? const []).toSet();
+
+  String _seedPhotoId(int userId, String path) => 'seed:$userId:$path';
 }
