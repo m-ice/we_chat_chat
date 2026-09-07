@@ -1,0 +1,184 @@
+#name: Flutter CI & Pgyer Upload
+#
+#on:
+#  push:
+#    branches:
+#      - '**'  # 任意分支 push 都触发
+#    tags:
+#      - '*'
+#
+#jobs:
+#  build_and_upload:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      # 1️⃣ 拉取代码
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      # 2️⃣ 安装 Flutter
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: "3.32.8"  # 替换为你的 Flutter 版本
+#          android-license: true   # 自动接受 Android SDK licenses
+#
+#
+#      # 4️⃣ 安装 jq 用于解析 JSON
+#      - name: Install jq
+#        run: sudo apt-get update && sudo apt-get install -y jq
+#
+#      # 5️⃣ 获取依赖
+#      - name: Install dependencies
+#        run: flutter pub get
+#
+#      # 6️⃣ 分析代码
+#      - name: Run flutter analyze
+#        run: flutter analyze || echo "Analyze finished with warnings/errors"
+#
+#      # 7️⃣ 跑测试
+#      #      - name: Run flutter test
+#      #        run: flutter test || echo "Tests finished with failures"
+#
+#      # 8️⃣ 打包 release APK
+#      - name: Build release APK
+#        run: |
+#          echo "Building release APK..."
+#          flutter build apk --release
+#          ls -l build/app/outputs/flutter-apk/
+#
+#      # 9️⃣ 检查 APK 是否生成
+#      - name: Check APK exists
+#        run: |
+#          if [ ! -f build/app/outputs/flutter-apk/app-release.apk ]; then
+#            echo "APK not found! Build failed."
+#            exit 1
+#          fi
+#
+#      # 🔟 上传到蒲公英
+#      - name: Upload to Pgyer
+#        id: upload
+#        shell: bash
+#        env:
+#          PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
+#          PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
+#        run: |
+#          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+#
+#          if [ ! -f "$APK_PATH" ]; then
+#            echo "APK not found at $APK_PATH"
+#            exit 1
+#          fi
+#
+#          echo "Uploading APK to Pgyer..."
+#          response=$(curl -s -F "file=@$APK_PATH" \
+#                            -F "_api_key=$PGY_API_KEY" \
+#                            -F "uKey=$PGY_USER_KEY" \
+#                            https://www.pgyer.com/apiv2/app/upload)
+#
+#          echo "Response from Pgyer:"
+#          echo "$response"
+#
+#          # 提取 buildShortcutUrl
+#          if command -v jq >/dev/null 2>&1; then
+#            shortcut=$(echo "$response" | jq -r '.data.buildShortcutUrl // empty')
+#          else
+#            shortcut=$(echo "$response" | sed -n 's/.*"buildShortcutUrl":"\([^"]*\)".*/\1/p')
+#          fi
+#
+#          if [ -n "$shortcut" ] && [ "$shortcut" != "null" ]; then
+#            app_url="https://www.pgyer.com/$shortcut"
+#            echo "APK uploaded successfully! Download URL: $app_url"
+#          else
+#            echo "Upload failed, please check the response above."
+#            app_url=""
+#          fi
+#
+#          # 设置 step 输出
+#          echo "app_url=$app_url" >> $GITHUB_OUTPUT
+#
+#      - name: Send notification
+#        if: always()
+#        uses: dawidd6/action-send-mail@v3
+#        with:
+#          server_address: smtp.gmail.com
+#          server_port: 465
+#          username: ${{ secrets.MAIL_USER }}   # 你的 Gmail 邮箱
+#          password: ${{ secrets.MAIL_PASS }}   # Gmail 应用专用密码
+#          subject: "APK Upload Result"
+#          body: |
+#            APK Upload Finished!
+#
+#            Result: ${{ steps.upload.outputs.app_url != '' && 'Success ✅' || 'Failed ❌' }}
+#            Download URL: ${{ steps.upload.outputs.app_url }}
+#          to: unaos@qq.com
+#          from: ${{ secrets.MAIL_USER }}       # 发件人邮箱
+#
+#
+#
+#
+#
+#
+#
+#
+#
+##      - name: Upload to Firebase App Distribution
+##        env:
+##          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+##          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+##        run: |
+##          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+##            --app $FIREBASE_APP_ID \
+##            --groups "测试组" \
+##            --token $FIREBASE_TOKEN
+#
+##      - name: Upload to Pgyer
+##        shell: bash
+##        env:
+##          PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
+##          PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
+##        run: |
+##          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+##
+##          if [ ! -f "$APK_PATH" ]; then
+##            echo "APK not found at $APK_PATH"
+##            exit 1
+##          fi
+##
+##          echo "Uploading APK to Pgyer..."
+##          response=$(curl -s -F "file=@$APK_PATH" \
+##                            -F "_api_key=$PGY_API_KEY" \
+##                            -F "uKey=$PGY_USER_KEY" \
+##                            https://www.pgyer.com/apiv2/app/upload)
+##
+##          echo "Response from Pgyer:"
+##          echo "$response"
+##
+##          # 提取下载地址
+##          if command -v jq >/dev/null 2>&1; then
+##            app_url=$(echo "$response" | jq -r '.data.downloadUrl // empty')
+##          else
+##            app_url=$(echo "$response" | sed -n 's/.*"downloadUrl":"\([^"]*\)".*/\1/p')
+##          fi
+##          # 判断上传是否成功
+##          if [ -n "$app_url" ] && [ "$app_url" != "null" ]; then
+##            echo "APK uploaded successfully! Download URL: https://www.pgyer.com/$app_url"
+##          else
+##            echo "Upload failed, please check the response above."
+##          fi
+##
+##      - name: Send notification
+##        if: always()
+##        uses: dawidd6/action-send-mail@v3
+##        with:
+##          server_address: smtp.gmail.com
+##          server_port: 465
+##          username: ${{ secrets.MAIL_USER }}   # 你的 Gmail 邮箱
+##          password: ${{ secrets.MAIL_PASS }}   # Gmail 应用专用密码
+##          subject: "APK Upload Result"
+##          body: |
+##            APK uploaded successfully!
+##            Download URL: ${{ steps.upload.outputs.app_url }}
+on:
+jobs:##          to: unaos@qq.com
+##          from: ${{ secrets.MAIL_USER }}       # 必须指定发件人邮箱

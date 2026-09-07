@@ -1,0 +1,19 @@
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      # 写入 google-services.json
+#      - name: Decode google-services.json
+#        run: echo "${{ secrets.FIREBASE_JSON }}" > android/app/google-services.json
+#
+#      # 写入 GoogleService-Info.plist
+#      - name: Decode GoogleService-Info.plist
+#        run: echo "${{ secrets.FIREBASE_PLIST }}" > ios/Runner/GoogleService-Info.plist
+#
+#      - name: Build APK
+#        run: flutter build apk --release
+#
+#on:
