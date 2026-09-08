@@ -10,7 +10,7 @@ on:
       distribute:
         description: '是否上传蒲公英 / Google Play / TestFlight'
         required: true
-        default: false
+        default: true
         type: boolean
 
 
